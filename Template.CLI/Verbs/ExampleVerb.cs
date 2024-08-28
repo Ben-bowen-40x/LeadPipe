@@ -19,26 +19,25 @@ namespace Template.CLI.Verbs
         #region Public (Other than Options)
         public int Run(IServiceProvider service)
         {
-            static string nothing(string input) =>
-                $"The user either chose to provide nothing or the provided path does not exist, so an empty string was used. Here is the literal input: {input}";
-            string fileLocation =
-                FileLocation == string.Empty || !Path.Exists(FileLocation)
-                ? nothing(FileLocation)
-                : $"Here is the literal path: {Path.GetFullPath(FileLocation)} And here is the literal input: {FileLocation}";
-            string secondLocation =
-                SecondFileLocation == string.Empty || !Path.Exists(SecondFileLocation)
-                ? nothing(SecondFileLocation)
-                : $"Here is the literal path: {Path.GetFullPath(SecondFileLocation)} And here is the literal input: {SecondFileLocation}";
-            string thirdLocation =
-                ThirdFileLocation == string.Empty || !Path.Exists(ThirdFileLocation)
-                ? nothing(ThirdFileLocation)
-                : $"Here is the literal path: {Path.GetFullPath(ThirdFileLocation)} And here is the literal input: {ThirdFileLocation}";
-            System.Console.WriteLine("The following are the options the user chose:");
-            System.Console.WriteLine($"{nameof(FileLocation)}:  {fileLocation}");
-            System.Console.WriteLine($"{nameof(SecondFileLocation)}:  {secondLocation}");
-            System.Console.WriteLine($"{nameof(ThirdFileLocation)}:  {thirdLocation}");
+            string fileLocation = GetMessage(FileLocation);
+            string secondLocation = GetMessage(SecondFileLocation);
+            string thirdLocation = GetMessage(ThirdFileLocation);
+            Console.WriteLine($"The following is the current working directory:\n\t{Environment.CurrentDirectory}");
+            Console.WriteLine("The following are the options the user chose.");
+            Console.WriteLine($"{nameof(FileLocation)}:\n\t{fileLocation}");
+            Console.WriteLine($"{nameof(SecondFileLocation)}:\n\t{secondLocation}");
+            Console.WriteLine($"{nameof(ThirdFileLocation)}:\n\t{thirdLocation}");
 
             return ProgramErrorCodes.Success;
+        }
+        #endregion
+
+        #region Private
+        private static string GetMessage(string location)
+        {
+            return location == string.Empty || !Path.Exists(location)
+                ? $"The user either chose to provide nothing or the provided path does not exist, so an empty string was used. Here is the literal input: {location}"
+                : $"Here is the literal path:\n\t{Path.GetFullPath(location)}\n\tAnd here is the literal input: {location}";
         }
         #endregion
     }
