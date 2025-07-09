@@ -1,4 +1,4 @@
-﻿namespace Template.CLI;
+﻿namespace Template.Cli;
 
 internal class ProgramErrorCodes
 {

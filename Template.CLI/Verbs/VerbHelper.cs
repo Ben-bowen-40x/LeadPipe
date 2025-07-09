@@ -1,4 +1,4 @@
-﻿namespace Template.CLI.Verbs;
+﻿namespace Template.Cli.Verbs;
 
 internal class VerbHelper
 {

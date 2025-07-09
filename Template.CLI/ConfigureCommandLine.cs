@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Template.Application;
 using Template.Infrastructure;
 
-namespace Template.CLI;
+namespace Template.Cli;
 
 internal static class ConfigureCommandLine
 {

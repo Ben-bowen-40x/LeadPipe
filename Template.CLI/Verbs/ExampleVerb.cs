@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace Template.CLI.Verbs
+namespace Template.Cli.Verbs
 {
     [Verb(Example, HelpText = "This is an example.")]
     internal class ExampleVerb : IVerb

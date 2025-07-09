@@ -1,6 +1,6 @@
 ﻿using Template.Infrastructure.SettingsInterfaces;
 
-namespace Template.CLI;
+namespace Template.Cli;
 
 internal class Settings : IInfrastructureSettings
 {

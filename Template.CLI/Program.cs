@@ -1,10 +1,10 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using CommandLine;
-using Template.CLI.Verbs;
+using Template.Cli.Verbs;
 using Microsoft.Extensions.Hosting;
 
-namespace Template.CLI;
+namespace Template.Cli;
 
 internal class Program
 {
@@ -58,13 +58,13 @@ internal class Program
 
         static int Error(IEnumerable<Error> e)
         {
-            e.ToList().ForEach(r => System.Console.WriteLine(r.Tag));
+            e.ToList().ForEach(r => Console.WriteLine(r.Tag));
             return ProgramErrorCodes.Error;
         }
 
         static int ObjectError(object o)
         {
-            System.Console.WriteLine(o.ToString());
+            Console.WriteLine(o.ToString());
             return ProgramErrorCodes.Error;
         }
     }
