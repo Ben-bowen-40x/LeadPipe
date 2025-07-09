@@ -8,8 +8,8 @@ public static class InjectInfrastructure
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings)
     {
         // Format: services.AddScoped<Interface, Class>();
+        //services.AddHttpClient(settings.name)
         services.AddHttpClient();
-        services.AddHttpClient(settings.name)
         return services;
     }
 }
