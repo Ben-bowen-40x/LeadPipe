@@ -1,28 +1,65 @@
-﻿using System.Text.Json;
+﻿using CSharpFunctionalExtensions;
+using System.Text.Json;
 
 namespace Template.Infrastructure.JsonService;
 
-// TODO: Use Result here instead of bare objects
+// All exceptions should be throw by the caller, because we don't have sufficient context in this class to understand WHY the error was thrown.
 internal static class JsonRw
 {
+    internal static Result<List<T>> ReadFile<T>(FileInfo path)
+    {
+        try
+        {
+            string jsonStr = File.ReadAllText(path.FullName);
+            return Deserialize<T>(jsonStr);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<T>>(ex.Message);
+        }
+    }
+    internal static Result WriteToFile<T>(FileInfo path, List<T> items)
+    {
+        try
+        {
+            Result<string> result = Serialize(items);
+            string strResult = result.IsSuccess
+                ? result.Value
+                : throw new Exception(result.Error);
+            using StreamWriter writer = new(path.FullName);
+            writer.Write(strResult);
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(ex.Message);
+        }
+    }
+
+    #region Private
     private static readonly JsonSerializerOptions _options = new() { PropertyNameCaseInsensitive = true, WriteIndented = true };
-    internal static List<T> DeserializeFile<T>(string path)
+    private static Result<List<T>> Deserialize<T>(string jsonStr)
     {
-        string jsonStr = File.ReadAllText(path);
-        return Deserialize<T>(jsonStr);
+        try
+        {
+            return JsonSerializer.Deserialize<List<T>>(jsonStr, _options)!;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<T>>($"The error occurred in the {nameof(Deserialize)} method.\nThis is the error: {ex.Message}");
+        }
     }
-    internal static List<T> Deserialize<T>(string jsonStr)
+    private static Result<string> Serialize<T>(IEnumerable<T> objects)
     {
-        return JsonSerializer.Deserialize<List<T>>(jsonStr, _options)!;
+        try
+        {
+            string result = JsonSerializer.Serialize(objects, _options);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<string>($"The error occurred in the {nameof(Serialize)} method.\nThis is the error: {ex.Message}");
+        }
     }
-    internal static string Serialize<T>(IEnumerable<T> objects)
-    {
-        return JsonSerializer.Serialize(objects, _options);
-    }
-    internal static void SerializeToFile<T>(string path, List<T> items)
-    {
-        string result = Serialize(items);
-        using StreamWriter writer = new(path);
-        writer.Write(result);
-    }
+    #endregion
 }
