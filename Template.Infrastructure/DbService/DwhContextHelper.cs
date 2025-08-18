@@ -4,12 +4,13 @@ namespace Template.Infrastructure.DbService;
 
 internal static class DwhContextHelper
 {
-    internal static async Task<IEnumerable<T>> GetItemsFromFileAsync<T>(DwhContext<T> context, FileInfo query) where T : class
+    internal static async Task<IEnumerable<T>> GetItemsFromFileAsync<T>(DwhContext<T> context, FileInfo queryLoc) where T : class
     {
-        return await context.Result.FromSqlRaw(File.ReadAllText(query.FullName)).ToListAsync();
+        string text = File.ReadAllText(queryLoc.FullName);
+        return await GetItemsFromRawAsync(context, text);
     }
-    internal static async Task<IEnumerable<T>> GetItemsFromRawAsync<T>(DwhContext<T> context, string query) where T : class
+    internal static async Task<IEnumerable<T>> GetItemsFromRawAsync<T>(DwhContext<T> context, string rawQuery) where T : class
     {
-        return await context.Result.FromSqlRaw(query).ToListAsync();
+        return await context.Result.FromSqlRaw(rawQuery).ToListAsync();
     }
 }
