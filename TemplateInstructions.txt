@@ -11,7 +11,7 @@ Creating the Template
       "identity": "CleanArch.Template",
       "name": "Clean Architecture Template",
       "shortName": "clean-arch-template",
-      "sourceName": "Template", // Template will be replaced throughout the solution with whatever name you put into your new solution
+      "sourceName": "Template", // Template will be replaced throughout the solution with whatever name you choose for your new solution
       "preferNameDirectory": true,
       "tags": {
          "language": "C#",
@@ -32,8 +32,8 @@ Using the Template
 
    This will create a new project named 'MyNewProject' using your custom template.
 
-   This will also replace whatever you put as "sourceName" with whatever you use for MyNewProject. 
-   So, in explanation, if you put "sourceName": "Template" in your template.json, then every instance of Template will be replaced with MyNewProject (or whatever name youv'e chosen).
+   This will also replace whatever you put as "sourceName" with 'MyNewProject'.
+   In explanation, if you put "sourceName": "Template" in your template.json, then every instance of Template will be replaced with 'MyNewProject'.
 
 2. To uninstall the template:
    dotnet new -u <path-to-your-template-folder> or <template-package-name>
