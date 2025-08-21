@@ -23,7 +23,10 @@
 
 ### 2. Pack your template using the dotnet CLI:
 
-```dotnet new -i <path-to-your-template-folder>```
+```dotnet new install <path-to-your-template-root-folder>```
+
+    Also, if you would like to update the existing template, use
+```dotnet new install <path-to-your-template-root-folder> --force```
 
    Alternatively, if you want to pack it as a NuGet package:
 
