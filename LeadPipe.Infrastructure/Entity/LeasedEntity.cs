@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using LeadPipe.Application.DataInterfaces.Entity;
+namespace LeadPipe.Infrastructure.Entity;
 
-namespace LeadPipe.Infrastructure.Entity
+internal class LeasedEntity : ILeasedEntity
 {
-    internal class LeasedEntity
-    {
-    }
+    public long PhoneNumber { get; set; }
+    public DateTime Date { get; set; }
+    public long UnixDate { get; set; }
+    public string? Contents { get; set; }
 }
