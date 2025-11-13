@@ -4,10 +4,11 @@ using LeadPipe.Application.Service;
 
 namespace LeadPipe.Infrastructure.Service;
 
-internal class JsonConversionService(ICsvRwService csv) : IJsonConversionService
+internal class JsonConversionService(ICsvRwService csv, IJsonRwService json) : IJsonConversionService
 {
     private readonly ICsvRwService _csv = csv;
-    public Result<List<T>> Extract<T>(FileInfo jsonFile) => JsonRwService.ReadFile<T>(jsonFile);
+    private readonly IJsonRwService _json = json;
+    public Result<List<T>> Extract<T>(FileInfo jsonFile) => _json.ReadFile<T>(jsonFile);
 
     public Result<FileInfo> SaveToCsv<T, TMap>(Result<List<T>> entities, FileInfo csvFile) where TMap : ClassMap<T>
     {
