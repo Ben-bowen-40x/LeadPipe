@@ -1,5 +1,6 @@
-﻿namespace LeadPipe.Infrastructure.Service;
+﻿using LeadPipe.Application.Service;
+namespace LeadPipe.Infrastructure.Service;
 
-internal class YellerClientService
+internal class YellerClientService : IYellerClientService
 {
 }
