@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using CsvHelper.Configuration;
 
-namespace LeadPipe.Application.InfrastructureInterfaces;
+namespace LeadPipe.Application.Services;
 
 public interface IJsonConversionService
 {
