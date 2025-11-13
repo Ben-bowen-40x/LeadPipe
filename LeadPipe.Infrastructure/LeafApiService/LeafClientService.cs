@@ -1,11 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
 using System.Net.Http.Json;
-using LeadPipe.Application.InfrastructureInterfaces;
-using LeadPipe.Domain.Dto;
+using LeadPipe.Application.Services;
+using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Application.DataInterfaces.Dto;
 
 namespace LeadPipe.Infrastructure.LeafApiService;
 
-internal class LeafClient(ILeafSettings settings) : ILeafClient
+internal class LeafClientService(ILeafSettings settings) : ILeafClientService
 {
     #region Public
     public HttpClient GetClient(IHttpClientFactory factory)
@@ -13,16 +14,16 @@ internal class LeafClient(ILeafSettings settings) : ILeafClient
         HttpClient client = factory.CreateClient(settings.LeafName!);
         return client;
     }
-    public async Task<Result<List<LeafDto>>> GetAsync(HttpClient client, int offset = 0, int errorLimit = 5, int limit = 1000)
+    public async Task<Result<List<ILeafDto>>> GetAsync(HttpClient client, int offset = 0, int errorLimit = 5, int limit = 1000)
     {
         int errorCount = 0;
-        List<LeafDto> master = [];
+        List<ILeafDto> master = [];
 
         bool resume = true;
         while (resume)
         {
             if (errorCount == errorLimit)
-                return Result.Failure<List<LeafDto>>($"Reached error limit. Error limit: {errorLimit} attempts.");
+                return Result.Failure<List<ILeafDto>>($"Reached error limit. Error limit: {errorLimit} attempts.");
 
             try
             {
@@ -33,27 +34,27 @@ internal class LeafClient(ILeafSettings settings) : ILeafClient
                 // Unwrap result
                 if (result.IsSuccess)
                 {
-                    List<LeafDto> value = result.Value;
+                    List<ILeafDto> value = (List<ILeafDto>)result.Value.Select(v => v as ILeafDto);
                     value.ForEach(master.Add);
                     resume = value.Count == limit;
                 }
                 else
                 {
                     errorCount++;
-                    return result;
+                    return Result.Failure<List<ILeafDto>>(result.Error);
                 }
                 offset += limit;
             }
             catch { errorCount++; }
         }
         if (master.Count == 0)
-            return Result.Failure<List<LeafDto>>("Something went wrong and values were not retrieved.");
+            return Result.Failure<List<ILeafDto>>("Something went wrong and values were not retrieved.");
         return master;
     }
-    public Task<Result<List<Message>>[]> GetMessages(HttpClient client, List<LeafDto> leafs)
+    public Result<List<IMessage>>[] GetMessages(HttpClient client, List<ILeafDto> leafs)
     {
         List<Task<Result<List<Message>>>> tasks = new(leafs.Count);
-        foreach (LeafDto leaf in leafs)
+        foreach (ILeafDto leaf in leafs)
         {
             // Retrieve the thread id
             if (leaf.uuid is null)
@@ -69,14 +70,47 @@ internal class LeafClient(ILeafSettings settings) : ILeafClient
         }
 
         Task<Result<List<Message>>[]> completedTask = Task.WhenAll(tasks);
-        return completedTask;
+        Result<List<IMessage>>[] result = ConvertTasks(completedTask);
+
+        return result;
     }
+
     #endregion
 
     #region Internal
-    internal Uri LeafThreadUrl(int offset = 0, int limit = 1000) => new($"{settings.LeafBase}{settings.LeafThreadsEndpoint}?limit={limit}&offset={offset}");
-    internal Uri LeafMessagesUrl(string thread, int limit = 100, string type = "sms") => new($"{settings.LeafBase}{settings.LeafThreadsEndpoint}/{thread}{settings.LeafMessagesEndpoint}?limit={limit}&type={type}&offset=0");
-    internal static async Task<Result<T>> GetSingleAsync<T>(Uri url, HttpClient client)
+    internal static Result<List<IMessage>>[] ConvertTasks(Task<Result<List<Message>>[]> completedTask)
+    {
+        if (completedTask.IsCompletedSuccessfully)
+        {
+            Result<List<Message>>[] taskResult = completedTask.Result;
+            IEnumerable<Result<List<IMessage>>> result = taskResult.Select(r =>
+            {
+                // Unwrapt the value
+                List<Message> value;
+                if (r.IsSuccess) value = r.Value;
+                else return Result.Failure<List<IMessage>>(r.Error);
+
+                // Convert values
+                List<IMessage> messages = [.. value.Select(v => v)];
+
+                return Result.Success(messages);
+            });
+            return [.. result];
+        }
+        else
+        {
+            string e = completedTask.Exception is not null
+                ? completedTask.Exception.Message
+                : "Unknown exception";
+            return [Result.Failure<List<IMessage>>(e)];
+        }
+    }
+    #endregion
+
+    #region Private
+    private Uri LeafThreadUrl(int offset = 0, int limit = 1000) => new($"{settings.LeafThreadsEndpoint}?limit={limit}&offset={offset}");
+    private Uri LeafMessagesUrl(string thread, int limit = 100, string type = "sms") => new($"{settings.LeafThreadsEndpoint}/{thread}{settings.LeafMessagesEndpoint}?limit={limit}&type={type}&offset=0");
+    private static async Task<Result<T>> GetSingleAsync<T>(Uri url, HttpClient client)
     {
         // Attempt to make the call
         try
@@ -105,9 +139,6 @@ internal class LeafClient(ILeafSettings settings) : ILeafClient
             return Result.Failure<T>(ex.Message);
         }
     }
-    #endregion
-
-    #region Private
     private static async void Wait(int sleepInterval = 500) => await Task.Delay(sleepInterval);
     #endregion
 }
