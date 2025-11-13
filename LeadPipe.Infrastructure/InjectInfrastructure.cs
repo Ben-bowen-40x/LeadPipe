@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using LeadPipe.Infrastructure.SettingsInterfaces;
 using LeadPipe.Application.Service;
+using LeadPipe.Infrastructure.Settings;
+using LeadPipe.Infrastructure.Service;
 
 namespace LeadPipe.Infrastructure;
 
@@ -9,10 +10,14 @@ public static class InjectInfrastructure
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings)
     {
         // Format: services.AddScoped<Interface, Class>();
+        services.AddScoped<ICsvRwService, CsvRwService>();
+        services.AddScoped<IJsonConversionService, JsonConversionService>();
+        services.AddScoped<IJsonRwService, JsonRwService>();
         services.AddScoped<ILeafClientService, ILeafClientService>();
+        services.AddScoped<IYellerClientService, YellerClientService>();
 
         // Add Leaf Client
-        services.AddHttpClient(settings.LeafName!, c=>
+        services.AddHttpClient(settings.LeafName!, c =>
         {
             c.BaseAddress = new Uri(settings.LeafBase!);
             c.DefaultRequestHeaders.Add("Accept", "application/json");
