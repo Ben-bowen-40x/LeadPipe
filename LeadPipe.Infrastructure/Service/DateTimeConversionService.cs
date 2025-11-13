@@ -1,4 +1,4 @@
-﻿namespace LeadPipe.Infrastructure.Services;
+﻿namespace LeadPipe.Infrastructure.Service;
 
 internal static class DateTimeConversionService
 {

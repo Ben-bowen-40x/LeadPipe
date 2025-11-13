@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using LeadPipe.Infrastructure.SettingsInterfaces;
-using LeadPipe.Application.Services;
+using LeadPipe.Application.Service;
 
 namespace LeadPipe.Infrastructure;
 

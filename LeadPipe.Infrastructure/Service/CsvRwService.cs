@@ -3,7 +3,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using System.Globalization;
 
-namespace LeadPipe.Infrastructure.Services;
+namespace LeadPipe.Infrastructure.Service;
 
 internal static class CsvRwService
 {
@@ -33,7 +33,7 @@ internal static class CsvRwService
         {
             using StreamReader reader = new(path.FullName);
             using CsvReader csv = new(reader, _config);
-            List<T> records = csv.GetRecords<T>().ToList();
+            List<T> records = [.. csv.GetRecords<T>()];
             return records;
         }
         catch (Exception ex)

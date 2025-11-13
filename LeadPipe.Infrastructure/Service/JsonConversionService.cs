@@ -1,8 +1,8 @@
 ﻿using CsvHelper.Configuration;
 using CSharpFunctionalExtensions;
-using LeadPipe.Application.Services;
+using LeadPipe.Application.Service;
 
-namespace LeadPipe.Infrastructure.Services;
+namespace LeadPipe.Infrastructure.Service;
 
 internal class JsonConversionService : IJsonConversionService
 {

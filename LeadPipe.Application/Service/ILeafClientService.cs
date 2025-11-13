@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.DataInterfaces.Dto;
-namespace LeadPipe.Application.Services;
+namespace LeadPipe.Application.Service;
 
 public interface ILeafClientService
 {

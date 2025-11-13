@@ -1,11 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
 using System.Net.Http.Json;
-using LeadPipe.Application.Services;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Application.DataInterfaces.Dto;
 using LeadPipe.Infrastructure.SettingsInterfaces;
+using LeadPipe.Application.Service;
 
-namespace LeadPipe.Infrastructure.Services;
+namespace LeadPipe.Infrastructure.Service;
 
 internal class LeafClientService(ILeafSettings settings) : ILeafClientService
 {
