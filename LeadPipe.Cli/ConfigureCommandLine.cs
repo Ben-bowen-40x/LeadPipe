@@ -20,6 +20,6 @@ internal static class ConfigureCommandLine
             builder.AddDebug();
             builder.AddConsole();
         });
-        services.AddInfrastructure(settings).AddTranslation().AddApplication();
+        services.AddInfrastructure(settings, configuration).AddTranslation().AddApplication();
     }
 }

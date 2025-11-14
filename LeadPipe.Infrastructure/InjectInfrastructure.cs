@@ -2,12 +2,15 @@
 using LeadPipe.Application.Service;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Service;
+using LeadPipe.Infrastructure.Database;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure;
 
 public static class InjectInfrastructure
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings, IConfiguration configuration)
     {
         // Format: services.AddScoped<Interface, Class>();
         services.AddScoped<ICsvRwService, CsvRwService>();
@@ -25,6 +28,14 @@ public static class InjectInfrastructure
         });
 
         services.AddHttpClient();
+
+        // Add Databases
+        services.AddDbContext<PlumbingContext>(options =>
+        {
+            var connectionString = configuration.GetConnectionString("PlumbingContext");
+            options.UseSqlite(connectionString);
+        });
+
         return services;
     }
 }
