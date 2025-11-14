@@ -3,7 +3,7 @@ using LeadPipe.Infrastructure.Database;
 using LeadPipe.Infrastructure.Entity;
 using Microsoft.EntityFrameworkCore;
 
-namespace LeadPipe.Infrastructure.RepositoryService;
+namespace LeadPipe.Infrastructure.Repository;
 
 internal class SubsRepository(PlumbingContext context)
 {

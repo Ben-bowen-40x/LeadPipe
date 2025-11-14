@@ -1,11 +1,14 @@
-﻿using LeadPipe.Application.DataInterfaces.Entity;
+﻿using LeadPipe.Domain.ValueObjects;
 
 namespace LeadPipe.Infrastructure.Entity;
 
-internal class LeafEntity : ILeafEntity
+internal class PlumbingEntity
 {
+    public int Id { get; set; }
     public long PhoneNumber { get; set; }
     public DateTime Date { get; set; }
     public long UnixDate { get; set; }
     public string? Contents { get; set; }
+    public Source Source { get; set; }
+    public ICollection<SubsEntity> SubsEntities { get; set; } = [];
 }

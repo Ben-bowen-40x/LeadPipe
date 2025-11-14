@@ -1,9 +1,8 @@
 ﻿using CsvHelper.Configuration.Attributes;
-using LeadPipe.Application.DataInterfaces.Dto;
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class LibacionDto : ILibacionDto
+internal class LibacionDto
 {
     [Name("Date")]
     public string? Date { get; set; }

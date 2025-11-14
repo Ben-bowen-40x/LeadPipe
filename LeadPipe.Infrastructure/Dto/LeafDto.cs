@@ -1,9 +1,7 @@
-﻿using LeadPipe.Application.DataInterfaces.Dto;
-
-namespace LeadPipe.Infrastructure.Dto;
+﻿namespace LeadPipe.Infrastructure.Dto;
 
 #pragma warning disable IDE1006 // Naming Styles
-public class LeafDto : ILeafDto
+public class LeafDto
 {
     public string? uuid { get; set; }
     public string? profile { get; set; }
@@ -16,31 +14,31 @@ public class LeafDto : ILeafDto
     public DateTime modification { get; set; }
     public bool isCallRequest { get; set; }
     public object[]? tags { get; set; }
-    public IProspect? prospect { get; set; }
-    public IAssignee? assignee { get; set; }
-    public IMessage[]? messages { get; set; }
+    public Prospect? prospect { get; set; }
+    public Assignee? assignee { get; set; }
+    public Message[]? messages { get; set; }
     public DateTime reminder { get; set; }
 }
 
 #region Properties
-public class Assignee : IAssignee
+public class Assignee
 {
     public string? uuid { get; set; }
     public string? first_name { get; set; }
     public string? last_name { get; set; }
 }
 
-public class Medium : IMedium
+public class Medium
 {
     public string? path { get; set; }
     public string? url { get; set; }
     public string? type { get; set; }
 }
 
-public class Message : IMessage
+public class Message
 {
     public string? uuid { get; set; }
-    public object? message { get; set; }
+    public string? message { get; set; }
     public string? state { get; set; }
     public string? type { get; set; }
     public bool auto_reply { get; set; }
@@ -49,14 +47,14 @@ public class Message : IMessage
     public DateTime sent { get; set; }
     public string? profile { get; set; }
     public string? thread { get; set; }
-    public ISender? sender { get; set; }
+    public Sender? sender { get; set; }
     public string? direction { get; set; }
     public string? source { get; set; }
     public string? error_description { get; set; }
-    public IMedium[]? media { get; set; }
+    public Medium[]? media { get; set; }
 }
 
-public class Prospect : IProspect
+public class Prospect
 {
     public string? uuid { get; set; }
     public string? first_name { get; set; }
@@ -71,7 +69,7 @@ public class Prospect : IProspect
     public string[]? profiles { get; set; }
 }
 
-public class Sender : ISender
+public class Sender
 {
     public string? uuid { get; set; }
     public string? first_name { get; set; }

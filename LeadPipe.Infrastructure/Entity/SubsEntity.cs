@@ -1,8 +1,6 @@
-﻿using LeadPipe.Application.DataInterfaces.Entity;
+﻿namespace LeadPipe.Infrastructure.Entity;
 
-namespace LeadPipe.Infrastructure.Entity;
-
-internal class SubsEntity : ISubsEntity
+internal class SubsEntity
 {
     public int Id { get; set; }
     public long PhoneNumber { get; set; }
@@ -10,14 +8,14 @@ internal class SubsEntity : ISubsEntity
     public DateTime SubDate { get; set; }
 
     // Foreign keys for associations
-    public long? LeafPhoneNumber { get; set; }
-    public long? YellerPhoneNumber { get; set; }
     public long? CalliPhoneNumber { get; set; }
     public long? LabPhoneNumber { get; set; }
+    public long? LeasedPhoneNumber { get; set; }
+    public long? LeafPhoneNumber { get; set; }
+    public long? LibacionPhoneNumber { get; set; }
+    public long? PanPhoneNumber { get; set; }
+    public long? YellerPhoneNumber { get; set; }
 
     // Navigation properties
-    public ILeafEntity? LeafEntity { get; set; }
-    public IYellerEntity? YellerEntity { get; set; }
-    public ICalliEntity? CalliEntity { get; set; }
-    public ILabEntity? LabEntity { get; set; }
+    public ICollection<PlumbingEntity> PlumbingEntities { get; set; } = [];
 }

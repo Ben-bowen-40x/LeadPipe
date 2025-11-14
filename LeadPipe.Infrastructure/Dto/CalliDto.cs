@@ -1,9 +1,8 @@
 ﻿using CsvHelper.Configuration.Attributes;
-using LeadPipe.Application.DataInterfaces.Dto;
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class CalliDto : ICalliDto
+internal class CalliDto
 {
     [Name("Phone")]
     public long Phone { get; set; }

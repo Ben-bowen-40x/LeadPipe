@@ -1,9 +1,8 @@
 ﻿using CsvHelper.Configuration.Attributes;
-using LeadPipe.Application.DataInterfaces.Dto;
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class PanDto : IPanDto
+internal class PanDto
 {
     [Name("Name")]
     public string? Name { get; set; }

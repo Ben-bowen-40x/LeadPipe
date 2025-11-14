@@ -1,9 +1,8 @@
 ﻿using CsvHelper.Configuration.Attributes;
-using LeadPipe.Application.DataInterfaces.Dto;
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class LeasedDto : ILeasedDto
+internal class LeasedDto
 {
     [Name("Date Received")]
     public string? Date { get; set; }
