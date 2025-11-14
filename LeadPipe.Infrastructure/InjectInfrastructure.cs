@@ -16,7 +16,7 @@ public static class InjectInfrastructure
         services.AddScoped<ICsvRwService, CsvRwService>();
         services.AddScoped<IJsonConversionService, JsonConversionService>();
         services.AddScoped<IJsonRwService, JsonRwService>();
-        services.AddScoped<ILeafClientService, ILeafClientService>();
+        services.AddScoped<ILeafClientService, LeafClientService>();
         services.AddScoped<IYellerClientService, YellerClientService>();
 
         // Add Leaf Client
