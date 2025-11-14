@@ -14,7 +14,7 @@ public static class InjectInfrastructure
     {
         // Format: services.AddScoped<Interface, Class>();
         services.AddScoped<ICsvRwService, CsvRwService>();
-        services.AddScoped<IJsonConversionService, JsonConversionService>();
+        services.AddScoped<IFileConversionService, FileConversionService>();
         services.AddScoped<IJsonRwService, JsonRwService>();
         services.AddScoped<ILeafClientService, LeafClientService>();
         services.AddScoped<IYellerClientService, YellerClientService>();
