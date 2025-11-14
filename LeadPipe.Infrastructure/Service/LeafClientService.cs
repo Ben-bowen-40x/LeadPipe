@@ -1,12 +1,12 @@
 ﻿using CSharpFunctionalExtensions;
 using System.Net.Http.Json;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.SettingsInterfaces;
 using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Translate;
 using System.Text;
 using LeadPipe.Domain.FunctionalObjects;
+using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Infrastructure.Service;
 

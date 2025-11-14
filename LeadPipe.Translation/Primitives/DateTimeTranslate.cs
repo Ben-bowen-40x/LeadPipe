@@ -1,6 +1,4 @@
-﻿using LeadPipe.Application.Service;
-
-namespace LeadPipe.Translation.Primitives;
+﻿namespace LeadPipe.Translation.Primitives;
 
 internal class DateTimeTranslate : IDateTimeTranslate
 {

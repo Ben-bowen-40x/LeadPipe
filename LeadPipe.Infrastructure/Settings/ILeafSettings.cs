@@ -1,4 +1,4 @@
-﻿namespace LeadPipe.Infrastructure.SettingsInterfaces;
+﻿namespace LeadPipe.Infrastructure.Settings;
 
 public interface ILeafSettings
 {
