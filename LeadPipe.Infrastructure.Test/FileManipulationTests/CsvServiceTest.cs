@@ -22,7 +22,8 @@ public class CsvServiceTest
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        CsvRwService.Write<TestFile, TestFileMap>(fileName, [content]);
+        CsvRwService csv = new();
+        csv.Write<TestFile, TestFileMap>(fileName, [content]);
 
         // Assert
         Assert.NotEqual(intDefault, content.Id); // The id does not equal the default -- otherwise, there was a parsing error
@@ -44,7 +45,8 @@ public class CsvServiceTest
         FileInfo fileName = new(TestFileHelper.AccessTestFile(TestFileType.Csv));
 
         // Act
-        var contents = CsvRwService.Parse<TestFile>(fileName);
+        CsvRwService csv = new();
+        var contents = csv.Parse<TestFile>(fileName);
 
         // Assert
         Assert.True(contents.IsSuccess);
@@ -79,12 +81,13 @@ public class CsvServiceTest
     {
         // Assemble
         FileInfo fileName = new(TestFileHelper.AccessTestFile(TestFileType.Csv));
-        
+
         // Create the actual object to be saved to file
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        CsvRwService.Append<TestFile, TestFileMap>(fileName, [content]);
+        CsvRwService csv = new();
+        csv.Append<TestFile, TestFileMap>(fileName, [content]);
 
         // Assert
         // Assert

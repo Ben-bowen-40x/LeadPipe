@@ -36,7 +36,8 @@ public class JsonServiceTest
         TestFile content = TestFileHelper.ParseStringToTestFile(id, name, dateTime, out int intDefault, out DateTime dtDefault, out int idResult, out DateTime dtResult);
 
         // Act
-        JsonRwService.WriteToFile(jsonFile, [content]);
+        JsonRwService json = new();
+        json.WriteToFile(jsonFile, [content]);
 
         // Assert
         Assert.NotEqual(intDefault, content.Id); // The id does not equal the default -- otherwise, there was a parsing error
@@ -94,7 +95,8 @@ public class JsonServiceTest
         FileInfo jsonFile = new(TestFileHelper.AccessTestFile(TestFileType.Json));
 
         // Act
-        var result = JsonRwService.ReadFile<TestFile>(jsonFile);
+        JsonRwService json = new();
+        var result = json.ReadFile<TestFile>(jsonFile);
 
         // Assert
         Assert.True(result.IsSuccess);
