@@ -77,6 +77,7 @@ internal class PlumbingRepository(PlumbingContext context)
         }
         return Result.Success();
     }
+    
     public async Task<Result> DeleteAsync(PlumbingEntity entity)
     {
         return await DeleteAsync(entity.Id);
