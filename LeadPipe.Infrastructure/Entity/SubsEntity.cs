@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Infrastructure.Entity;
 
-internal class SubsEntity
+public class SubsEntity
 {
     public long Id { get; set; }
     public long CustomerId { get; set; }

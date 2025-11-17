@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Entity;
 
-internal class SubsPlumbingLink
+public class SubsPlumbingLink
 {
     public long SubsId { get; set; }
     public required SubsEntity SubsEntity { get; set; }

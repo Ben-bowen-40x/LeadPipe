@@ -1,3 +1,10 @@
-﻿namespace LeadPipe.Infrastructure.Translate;
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Entity;
 
-public interface IEntityToVo { }
+namespace LeadPipe.Infrastructure.Translate;
+
+public interface IEntityToVo
+{
+    Plumbing Translate(PlumbingEntity entity);
+    Sandwich Translate(SubsEntity entity);
+}
