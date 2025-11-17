@@ -5,6 +5,49 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
 public class SubsRepositoryTests
 {
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldAddMultipleSubsEntities()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new SubsRepository(context);
+
+        var entities = new List<SubsEntity>
+        {
+            new() { Id = 1, Number = 12345, Number2 = 67890 },
+            new() { Id = 2, Number = 11111, Number2 = 22222 }
+        };
+
+        var result = await repo.AddRangeAsync(entities);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, context.SubsEntities.Count());
+    }
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new SubsRepository(context);
+
+        var result = await repo.AddRangeAsync(new List<SubsEntity>());
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("No subscription entities", result.Error);
+    }
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldFail_WhenNullList()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new SubsRepository(context);
+
+        var result = await repo.AddRangeAsync(null);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("No subscription entities", result.Error);
+    }
+
     [Fact]
     public async Task AddAsync_ShouldAddSubsEntity()
     {

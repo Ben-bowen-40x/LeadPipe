@@ -1,0 +1,141 @@
+﻿using LeadPipe.Infrastructure.Entity;
+using LeadPipe.Infrastructure.Repository;
+
+namespace LeadPipe.Infrastructure.Test.RepositoryTests;
+
+public class SubsPlumbLinkRepositoryTests
+{
+    [Fact]
+    public async Task AddRangeAsync_ShouldAddMultipleLinks()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new SubsPlumbLinkRepository(context);
+
+        var links = new List<SubsPlumbingLink>
+        {
+            new() { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() },
+            new() { SubsId = 2, SubsEntity = new(), PlumbingId = 2, MatchingSubPhone = 67890, PlumbingEntity = new() }
+        };
+
+        var result = await repo.AddRangeAsync(links);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, context.SubsPlumbingLinks.Count());
+    }
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new SubsPlumbLinkRepository(context);
+
+        var result = await repo.AddRangeAsync(new List<SubsPlumbingLink>());
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("No link entities", result.Error);
+    }
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldFail_WhenNullList()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new SubsPlumbLinkRepository(context);
+
+        var result = await repo.AddRangeAsync([]);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("No link entities", result.Error);
+    }
+
+    [Fact]
+    public async Task AddAsync_ShouldAddLink()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new SubsPlumbLinkRepository(context);
+
+        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() };
+        var result = await repo.AddAsync(link);
+
+        Assert.True(result.IsSuccess);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnLink_WhenExists()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        context.SubsPlumbingLinks.Add(new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() });
+        await context.SaveChangesAsync();
+
+        var repo = new SubsPlumbLinkRepository(context);
+        var result = await repo.GetByIdAsync(1, 1);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(12345, result.Value.MatchingSubPhone);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldFail_WhenNotFound()
+    {
+        var repo = new SubsPlumbLinkRepository(RepoTestHelpers.GetInMemoryContext());
+        var result = await repo.GetByIdAsync(99, 99);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("not found", result.Error);
+    }
+
+    [Fact]
+    public async Task UpdateValuesAsync_ShouldUpdateLink()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() };
+        context.SubsPlumbingLinks.Add(link);
+        await context.SaveChangesAsync();
+
+        var repo = new SubsPlumbLinkRepository(context);
+        var updatedLink = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 67890, PlumbingEntity = new() };
+
+        var result = await repo.UpdateValuesAsync(updatedLink);
+        var reloaded = await repo.GetByIdAsync(1, 1);
+
+        Assert.True(result.IsSuccess);
+        Assert.True(reloaded.IsSuccess);
+        Assert.Equal(67890, reloaded.Value.MatchingSubPhone);
+    }
+
+    [Fact]
+    public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
+    {
+        var repo = new SubsPlumbLinkRepository(RepoTestHelpers.GetInMemoryContext());
+        var updatedLink = new SubsPlumbingLink { SubsId = 99, SubsEntity = new(), PlumbingId = 99, MatchingSubPhone = 11111, PlumbingEntity = new() };
+
+        var result = await repo.UpdateValuesAsync(updatedLink);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("does not exist", result.Error);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldRemoveLink()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() };
+        context.SubsPlumbingLinks.Add(link);
+        await context.SaveChangesAsync();
+
+        var repo = new SubsPlumbLinkRepository(context);
+        var result = await repo.DeleteAsync(1, 1);
+        var reloaded = await repo.GetByIdAsync(1, 1);
+
+        Assert.True(result.IsSuccess);
+        Assert.True(reloaded.IsFailure);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
+    {
+        var repo = new SubsPlumbLinkRepository(RepoTestHelpers.GetInMemoryContext());
+        var result = await repo.DeleteAsync(99, 99);
+
+        Assert.True(result.IsSuccess);
+    }
+}

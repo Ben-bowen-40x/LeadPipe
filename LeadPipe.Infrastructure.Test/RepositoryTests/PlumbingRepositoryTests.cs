@@ -7,6 +7,37 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
 public class PlumbingRepositoryTests
 {
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldAddMultipleEntities()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new PlumbingRepository(context);
+
+        var entities = new List<PlumbingEntity>
+        {
+            new() { Id = 1, PhoneNumber = 12345 },
+            new() { Id = 2, PhoneNumber = 67890 }
+        };
+
+        var result = await repo.AddRangeAsync(entities);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(2, context.PlumbingEntities.Count());
+    }
+
+    [Fact]
+    public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
+    {
+        var context = RepoTestHelpers.GetInMemoryContext();
+        var repo = new PlumbingRepository(context);
+
+        var result = await repo.AddRangeAsync(new List<PlumbingEntity>());
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains("No plumbing entities", result.Error);
+    }
+
     [Fact]
     public async Task AddAsync_ShouldAddPlumbingEntity()
     {
