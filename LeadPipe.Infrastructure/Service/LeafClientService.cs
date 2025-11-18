@@ -1,8 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using Google.Protobuf;
-using Google.Protobuf.WellKnownTypes;
 using LeadPipe.Application.Service;
-using LeadPipe.Domain.FunctionalObjects;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
@@ -10,45 +7,50 @@ using LeadPipe.Infrastructure.Repository;
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Translate;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Net.Http.Json;
-using System.Threading.Channels;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LeadPipe.Infrastructure.Service;
 
-internal class LeafClientService(
-    ILeafSettings settings,
-    IDtoToVo dtoTranslate,
-    IJsonRwService json,
-    IHttpClientFactory factory,
-    IPlumbingRepository repo,
-    ILogger<LeafClientService> logger) : ILeafClientService
+internal class LeafClientService : ILeafClientService
 {
+    public LeafClientService(
+        ILeafSettings settings,
+        IDtoToVo dtoTranslate,
+        IJsonRwService json,
+        IHttpClientFactory factory,
+        IPlumbingRepository repo,
+        IFileService file,
+        ILogger<LeafClientService> logger)
+    {
+        _logger = logger;
+        _settings = settings;
+        _dto = dtoTranslate;
+        _json = json;
+        _factory = factory;
+        _repo = repo;
+        _file = file;
+        _throttle = new(_settings.LeafConcurrentMax);
+    }
+
     #region Private
-    private readonly ILogger<LeafClientService> _logger = logger;
-    private readonly ILeafSettings _settings = settings;
-    private readonly IDtoToVo _dto = dtoTranslate;
-    private readonly IJsonRwService _json = json;
-    private readonly IHttpClientFactory _factory = factory;
-    private readonly IPlumbingRepository _repo = repo;
+    private readonly ILogger<LeafClientService> _logger;
+    private readonly ILeafSettings _settings;
+    private readonly IDtoToVo _dto;
+    private readonly IJsonRwService _json;
+    private readonly IHttpClientFactory _factory;
+    private readonly IPlumbingRepository _repo;
+    private readonly IFileService _file;
     private HttpClient? _client;
     private HttpClient Client => _client ??= _factory.CreateClient(_settings.LeafName!);
-    private List<LeafDto>? _leafs;
-    private Result SetLeafs(List<LeafDto> leafs)
-    {
-        if (leafs.Count == 0)
-            return Result.Failure("Input list is empty");
-        _leafs = leafs;
-        return Result.Success();
-    }
-    private Result<List<LeafDto>> GetLeafs() => _leafs is null || _leafs.Count == 0 ? Result.Failure<List<LeafDto>>("Leaf dto list is null or empty") : _leafs;
-    private Uri LeafThreadUrl(int offset = 0, int limit = 1000) => new($"{_settings.LeafThreadsEndpoint}?limit={limit}&offset={offset}");
-    private Uri LeafMessagesUrl(string thread, int limit = 10, string type = "sms") => new($"{_settings.LeafThreadsEndpoint}/{thread}{_settings.LeafMessagesEndpoint}?limit={limit}&type={type}&offset=0");
+    private readonly SemaphoreSlim _throttle;
+    private Uri LeafThreadUrl(int offset = 0, int limit = 1000) =>
+        new($"{_settings.LeafThreadsEndpoint}?limit={limit}&offset={offset}");
+    private Uri LeafMessagesUrl(string thread, int limit = 10, string type = "sms") =>
+        new($"{_settings.LeafThreadsEndpoint}/{thread}{_settings.LeafMessagesEndpoint}?limit={limit}&type={type}&offset=0");
     private static async void Wait(int sleepInterval = 500) => await Task.Delay(sleepInterval);
-    private static async Task<Result<T>> GetSingleAsync<T>(Uri url, HttpClient client)
+    private async Task<Result<T>> GetSingleAsync<T>(Uri url, HttpClient client)
     {
-        // Attempt to make the call
+        await _throttle.WaitAsync();
         try
         {
             HttpResponseMessage response = await client.GetAsync(url);
@@ -56,17 +58,9 @@ internal class LeafClientService(
             if (response.IsSuccessStatusCode)
             {
                 T? value = await response.Content.ReadFromJsonAsync<T>();
-                if (value is not null)
-                {
-                    return value!;
-                }
-
-                string str = await response.Content.ReadAsStringAsync();
-                string error = string.IsNullOrWhiteSpace(str) || str.Length == 0
-                    ? "Parsing failure. The process of reading the results from Json failed. The results somehow became null."
-                    : str;
-
-                return Result.Failure<T>(error);
+                return value is not null
+                    ? Result.Success(value)
+                    : Result.Failure<T>("Parsing failure: JSON returned null.");
             }
             return Result.Failure<T>(response.ReasonPhrase);
         }
@@ -74,21 +68,37 @@ internal class LeafClientService(
         {
             return Result.Failure<T>(ex.Message);
         }
+        finally
+        {
+            _throttle.Release();
+        }
     }
     #endregion
 
     #region Public
+    /// <summary>
+    /// Refreshes threads from the API starting after the last Leaf-sourced item in the database.
+    /// Falls back to full refresh if none exist.
+    /// </summary>
     public async Task<Result<List<Plumbing>>> RefreshAsync(int errorLimit = 5)
     {
-        // Retrieve leaf sourced items from database to update database
         Result<List<PlumbingEntity>> plumbingEntities = await _repo.GetAllAsync();
 
-        List<PlumbingEntity>? leafPlumbing = plumbingEntities.IsSuccess
-            ? [.. plumbingEntities.Value.Where(v => v.Source == Source.Leaf)]
-            : null;
-        if (leafPlumbing is null)
+        if (!plumbingEntities.IsSuccess)
+        {
+            _logger.LogWarning("Repository call failed: {Error}. Performing full refresh.", plumbingEntities.Error);
             return await GetAllAsync(errorLimit);
-        return await GetAllAsync(offset: leafPlumbing.Count - 1, errorLimit);
+        }
+
+        var leafPlumbing = plumbingEntities.Value.Where(v => v.Source == Source.Leaf).ToList();
+        if (leafPlumbing.Count == 0)
+        {
+            _logger.LogWarning("Database returned no items for {Source}. Performing full refresh.", Source.Leaf);
+            return await GetAllAsync(errorLimit);
+        }
+
+        int offset = leafPlumbing.Count - 1; // Api uses index-style offsets
+        return await GetAllAsync(offset, errorLimit);
     }
     public async Task<Result<List<Plumbing>>> GetAllAsync(int offset = 0, int errorLimit = 5)
     {
@@ -120,7 +130,7 @@ internal class LeafClientService(
                     List<LeafDto> value = result.Value;
                     value.ForEach(raw.Add);
 
-                    resume = raw.Count == limit;
+                    resume = value.Count == limit;
                 }
                 else
                 {
@@ -137,7 +147,7 @@ internal class LeafClientService(
         }
 
         // Refresh messages
-        Result<List<Message>>[] msgs = GetMessages(raw);
+        Result<List<Message>>[] msgs = await GetMessagesAsync(raw);
 
         // Reset Leafs using GroupJoin
         var updatedLeafs = raw
@@ -167,71 +177,38 @@ internal class LeafClientService(
         // Save raw, assuming there were raw values
         if (raw.Count > 0)
         {
-            SetLeafs(raw);
-            FileInfo file = new(FolderFinder.GetLocalFile(nameof(Infrastructure), ".info", "RawLeaf.json"));
+            FileInfo file = new(_file.GetLocalFile(nameof(Infrastructure), ".info", "RawLeaf.json"));
             Result saved = _json.WriteToFile(file, raw);
             if (saved.IsFailure)
                 _logger.LogError("Failed to write raw dtos to file {FileName} due to {Error}", file.FullName, saved.Error);
         }
 
         if (failure)
-        {
             _logger.LogError("Reached error limit {ErrorLimit}", errorLimit);
-            return Result.Failure<List<Plumbing>>($"Reached error limit. Error limit: {errorLimit}");
-        }
 
         return master;
     }
     #endregion
 
     #region Internal
-    internal Result<List<Message>>[] GetMessages(List<LeafDto> leafs)
+    internal async Task<Result<List<Message>>[]> GetMessagesAsync(List<LeafDto> leafs)
     {
-        List<Task<Result<List<Message>>>> tasks = new(leafs.Count);
-        foreach (LeafDto leaf in leafs)
-        {
-            // Retrieve the thread id
-            if (leaf.uuid is null)
-                continue;
-            string threadid = leaf.uuid;
-            Uri uri = LeafMessagesUrl(threadid);
-
-            // Retrieve new list
-            Task<Result<List<Message>>> messagesResultTask = GetSingleAsync<List<Message>>(uri, Client);
-            tasks.Add(messagesResultTask);
-
-            Thread.Sleep(1000 / (5 - 2));
-        }
-
-        Task<Result<List<Message>>[]> completedTask = Task.WhenAll(tasks);
-        Result<List<Message>>[] result = ConvertTasks(completedTask);
-
-        return result;
-    }
-
-    internal Result<List<T>>[] ConvertTasks<T>(Task<Result<List<T>>[]> completedTask)
-    {
-        if (completedTask.IsCompletedSuccessfully)
-        {
-            Result<List<T>>[] taskResult = completedTask.Result;
-            IEnumerable<Result<List<T>>> result = taskResult.Select(r =>
+        var tasks = leafs
+            .Where(l => l.uuid is not null)
+            .Select(async leaf =>
             {
-                // Unwrapt the value
-                if (r.IsFailure) return Result.Failure<List<T>>(r.Error);
-
-                List<T> value = r.Value;
-                return Result.Success(value);
-            });
-            return [.. result];
-        }
-        else
-        {
-            string e = completedTask.Exception is not null
-                ? completedTask.Exception.Message
-                : "Unknown exception";
-            _logger.LogError("Error: {Error}", e);
-            return [Result.Failure<List<T>>(e)];
-        }
+                await _throttle.WaitAsync();
+                try
+                {
+                    Uri uri = LeafMessagesUrl(leaf.uuid!);
+                    return await GetSingleAsync<List<Message>>(uri, Client);
+                }
+                finally
+                {
+                    _throttle.Release();
+                }
+            }).ToList();
+        return await Task.WhenAll(tasks);
     }
     #endregion
 }

@@ -10,4 +10,5 @@ public interface ILeafSettings
     public string? LeafUuid { get; set; }
     public string? LeafThreadsEndpoint { get; set; }
     public string? LeafMessagesEndpoint { get; set; }
+    int LeafConcurrentMax { get; set; }
 }
