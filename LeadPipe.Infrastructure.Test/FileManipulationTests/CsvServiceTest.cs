@@ -23,7 +23,7 @@ public class CsvServiceTest
 
         // Act
         CsvRwService csv = new();
-        csv.Write<TestFile, TestFileMap>(fileName, [content]);
+        csv.Write<TestFile, TestFile>(fileName, [content]);
 
         // Assert
         Assert.NotEqual(intDefault, content.Id); // The id does not equal the default -- otherwise, there was a parsing error
@@ -87,7 +87,7 @@ public class CsvServiceTest
 
         // Act
         CsvRwService csv = new();
-        csv.Append<TestFile, TestFileMap>(fileName, [content]);
+        csv.Append<TestFile, TestFile>(fileName, [content]);
 
         // Assert
         // Assert
