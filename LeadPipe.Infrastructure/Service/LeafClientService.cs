@@ -11,7 +11,7 @@ using System.Net.Http.Json;
 
 namespace LeadPipe.Infrastructure.Service;
 
-internal class LeafClientService : ILeafClientService
+public class LeafClientService : ILeafClientService
 {
     public LeafClientService(
         ILeafSettings settings,
@@ -84,7 +84,7 @@ internal class LeafClientService : ILeafClientService
     {
         Result<List<PlumbingEntity>> plumbingEntities = await _repo.GetAllAsync();
 
-        if (!plumbingEntities.IsSuccess)
+        if (plumbingEntities.IsFailure)
         {
             _logger.LogWarning("Repository call failed: {Error}. Performing full refresh.", plumbingEntities.Error);
             return await GetAllAsync(errorLimit);
@@ -100,6 +100,7 @@ internal class LeafClientService : ILeafClientService
         int offset = leafPlumbing.Count - 1; // Api uses index-style offsets
         return await GetAllAsync(offset, errorLimit);
     }
+
     public async Task<Result<List<Plumbing>>> GetAllAsync(int offset = 0, int errorLimit = 5)
     {
         const int limit = 1000;
@@ -128,16 +129,16 @@ internal class LeafClientService : ILeafClientService
                 {
                     // Add dtos to raw list
                     List<LeafDto> value = result.Value;
-                    value.ForEach(raw.Add);
+                    raw.AddRange(value);
 
                     resume = value.Count == limit;
+                    offset += limit;
                 }
                 else
                 {
                     errorCount++;
                     _logger.LogWarning("API call failed at offset {Offset}. Error count: {ErrorCount}. Error Limit: {ErrorLimit}. Error: {Error}", offset, errorCount, errorLimit, result.Error);
                 }
-                offset += limit;
             }
             catch (Exception e)
             {
@@ -146,26 +147,22 @@ internal class LeafClientService : ILeafClientService
             }
         }
 
-        // Refresh messages
-        Result<List<Message>>[] msgs = await GetMessagesAsync(raw);
+        if (raw.Count > 0)
+        {
+            // Save raw, assuming there were raw values
+            FileInfo file = new(_file.GetLocalFile(nameof(Infrastructure), ".info", "RawLeaf.json"));
+            Result saved = _json.WriteToFile(file, raw);
+            if (saved.IsFailure)
+                _logger.LogError("Failed to write raw dtos to file {FileName} due to {Error}", file.FullName, saved.Error);
 
-        // Reset Leafs using GroupJoin
-        var updatedLeafs = raw
-            .GroupJoin(
-                msgs.Where(r => r.IsSuccess && r.Value is not null)
-                    .SelectMany(r => r.Value),
-                leaf => leaf.uuid,           // key from raw leaf
-                msg => msg.thread,           // key from message
-                (leaf, relatedMsgs) =>
-                {
-                    leaf.messages = [.. relatedMsgs];
-                    return leaf;
-                }
-            ).ToList();
+            // Refresh messages
+            Result<List<Message>>[] msgs = await GetMessagesAsync(raw);
+            List<LeafDto> updatedLeafs = Update(raw, msgs);
 
-        // Translate from dto to vo
-        List<Plumbing> translation = [.. updatedLeafs.Select(_dto.Translate)];
-        translation.ForEach(master.Add);
+            // Translate from dto to vo
+            List<Plumbing> translation = [.. updatedLeafs.Select(_dto.Translate)];
+            translation.ForEach(master.Add);
+        }
 
         if (master.Count == 0)
         {
@@ -174,23 +171,49 @@ internal class LeafClientService : ILeafClientService
             return Result.Failure<List<Plumbing>>(msg);
         }
 
-        // Save raw, assuming there were raw values
-        if (raw.Count > 0)
-        {
-            FileInfo file = new(_file.GetLocalFile(nameof(Infrastructure), ".info", "RawLeaf.json"));
-            Result saved = _json.WriteToFile(file, raw);
-            if (saved.IsFailure)
-                _logger.LogError("Failed to write raw dtos to file {FileName} due to {Error}", file.FullName, saved.Error);
-        }
-
         if (failure)
             _logger.LogError("Reached error limit {ErrorLimit}", errorLimit);
 
-        return master;
+        return Result.Success(master);
     }
     #endregion
 
     #region Internal
+    internal List<LeafDto> Update(List<LeafDto> raw, Result<List<Message>>[] msgs)
+    {
+        var messageLookup = msgs
+            .Select(r =>
+            {
+                // Log Failures
+                if (r.IsFailure)
+                    _logger.LogError("Failed to retrieve messages. {Error}", r.Error);
+                return r;
+            })
+            .Where(r => r.IsSuccess && r.Value is not null)
+            .SelectMany(r => r.Value)
+            .Where(m => m.thread is not null)
+            .GroupBy(m => m.thread!)
+            .ToDictionary(
+                g => g.Key,
+                g => g.ToArray() // Message[]
+            );
+
+        // Reassign messages
+        foreach (var leaf in raw)
+        {
+            if (leaf.uuid is null)
+            {
+                leaf.messages = [];
+                continue;
+            }
+
+            leaf.messages =
+                messageLookup.TryGetValue(leaf.uuid, out var messages)
+                ? messages
+                : [];
+        }
+        return raw;
+    }
     internal async Task<Result<List<Message>>[]> GetMessagesAsync(List<LeafDto> leafs)
     {
         var tasks = leafs

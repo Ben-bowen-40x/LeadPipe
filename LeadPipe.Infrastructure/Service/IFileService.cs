@@ -1,11 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace LeadPipe.Infrastructure.Service
+namespace LeadPipe.Infrastructure.Service;
+
+public interface IFileService
 {
-    internal interface IFileService
-    {
-        string GetLocalFile(string projectContainingLocalFolder, string localFolderToFind, string fileName);
-        string GetLocalFolder(string projectContainingLocalFolder, string localFolderToFind);
-        string GetMemberName(object origin, [CallerMemberName] string memberName = "");
-    }
+    string GetLocalFile(string projectContainingLocalFolder, string localFolderToFind, string fileName);
+    string GetLocalFolder(string projectContainingLocalFolder, string localFolderToFind);
+    string GetMemberName(object origin, [CallerMemberName] string memberName = "");
 }
