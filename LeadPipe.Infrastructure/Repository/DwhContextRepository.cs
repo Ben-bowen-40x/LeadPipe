@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LeadPipe.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
 
-namespace LeadPipe.Infrastructure.Database;
+namespace LeadPipe.Infrastructure.Repository;
 
-internal static class DwhContextHelper
+internal static class DwhContextRepository
 {
     internal static async Task<IEnumerable<T>> GetItemsFromFileAsync<T>(DwhContext<T> context, FileInfo queryLoc) where T : class
     {
