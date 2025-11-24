@@ -90,7 +90,7 @@ public class LeafClientService : ILeafClientService
             return await GetAllAsync(errorLimit);
         }
 
-        var leafPlumbing = plumbingEntities.Value.Where(v => v.Source == Source.Leaf).ToList();
+        List<PlumbingEntity> leafPlumbing = [.. plumbingEntities.Value.Where(v => v.Source == Source.Leaf)];
         if (leafPlumbing.Count == 0)
         {
             _logger.LogWarning("Database returned no items for {Source}. Performing full refresh.", Source.Leaf);
@@ -181,7 +181,7 @@ public class LeafClientService : ILeafClientService
     #region Internal
     internal List<LeafDto> Update(List<LeafDto> raw, Result<List<Message>>[] msgs)
     {
-        var messageLookup = msgs
+        Dictionary<string, Message[]> messageLookup = msgs
             .Select(r =>
             {
                 // Log Failures
@@ -199,7 +199,7 @@ public class LeafClientService : ILeafClientService
             );
 
         // Reassign messages
-        foreach (var leaf in raw)
+        foreach (LeafDto leaf in raw)
         {
             if (leaf.uuid is null)
             {
@@ -216,7 +216,7 @@ public class LeafClientService : ILeafClientService
     }
     internal async Task<Result<List<Message>>[]> GetMessagesAsync(List<LeafDto> leafs)
     {
-        var tasks = leafs
+        List<Task<Result<List<Message>>>> tasks = leafs
             .Where(l => l.uuid is not null)
             .Select(async leaf =>
             {
