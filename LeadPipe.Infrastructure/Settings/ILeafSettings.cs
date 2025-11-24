@@ -2,13 +2,13 @@
 
 public interface ILeafSettings
 {
-    public string? LeafName { get; set; }
-    public string? LeafTokenType { get; set; }
-    public string? LeafRefreshToken { get; set; }
-    public string? LeafBase { get; set; }
-    public string? LeafAcctUuid { get; set; }
-    public string? LeafUuid { get; set; }
-    public string? LeafThreadsEndpoint { get; set; }
-    public string? LeafMessagesEndpoint { get; set; }
+    string? LeafName { get; set; }
+    string? LeafTokenType { get; set; }
+    string? LeafRefreshToken { get; set; }
+    string? LeafBase { get; set; }
+    string? LeafAcctUuid { get; set; }
+    string? LeafUuid { get; set; }
+    string? LeafThreadsEndpoint { get; set; }
+    string? LeafMessagesEndpoint { get; set; }
     int LeafConcurrentMax { get; set; }
 }
