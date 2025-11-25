@@ -14,11 +14,11 @@ internal class SubsPlumbLinkRepository(PlumbingContext context) : ISubsPlumbLink
         return result;
     }
 
-    public async Task<Result<SubsPlumbingLink>> GetByIdAsync(long subsId, long plumbId)
+    public async Task<Result<SubsPlumbingLink>> GetByIdAsync(long id, long plumbId)
     {
-        SubsPlumbingLink? found = await _context.SubsPlumbingLinks.FindAsync(subsId, plumbId);
+        SubsPlumbingLink? found = await _context.SubsPlumbingLinks.FindAsync(id, plumbId);
         return found is null
-            ? Result.Failure<SubsPlumbingLink>($"Entity with compound id was not found\nSub Id: {subsId}\nPlumb Id: {plumbId}")
+            ? Result.Failure<SubsPlumbingLink>($"Entity with compound id was not found\nSub Id: {id}\nPlumb Id: {plumbId}")
             : Result.Success(found);
     }
 

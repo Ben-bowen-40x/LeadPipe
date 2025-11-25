@@ -11,4 +11,5 @@ public class PlumbingEntity
     public string? Contents { get; set; }
     public Source Source { get; set; }
     public ICollection<SubsPlumbingLink> SubsPlumbingLinks { get; set; } = [];
+    public ICollection<PlumbingCallLink> PlumbingCallLinks { get; set; } = [];
 }

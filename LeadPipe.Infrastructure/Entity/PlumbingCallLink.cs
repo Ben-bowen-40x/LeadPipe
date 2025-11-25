@@ -1,14 +1,12 @@
 ﻿namespace LeadPipe.Infrastructure.Entity;
 
-public class SubsPlumbingLink
+public class PlumbingCallLink
 {
     public long Id { get; set; }
-
-    public long SubsId { get; set; }
-    public required SubsEntity SubsEntity { get; set; }
 
     public long PlumbingId { get; set; }
     public required PlumbingEntity PlumbingEntity { get; set; }
 
-    public long MatchingSubPhone { get; set; }
+    public long CallId { get; set; }
+    public required CallEntity CallEntity { get; set; }
 }

@@ -26,4 +26,5 @@ public class SubsEntity
 
     // Navigation properties
     public ICollection<SubsPlumbingLink> SubsPlumbingLinks { get; set; } = [];
+    public ICollection<SubsCallLink> SubsCallLinks { get; set; } = [];
 }
