@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Application.Service;
 
 public interface IFileService
 {
