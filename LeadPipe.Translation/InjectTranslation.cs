@@ -14,9 +14,10 @@ public static class InjectTranslation
     public static IServiceCollection AddTranslation(this IServiceCollection services, IInfrastructureSettings settings)
     {
         // Format: services.AddScoped<Interface, Class>();
+        
+        // Primitives
         services.AddScoped<IDateTimeTranslate, DateTimeTranslate>();
 
-        // Add translations
         // Translations 
         services.AddScoped<IDtoToVo, DtoToVo>();
         services.AddScoped<IEntityToVo, EntityToVo>();
