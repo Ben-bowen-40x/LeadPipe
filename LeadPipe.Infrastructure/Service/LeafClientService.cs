@@ -14,7 +14,7 @@ public class LeafClientService : ILeafService
 {
     public LeafClientService(
         ILeafSettings settings,
-        IDtoToVo dtoTranslate,
+        IDtoToVo<LeafDto, Plumbing> dtoTranslate,
         IJsonRwService json,
         IHttpClientFactory factory,
         IPlumbingRepository repo,
@@ -34,7 +34,7 @@ public class LeafClientService : ILeafService
     #region Private
     private readonly ILogger<LeafClientService> _logger;
     private readonly ILeafSettings _settings;
-    private readonly IDtoToVo _dto;
+    private readonly IDtoToVo<LeafDto, Plumbing> _dto;
     private readonly IJsonRwService _json;
     private readonly IHttpClientFactory _factory;
     private readonly IPlumbingRepository _repo;

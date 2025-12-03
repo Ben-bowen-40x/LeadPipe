@@ -1,0 +1,22 @@
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Translate;
+
+namespace LeadPipe.Translation.Translate;
+
+internal class PlumbingToLeafDto : IVoToDto<Plumbing, LeafDto>
+{
+    public LeafDto Translate(Plumbing p)
+    {
+        string cellphone = $"{p.PhoneNumber.Number}";
+        DateTime creation = new(p.Date.Ticks);
+        string? message = p.Contents;
+        LeafDto result = new()
+        {
+            creation = creation,
+            prospect = new() { cellphone = cellphone },
+            messages = [new Message() { message = message }]
+        };
+        return result;
+    }
+}

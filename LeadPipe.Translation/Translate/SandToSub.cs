@@ -1,12 +1,10 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using LeadPipe.Domain.ValueObjects;
+﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Translate;
-using System;
 
 namespace LeadPipe.Translation.Translate;
 
-internal class VoToEntity : IVoToEntity
+internal class SandToSub : IVoToEntity<Sandwich, SubsEntity>
 {
     public SubsEntity Translate(Sandwich s)
     {
@@ -31,34 +29,6 @@ internal class VoToEntity : IVoToEntity
             Seller = s.Seller,
             Seller2 = s.Seller2,
             Seller3 = s.Seller3
-        };
-        return result;
-    }
-
-    public PlumbingEntity Translate(Plumbing plumbing)
-    {
-        var result = new PlumbingEntity()
-        {
-            PhoneNumber = plumbing.PhoneNumber.Number,
-            Date = new(plumbing.Date.Ticks),
-            UnixDate = plumbing.Date.ToUnixTimeSeconds(),
-            Contents = plumbing.Contents,
-            Source = plumbing.Source,
-        };
-        return result;
-    }
-
-    public CallEntity Translate(Call c)
-    {
-        var result = new CallEntity()
-        {
-            PhoneNumber = c.Number.Number,
-            CallDate = new(c.Date.Ticks),
-            UnixCallDate = c.Date.ToUnixTimeSeconds(),
-            Note = c.Note,
-            Source = c.Source,
-            Duration = c.Duration.Seconds,
-            Billable = c.Billable
         };
         return result;
     }

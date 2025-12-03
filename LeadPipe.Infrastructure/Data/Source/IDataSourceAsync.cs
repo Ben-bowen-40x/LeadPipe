@@ -2,7 +2,8 @@
 
 namespace LeadPipe.Infrastructure.Data.Source;
 
-public interface IDataSourceAsync<TDto>
+public interface IDataSourceAsync<T>
 {
-    public Task<Result<List<TDto>>> LoadAsync();
+    public Task<Result<List<T>>> LoadAsync();
+    Task<Result<List<T>>> RefreshAsync();
 }

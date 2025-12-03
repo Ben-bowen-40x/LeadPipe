@@ -56,7 +56,7 @@ public class DataSourceTests
         var labServiceMock = Substitute.For<ILabService>();
         var voToDtoMock = Substitute.For<IVoToDto<Plumbing, LabDto>>();
 
-        var plumbings = new List<Plumbing> { new Plumbing(new(PhoneNumber.Default), DateTimeOffset.MaxValue, Source.Test) };
+        var plumbings = new List<Plumbing> { new Plumbing(new(PhoneNumber.Default), DateTimeOffset.MaxValue, string.Empty, Source.Test) };
         var labDtos = new List<LabDto> { new LabDto() };
 
         labServiceMock.GetLabsAsync().Returns(Task.FromResult(Result.Success(plumbings)));
@@ -70,7 +70,7 @@ public class DataSourceTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(labDtos.Count, result.Value.Count);
-        labServiceMock.Received(1).GetLabsAsync();
+        await labServiceMock.Received(1).GetLabsAsync();
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class DataSourceTests
         var leafServiceMock = Substitute.For<ILeafService>();
         var voToDtoMock = Substitute.For<IVoToDto<Plumbing, LeafDto>>();
 
-        var plumbings = new List<Plumbing> { new Plumbing() };
+        var plumbings = new List<Plumbing> { new Plumbing(new(PhoneNumber.Default), DateTimeOffset.MaxValue, string.Empty, Source.Test) };
         var leafDtos = new List<LeafDto> { new LeafDto() };
 
         leafServiceMock.GetAllAsync().Returns(Task.FromResult(Result.Success(plumbings)));
@@ -117,7 +117,7 @@ public class DataSourceTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.Equal(leafDtos.Count, result.Value.Count);
-        leafServiceMock.Received(1).GetAllAsync();
+        await leafServiceMock.Received(1).GetAllAsync();
     }
 
     [Fact]

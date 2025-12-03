@@ -2,5 +2,5 @@
 
 public interface IDtoToVo<TDto, TVo>
 {
-    TDto Translate(TVo data);
+    TVo Translate(TDto data);
 }

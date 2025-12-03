@@ -25,4 +25,9 @@ public abstract class FileDataSource<TDto, TSource>(FileInfo file, ICsvRwService
             _ => Result.Failure<List<TDto>>("Unknown file type")
         };
     }
+
+    public async Task<Result<List<TDto>>> RefreshAsync()
+    {
+        return await LoadAsync();
+    }
 }

@@ -17,4 +17,13 @@ public class LabDataSource(ILabService lab, IVoToDto<Plumbing, LabDto> voToDto) 
         List<LabDto> result = [.. get.Value.Select(_voToDto.Translate)];
         return result;
     }
+
+    public async Task<Result<List<LabDto>>> RefreshAsync()
+    {
+        Result<List<Plumbing>> get = await _lab.UpdateDataAsync();
+        if (get.IsFailure)
+            return Result.Failure<List<LabDto>>(get.Error);
+        List<LabDto> result = [.. get.Value.Select(_voToDto.Translate)];
+        return result;
+    }
 }

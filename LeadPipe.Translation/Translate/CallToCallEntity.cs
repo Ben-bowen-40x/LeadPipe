@@ -1,0 +1,23 @@
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Translate;
+
+namespace LeadPipe.Translation.Translate;
+
+internal class CallToCallEntity : IVoToEntity<Call, CallEntity>
+{
+    public CallEntity Translate(Call c)
+    {
+        var result = new CallEntity()
+        {
+            PhoneNumber = c.Number.Number,
+            CallDate = new(c.Date.Ticks),
+            UnixCallDate = c.Date.ToUnixTimeSeconds(),
+            Note = c.Note,
+            Source = c.Source,
+            Duration = c.Duration.Seconds,
+            Billable = c.Billable
+        };
+        return result;
+    }
+}

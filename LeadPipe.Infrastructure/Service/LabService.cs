@@ -14,7 +14,7 @@ internal class LabService : ILabService
     #region Ctor
     private readonly HttpClient _client;
     private readonly ILogger<LabService> _logger;
-    private readonly IDtoToVo _dtoToVo;
+    private readonly IDtoToVo<LabDto, Plumbing> _dtoToVo;
     private readonly ILabSettings _settings;
     private readonly IPlumbingRepository _plumbingRepo;
     private readonly SemaphoreSlim _throttle;
@@ -23,7 +23,7 @@ internal class LabService : ILabService
         IHttpClientFactory httpClientFactory,
         ILabSettings settings,
         ILogger<LabService> logger,
-        IDtoToVo dtoToVo,
+        IDtoToVo<LabDto, Plumbing> dtoToVo,
         IPlumbingRepository plumbingRepo)
     {
         _client = httpClientFactory.CreateClient(settings.LabName!);

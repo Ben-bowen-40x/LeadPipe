@@ -4,7 +4,8 @@ using LeadPipe.Infrastructure.Translate;
 using LeadPipe.Translation.Primitives;
 
 namespace LeadPipe.Translation.Translate;
-internal class DtoToVo(IDateTimeTranslate dt) : IDtoToVo
+
+internal class LeafDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeafDto, Plumbing>
 {
     private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(LeafDto v)
@@ -40,21 +41,5 @@ internal class DtoToVo(IDateTimeTranslate dt) : IDtoToVo
 
         Plumbing result = new(PhoneNumber: number, Date: date, Contents: content, Source: Source.Leaf);
         return result;
-    }
-
-    public Plumbing Translate(CalliDto v)
-    {
-        PhoneNumber phone = new(v.Phone);
-        DateTime datetime = DateTime.TryParse(v.Date + " " + v.Time, out DateTime dt)
-            ? dt
-            : DateTime.MaxValue;
-        DateTimeOffset date = datetime;
-
-        return new Plumbing(PhoneNumber: phone, Date: date, Contents: v.PestProblem, Source: Source.Calli);
-    }
-
-    public Plumbing Translate(LabDto dto)
-    {
-        throw new NotImplementedException();
     }
 }
