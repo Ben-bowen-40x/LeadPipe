@@ -7,9 +7,9 @@ using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
-public class CustardMySqlRepositoryTests
+public class CustomerMySqlRepositoryTests
 {
-    private CustardMySqlRepository CreateRepository()
+    private CustomerMySqlRepository CreateRepository()
     {
         var settings = Substitute.For<IMySqlSettings>();
         settings.Schema1.Returns("dbo");
@@ -17,17 +17,17 @@ public class CustardMySqlRepositoryTests
 
         var context = new MySqlContext(
             new DbContextOptionsBuilder<MySqlContext>()
-                .UseInMemoryDatabase(nameof(CustardMySqlRepositoryTests))
+                .UseInMemoryDatabase(nameof(CustomerMySqlRepositoryTests))
                 .Options,
             settings);
-        return new CustardMySqlRepository(context);
+        return new CustomerMySqlRepository(context);
     }
 
     [Fact]
     public async Task AddAsync_ShouldAddEntity()
     {
         var repo = CreateRepository();
-        var entity = new CustardMySqlEntity { customerID = 1 };
+        var entity = new CustomerMySqlEntity { customerID = 1 };
 
         var result = await repo.AddAsync(entity);
 
@@ -39,7 +39,7 @@ public class CustardMySqlRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity()
     {
         var repo = CreateRepository();
-        var entity = new CustardMySqlEntity { customerID = 2 };
+        var entity = new CustomerMySqlEntity { customerID = 2 };
         await repo.AddAsync(entity);
 
         var result = await repo.GetByIdAsync(2);
@@ -52,7 +52,7 @@ public class CustardMySqlRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var repo = CreateRepository();
-        var entity = new CustardMySqlEntity { customerID = 3 };
+        var entity = new CustomerMySqlEntity { customerID = 3 };
         await repo.AddAsync(entity);
 
         var deleteResult = await repo.DeleteAsync(entity.customerID);
