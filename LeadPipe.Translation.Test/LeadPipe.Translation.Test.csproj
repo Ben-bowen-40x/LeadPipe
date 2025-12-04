@@ -22,4 +22,8 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\LeadPipe.Translation\LeadPipe.Translation.csproj" />
+  </ItemGroup>
+
 </Project>
