@@ -3,7 +3,7 @@ using LeadPipe.Application.Service;
 
 namespace LeadPipe.Infrastructure.Service;
 
-internal class FileConversionService(ICsvRwService csv, IJsonRwService json) : IFileConversionService
+internal class FileConversionService(ICsvRwService csv, IJsonRwService json) : IFileRWService
 {
     private readonly ICsvRwService _csv = csv;
     private readonly IJsonRwService _json = json;

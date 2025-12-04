@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Application.Service;
 
-public interface IFileConversionService
+public interface IFileRWService
 {
     Result<List<T>> ExtractCsv<T>(FileInfo csv);
     Result<List<T>> ExtractJson<T>(FileInfo jsonFile);
