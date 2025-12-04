@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Translation.Primitives;
 
-internal class DateTimeTranslate : IDateTimeTranslate
+public class DateTimeTranslate : IDateTimeTranslate
 {
     // Cache TimeZoneInfo objects for efficiency
     private static readonly Dictionary<ETimeZone, TimeZoneInfo> TimeZones = new()
@@ -15,7 +15,7 @@ internal class DateTimeTranslate : IDateTimeTranslate
 
     /// <summary>
     /// Convert a local DateTime in the given ETimeZone to UTC DateTimeOffset.
-    /// Handles invalid times deterministically.
+    /// Handles invalid and ambiguous times deterministically.
     /// </summary>
     public DateTimeOffset Convert(DateTime localTime, ETimeZone zone)
     {
@@ -25,15 +25,28 @@ internal class DateTimeTranslate : IDateTimeTranslate
         if (!TimeZones.TryGetValue(zone, out var tz))
             tz = TimeZoneInfo.Utc;
 
-        // Push invalid time into the next valid time slot
+        // Handle invalid times (DST gaps) by moving forward until valid
         if (tz.IsInvalidTime(localTime))
-            localTime = PushIntoValidTime(localTime, tz);
+        {
+            localTime = AdjustForwardToValid(localTime, tz);
+        }
 
+        // Handle ambiguous times (DST fall-back repeated hour)
+        if (tz.IsAmbiguousTime(localTime))
+        {
+            TimeSpan[] offsets = tz.GetAmbiguousTimeOffsets(localTime);
+
+            // Choose policy: pick the **earlier offset** (usually DST)
+            TimeSpan chosenOffset = offsets.Min();
+            return new DateTimeOffset(localTime, chosenOffset).ToUniversalTime();
+        }
+
+        // Normal conversion
         return TimeZoneInfo.ConvertTimeToUtc(localTime, tz);
     }
 
     /// <summary>
-    /// Convert a local DateTime in the given ETimeZone to UTC DateTimeOffset (out variant).
+    /// Convert a local DateTime to UTC using out parameter.
     /// Returns false if conversion fails.
     /// </summary>
     public bool Convert(DateTime localTime, ETimeZone zone, out DateTimeOffset result)
@@ -60,21 +73,15 @@ internal class DateTimeTranslate : IDateTimeTranslate
     #region Private Helpers
 
     /// <summary>
-    /// Deterministically pushes an invalid time into the next valid time slot.
+    /// Adjusts an invalid local time forward until it becomes valid.
     /// </summary>
-    private static DateTime PushIntoValidTime(DateTime date, TimeZoneInfo tz)
+    private static DateTime AdjustForwardToValid(DateTime date, TimeZoneInfo tz)
     {
-        // Determine smallest increment for adjustment
-        TimeSpan increment = TimeSpan.FromMinutes(1);
         DateTime adjusted = date;
-
-        // Move forward until the time is valid
         while (tz.IsInvalidTime(adjusted))
-            adjusted = adjusted.Add(increment);
-
+            adjusted = adjusted.AddMinutes(1);
         return adjusted;
     }
 
     #endregion
 }
-
