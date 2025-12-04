@@ -9,7 +9,7 @@ using LeadPipe.Infrastructure.Translate;
 namespace LeadPipe.Infrastructure.Service;
 
 [SourceKey(Source.Leased)]
-internal class LeasedUpdateFromFileService(
+internal sealed class LeasedUpdateFromFileService(
     IDataSourceAsync<LeasedDto> source,
     IDtoToVo<LeasedDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,

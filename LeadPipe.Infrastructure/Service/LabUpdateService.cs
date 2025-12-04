@@ -9,7 +9,7 @@ using LeadPipe.Infrastructure.Translate;
 namespace LeadPipe.Infrastructure.Service;
 
 [SourceKey(Source.Lab)]
-internal class LabUpdateService(
+internal sealed class LabUpdateService(
     IDataSourceAsync<LabDto> source, 
     IDtoToVo<LabDto, Plumbing> dtoToVo, 
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity, 

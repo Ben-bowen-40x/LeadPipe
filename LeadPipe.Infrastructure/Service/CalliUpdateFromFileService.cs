@@ -9,7 +9,7 @@ using LeadPipe.Infrastructure.Translate;
 namespace LeadPipe.Infrastructure.Service;
 
 [SourceKey(Source.Calli)]
-internal class CalliUpdateFromFileService(
+internal sealed class CalliUpdateFromFileService(
     IDataSourceAsync<CalliDto> source,
     IDtoToVo<CalliDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,

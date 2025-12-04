@@ -9,7 +9,7 @@ using LeadPipe.Infrastructure.Translate;
 namespace LeadPipe.Infrastructure.Service;
 
 [SourceKey(Source.Pan)]
-internal class PanUpdateFromFileService(
+internal sealed class PanUpdateFromFileService(
     IDataSourceAsync<PanDto> source,
     IDtoToVo<PanDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
