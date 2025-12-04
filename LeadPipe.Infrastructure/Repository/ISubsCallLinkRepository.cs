@@ -2,4 +2,4 @@
 
 namespace LeadPipe.Infrastructure.Repository;
 
-public interface ISubsCallLinkRepository : IRepository<SubsCallLink> { }
+public interface ISubsCallLinkRepository : IRepository<CallSubsLink> { }

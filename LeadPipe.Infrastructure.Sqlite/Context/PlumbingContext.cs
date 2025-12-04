@@ -7,9 +7,9 @@ public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCont
 {
     public DbSet<SubsEntity> SubsEntities { get; set; }
     public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
-    public DbSet<SubsPlumbingLink> SubsPlumbingLinks { get; set; }
     public DbSet<CallEntity> CallEntities { get; set; }
-    public DbSet<SubsCallLink> SubsCallLinks { get; set; }
+    public DbSet<SubsPlumbingLink> SubsPlumbingLinks { get; set; }
+    public DbSet<CallSubsLink> SubsCallLinks { get; set; }
     public DbSet<PlumbingCallLink> PlumbingCallLinks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -53,7 +53,7 @@ public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbCont
         spLink.Property(l => l.MatchingSubPhone).IsRequired();
 
         // SubsCallLink
-        var subsCall = modelBuilder.Entity<SubsCallLink>();
+        var subsCall = modelBuilder.Entity<CallSubsLink>();
         subsCall.HasKey(sc => sc.Id);
         subsCall.Property(sc => sc.Id).ValueGeneratedOnAdd();
         subsCall.HasIndex(sc => sc.SubsId);

@@ -11,6 +11,6 @@ public class CallEntity : IEntity
     public long Duration { get; set; }
     public bool Billable { get; set; }
 
-    public ICollection<SubsCallLink> SubsCallLinks { get; set; } = [];
+    public ICollection<CallSubsLink> SubsCallLinks { get; set; } = [];
     public ICollection<PlumbingCallLink> PlumbingCallLinks { get; set; } = [];
 }

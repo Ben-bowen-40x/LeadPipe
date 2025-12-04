@@ -105,10 +105,10 @@ internal class PlumbingAssociationService(
             }).ToList();
 
         Dictionary<long, CallEntity> callDict = callEntities.ToDictionary(c => c.PhoneNumber, c => c);
-        List<SubsCallLink> subsCallLink = subsEntities
+        List<CallSubsLink> subsCallLink = subsEntities
             .SelectMany(s => new[] { s.Number, s.Number2 }
                 .Where(num => callDict.ContainsKey(num))
-                .Select(num => new SubsCallLink
+                .Select(num => new CallSubsLink
                 {
                     SubsId = s.Id,
                     SubsEntity = s,
@@ -119,7 +119,7 @@ internal class PlumbingAssociationService(
             ).ToList();
 
         Result<List<SubsPlumbingLink>> addedSubsPlumbingLinks = await _subsPlumbingRepo.AddRangeAsync(subsPlumbingLinks);
-        Result<List<SubsCallLink>> addedSubsCallLinks = await _subsCallRepo.AddRangeAsync(subsCallLink);
+        Result<List<CallSubsLink>> addedSubsCallLinks = await _subsCallRepo.AddRangeAsync(subsCallLink);
         Result<List<PlumbingCallLink>> addedPlumbingCallLinks = await _plumbingCallRepo.AddRangeAsync(plumbingCallLink);
 
         // Verify all links exist

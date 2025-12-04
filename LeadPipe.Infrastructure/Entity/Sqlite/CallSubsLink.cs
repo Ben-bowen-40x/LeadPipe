@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class SubsCallLink : IEntity
+public class CallSubsLink : IEntity
 {
     public long Id { get; set; }
     public long SubsId { get; set; }
