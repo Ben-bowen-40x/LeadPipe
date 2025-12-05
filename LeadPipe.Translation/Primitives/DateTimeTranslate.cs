@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Translation.Primitives;
 
-public class DateTimeTranslate : IDateTimeTranslate
+internal class DateTimeTranslate : IDateTimeTranslate
 {
     // Cache TimeZoneInfo objects for efficiency
     private static readonly Dictionary<ETimeZone, TimeZoneInfo> TimeZones = new()

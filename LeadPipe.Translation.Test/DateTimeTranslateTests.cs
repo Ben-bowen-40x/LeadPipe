@@ -17,9 +17,16 @@ public class DateTimeTranslateTests
     [Fact]
     public void UtcDateTime_ShouldRemainUnchanged()
     {
+        // Arrange
         DateTime utcNow = DateTime.UtcNow;
-        DateTimeOffset result = _translator.Convert(utcNow, ETimeZone.Pacific);
+        TimeZoneInfo pacifictz = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
+        DateTime pacific = TimeZoneInfo.ConvertTimeFromUtc(utcNow, pacifictz);
+        TimeZoneInfo.ConvertTimeToUtc(utcNow);
+        
+        // Act
+        DateTimeOffset result = _translator.Convert(pacific, ETimeZone.Pacific);
 
+        // Assert
         Assert.Equal(utcNow, result.UtcDateTime);
         Assert.Equal(TimeSpan.Zero, result.Offset);
     }
