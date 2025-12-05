@@ -1,20 +1,18 @@
-namespace LeadPipe.Translation.Test;
+﻿using LeadPipe.Translation.Primitives;
 
-using LeadPipe.Translation.Primitives;
-using System;
-using Xunit;
+namespace LeadPipe.Translation.Test;
 
 public class DateTimeTranslateTests
 {
     private readonly DateTimeTranslate _translator = new();
 
-    private static readonly ETimeZone[] Zones = new[]
-    {
+    private static readonly ETimeZone[] Zones =
+    [
         ETimeZone.Pacific,
         ETimeZone.Mountain,
         ETimeZone.Central,
         ETimeZone.Eastern
-    };
+    ];
 
     [Fact]
     public void UtcDateTime_ShouldRemainUnchanged()
@@ -170,26 +168,33 @@ public class DateTimeTranslateTests
         }
     }
 
-    //[Fact]
-    //public void AmbiguousTimes_ShouldResolveToValidUtc()
-    //{
-    //    var zone = ETimeZone.Eastern;
-    //    TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+    [Fact]
+    public void AmbiguousTimes_ShouldConvertToCorrectUtc_WithZeroOffset()
+    {
+        var zone = ETimeZone.Eastern;
+        TimeZoneInfo tz = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
 
-    //    // Ambiguous time: 1:30 AM on DST fall-back
-    //    DateTime ambiguous = new DateTime(2025, 11, 2, 1, 30, 0, DateTimeKind.Unspecified);
-    //    Assert.True(tz.IsAmbiguousTime(ambiguous));
+        // Ambiguous local time: 1:30 AM in the fall-back hour
+        DateTime ambiguousLocal = new(2025, 11, 2, 1, 30, 0, DateTimeKind.Unspecified);
 
-    //    DateTimeOffset result = _translator.Convert(ambiguous, zone);
+        Assert.True(tz.IsAmbiguousTime(ambiguousLocal));
 
-    //    // Ensure the result offset matches one of the valid ambiguous offsets
-    //    TimeSpan[] validOffsets = tz.GetAmbiguousTimeOffsets(ambiguous);
-    //    Assert.Contains(result.Offset, validOffsets);
+        // Act
+        DateTimeOffset result = _translator.Convert(ambiguousLocal, zone);
 
-    //    // Ensure the UTC time is consistent with the chosen offset
-    //    DateTimeOffset expectedUtc = new DateTimeOffset(ambiguous, result.Offset).ToUniversalTime();
-    //    Assert.Equal(expectedUtc, result);
-    //}
+        // The result must be UTC (offset 0)
+        Assert.Equal(TimeSpan.Zero, result.Offset);
+
+        // Compute the two valid UTC instants for the ambiguous time
+        var possibleOffsets = tz.GetAmbiguousTimeOffsets(ambiguousLocal);
+
+        var expectedUtc1 = new DateTimeOffset(ambiguousLocal, possibleOffsets[0]).UtcDateTime;
+        var expectedUtc2 = new DateTimeOffset(ambiguousLocal, possibleOffsets[1]).UtcDateTime;
+
+        // The result's UTC time must match one of the ambiguous possibilities
+        Assert.Contains(result.UtcDateTime, new[] { expectedUtc1, expectedUtc2 });
+    }
+
 
     [Fact]
     public void RepeatedConversions_AcrossYearBoundary_ShouldBeStable()

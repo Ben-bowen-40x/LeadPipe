@@ -19,31 +19,41 @@ public class DateTimeTranslate : IDateTimeTranslate
     /// </summary>
     public DateTimeOffset Convert(DateTime localTime, ETimeZone zone)
     {
+        // 1) If the caller already gave us a UTC DateTime, return it exactly as UTC +00:00
         if (localTime.Kind == DateTimeKind.Utc)
+        {
+            // Use the ticks directly to preserve full fidelity
             return new DateTimeOffset(localTime, TimeSpan.Zero);
+        }
 
+        // 2) Lookup timezone (fallback to UTC)
         if (!TimeZones.TryGetValue(zone, out var tz))
             tz = TimeZoneInfo.Utc;
 
-        // Handle invalid times (DST gaps) by moving forward until valid
-        if (tz.IsInvalidTime(localTime))
-        {
-            localTime = AdjustForwardToValid(localTime, tz);
-        }
+        // 3) Treat the incoming DateTime as a local time in the specified tz.
+        //    Ensure it's "unspecified" so we don't accidentally treat it as system local.
+        if (localTime.Kind != DateTimeKind.Unspecified)
+            localTime = DateTime.SpecifyKind(localTime, DateTimeKind.Unspecified);
 
-        // Handle ambiguous times (DST fall-back repeated hour)
+        // 4) Handle invalid local times (DST gaps)
+        if (tz.IsInvalidTime(localTime))
+            localTime = AdjustForwardToValid(localTime, tz);
+
+        // 5) Handle ambiguous times deterministically (choose earlier offset policy)
         if (tz.IsAmbiguousTime(localTime))
         {
-            TimeSpan[] offsets = tz.GetAmbiguousTimeOffsets(localTime);
-
-            // Choose policy: pick the **earlier offset** (usually DST)
-            TimeSpan chosenOffset = offsets.Min();
-            return new DateTimeOffset(localTime, chosenOffset).ToUniversalTime();
+            TimeSpan chosenOffset = tz.GetAmbiguousTimeOffsets(localTime).Min();
+            // create DTO with chosen offset and convert to UTC, then return explicit zero-offset DTO
+            DateTimeOffset withOffset = new DateTimeOffset(localTime, chosenOffset);
+            DateTime utcFromAmbiguous = withOffset.UtcDateTime;
+            return new DateTimeOffset(utcFromAmbiguous, TimeSpan.Zero);
         }
 
-        // Normal conversion
-        return TimeZoneInfo.ConvertTimeToUtc(localTime, tz);
+        // 6) Normal conversion: get UTC DateTime explicitly and return a zero-offset DTO
+        DateTime utcDateTime = TimeZoneInfo.ConvertTimeToUtc(localTime, tz);
+        return new DateTimeOffset(utcDateTime, TimeSpan.Zero);
     }
+
 
     /// <summary>
     /// Convert a local DateTime to UTC using out parameter.
