@@ -4,6 +4,10 @@ using LeadPipe.Domain.ValueObjects;
 
 namespace LeadPipe.Application.Manager;
 
+public interface IUpdateManager
+{
+    Task<Result<List<Plumbing>>> ManageAsync(bool update = true);
+}
 public abstract class UpdateManager(IUpdateService<Plumbing> update)
 {
     private readonly IUpdateService<Plumbing> _update = update;
