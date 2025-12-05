@@ -3,23 +3,23 @@ using LeadPipe.Application.Service;
 
 namespace LeadPipe.Application.Manager;
 
-public interface IJsonManager
+public interface IFileRWManager
 {
     Result<List<T>> ManageRead<T>(FileInfo file);
     Result ManageWrite<T>(FileInfo file, List<T> data);
 }
 
-public sealed class JsonManager(IFileRWService service) : IJsonManager
+public sealed class FileRWManager(IFileRWService service) : IFileRWManager
 {
     private readonly IFileRWService _service = service;
-    private const string error = "File extension not supported";
+    private const string error = "File extension not supported: ";
     public Result<List<T>> ManageRead<T>(FileInfo file)
     {
         return file.Extension switch
         {
             ".csv" => _service.ExtractCsv<T>(file),
             ".json" => _service.ExtractJson<T>(file),
-            _ => Result.Failure<List<T>>(error)
+            _ => Result.Failure<List<T>>(error + file.Extension)
         };
     }
     public Result ManageWrite<T>(FileInfo file, List<T> data)
@@ -28,7 +28,7 @@ public sealed class JsonManager(IFileRWService service) : IJsonManager
         {
             ".csv" => _service.SaveToCsv<T>(data, file),
             ".json" => _service.SaveToJson<T>(data, file),
-            _ => Result.Failure(error)
+            _ => Result.Failure(error + file.Extension)
         };
     }
 }

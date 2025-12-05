@@ -14,7 +14,7 @@ public static class InjectApplication
         RegisterManagers(services);
 
         // Add managers singly
-        services.AddScoped<IJsonManager, JsonManager>();
+        services.AddScoped<IFileRWManager, FileRWManager>();
         services.AddScoped<IPlumbingAssociationManager, PlumbingAssociationManager>();
 
         return services;
