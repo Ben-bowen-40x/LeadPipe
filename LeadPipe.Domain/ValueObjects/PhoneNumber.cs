@@ -83,4 +83,39 @@ public partial class PhoneNumber
     [GeneratedRegex(@"\D")]
     private static partial Regex NonDigitChar();
     #endregion
+
+    #region Equality
+
+    public override bool Equals(object? obj)
+    {
+        if (obj == null) return false;
+        if (obj is not PhoneNumber) return false;
+        return Equals(obj as PhoneNumber);
+    }
+
+    public bool Equals(PhoneNumber? that)
+    {
+        if (ReferenceEquals(this, that)) return true;
+        if (that is null) return false;
+
+        return Number == that.Number;
+    }
+
+    public override int GetHashCode()
+    {
+        return Number.GetHashCode();
+    }
+
+    public static bool operator ==(PhoneNumber? left, PhoneNumber? right)
+    {
+        if (left is null) return right is null;
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(PhoneNumber? left, PhoneNumber? right)
+    {
+        return !(left == right);
+    }
+
+    #endregion
 }
