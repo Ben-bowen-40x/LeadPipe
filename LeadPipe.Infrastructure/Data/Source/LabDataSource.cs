@@ -13,7 +13,8 @@ public class LabDataSource(ILabService lab, IVoToDto<Plumbing, LabDto> voToDto) 
     public async Task<Result<List<LabDto>>> LoadAsync()
     {
         Result<List<Plumbing>> get = await _lab.GetLabsAsync();
-        if (get.IsFailure) return Result.Failure<List<LabDto>>(get.Error);
+        if (get.IsFailure)
+            return Result.Failure<List<LabDto>>(get.Error);
         List<LabDto> result = [.. get.Value.Select(_voToDto.Translate)];
         return result;
     }
