@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Translate;
 
-namespace LeadPipe.Translation.Translate;
+namespace LeadPipe.Translation.Translate.EntityToVo;
 
 internal class PlumbingEntityToPlumbing : IEntityToVo<PlumbingEntity, Plumbing>
 {

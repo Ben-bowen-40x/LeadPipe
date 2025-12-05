@@ -3,7 +3,7 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Translate;
 using LeadPipe.Translation.Primitives;
 
-namespace LeadPipe.Translation.Translate;
+namespace LeadPipe.Translation.Translate.EntityToVo;
 
 internal class SubsToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo<SubsEntity, Sandwich>
 {

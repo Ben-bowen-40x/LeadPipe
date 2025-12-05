@@ -3,7 +3,7 @@ using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Translate;
 using LeadPipe.Translation.Primitives;
 
-namespace LeadPipe.Translation.Translate;
+namespace LeadPipe.Translation.Translate.DtoToVo;
 
 internal class LeafDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeafDto, Plumbing>
 {

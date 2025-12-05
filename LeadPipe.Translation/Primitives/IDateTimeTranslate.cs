@@ -11,5 +11,6 @@ public enum ETimeZone
     Pacific,
     Mountain,
     Central,
-    Eastern
+    Eastern,
+    Utc
 }

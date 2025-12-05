@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Translate;
 
-namespace LeadPipe.Translation.Translate;
+namespace LeadPipe.Translation.Translate.VoToEntity;
 
 internal class CallToCallEntity : IVoToEntity<Call, CallEntity>
 {

@@ -2,11 +2,11 @@
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Translate;
 
-namespace LeadPipe.Translation.Translate;
+namespace LeadPipe.Translation.Translate.DtoToVo;
 
-internal class PlumbingToLabDto : IVoToDto<Plumbing, LabDto>
+internal class LabDtoToPlumbing : IDtoToVo<LabDto, Plumbing>
 {
-    public LabDto Translate(Plumbing p)
+    public Plumbing Translate(LabDto dto)
     {
         throw new NotImplementedException();
     }

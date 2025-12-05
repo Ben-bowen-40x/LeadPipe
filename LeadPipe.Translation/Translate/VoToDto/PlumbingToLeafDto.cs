@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Translate;
 
-namespace LeadPipe.Translation.Translate;
+namespace LeadPipe.Translation.Translate.VoToDto;
 
 internal class PlumbingToLeafDto : IVoToDto<Plumbing, LeafDto>
 {
