@@ -1,5 +1,4 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Repository;
 using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using LeadPipe.Infrastructure.Entity.Sqlite;
