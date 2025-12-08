@@ -44,7 +44,7 @@ internal class PlumbingAssociationService(
         if (entitiesResult.IsFailure)
             return Result.Failure<List<Plumbing>>(entitiesResult.Error);
 
-        List<Plumbing> voList = [.. entitiesResult.Value.Select<PlumbingEntity, Plumbing>(_entityToPlumb.Translate)];
+        List<Plumbing> voList = [.. entitiesResult.Value.Select(_entityToPlumb.Translate)];
         return Result.Success(voList);
     }
 
