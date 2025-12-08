@@ -10,8 +10,9 @@ namespace LeadPipe.Infrastructure.Service;
 [SourceKey(Source.Leaf)]
 internal sealed class LeafUpdateService(
     IDataSourceAsync<LeafDto> source,
+    ILoadData<LeafDto> load,
     IDtoToVo<LeafDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
     IDataPersistence<PlumbingEntity> persistence
-    ) : UpdateService<LeafDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
+    ) : UpdateService<LeafDto, Plumbing, PlumbingEntity>(source, load, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
 { }

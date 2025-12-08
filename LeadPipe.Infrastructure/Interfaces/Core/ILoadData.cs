@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Infrastructure.Interfaces.Core;
 
-public interface ILoad<T>
+public interface ILoadData<T>
 {
     Task<Result<List<T>>> LoadAsync();
 }

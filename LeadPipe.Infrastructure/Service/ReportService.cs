@@ -6,14 +6,16 @@ namespace LeadPipe.Infrastructure.Service;
 
 internal abstract class ReportService<TVo, TReport>(
     ITransform<TVo, TReport> transform,
+    ILoadData<TVo> load,
     IReport<TReport> report
     ) : IReportService<TVo>
 {
     private readonly ITransform<TVo, TReport> _transform = transform;
+    private readonly ILoadData<TVo> _load = load;
     private readonly IReport<TReport> _report = report;
     public async Task<Result<List<TVo>>> GetDataAsync()
     {
-        return await _transform.LoadAsync();
+        return await _load.LoadAsync();
     }
 
     public async Task<Result> SendReportAsync(List<TVo> data)
