@@ -4,9 +4,9 @@ using LeadPipe.Infrastructure.Interfaces.Service;
 
 namespace LeadPipe.Infrastructure.Service;
 
-internal class YellerClientService : IYellerGetterService
+internal class YellerClientService : IYellerService
 {
-    public async Task<Result<List<Plumbing>>> GetAllAsync()
+    public Task<Result<List<Plumbing>>> GetAllAsync()
     {
         throw new NotImplementedException();
     }
@@ -15,4 +15,5 @@ internal class YellerClientService : IYellerGetterService
     {
         throw new NotImplementedException();
     }
+
 }
