@@ -4,8 +4,6 @@ namespace LeadPipe.Domain.Test;
 
 public class PhoneNumberTests
 {
-    // ---- Constructors: PhoneNumber(long) ----
-
     [Theory]
     [InlineData(2234567891, 2234567891)]
     [InlineData(02234567890, 2234567890)]  // Leading zero falls off
@@ -17,9 +15,6 @@ public class PhoneNumberTests
         var p = new PhoneNumber(input);
         Assert.Equal(expected, p.Number);
     }
-
-
-    // ---- Constructors: PhoneNumber(string) ----
 
     [Theory]
     [InlineData("2234567890", 2234567890)]
@@ -37,9 +32,6 @@ public class PhoneNumberTests
         Assert.Equal(expected, p.Number);
     }
 
-
-    // ---- Copy constructor: PhoneNumber(PhoneNumber) ----
-
     [Fact]
     public void Ctor_Copy_CopiesNumber()
     {
@@ -47,9 +39,6 @@ public class PhoneNumberTests
         var copy = new PhoneNumber(original);
         Assert.Equal(original.Number, copy.Number);
     }
-
-
-    // ---- TryParse ----
 
     [Fact]
     public void TryParse_Valid_ReturnsTrue()
@@ -75,9 +64,6 @@ public class PhoneNumberTests
         Assert.Equal(PhoneNumber.Default, result.Number);
     }
 
-
-    // ---- ToString ----
-
     [Fact]
     public void ToString_FormatsProperly()
     {
@@ -92,9 +78,6 @@ public class PhoneNumberTests
         var s = p.ToString();
         Assert.Equal("(000) 000-0000", s);
     }
-
-
-    // ---- IsDefault ----
 
     [Theory]
     [InlineData(PhoneNumber.Default, true)]
@@ -119,9 +102,6 @@ public class PhoneNumberTests
 
         Assert.Equal(first, second);
     }
-
-
-    // ---- Equals / GetHashCode ----
 
     [Fact]
     public void Equals_True_ForSameNumber()
@@ -158,9 +138,6 @@ public class PhoneNumberTests
         var p = new PhoneNumber(2234567890);
         Assert.Equal(2234567890.GetHashCode(), p.GetHashCode());
     }
-
-
-    // ---- Operators == and != ----
 
     [Fact]
     public void Operator_Equal_True()
