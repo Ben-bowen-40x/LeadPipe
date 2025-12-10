@@ -13,6 +13,7 @@ namespace LeadPipe.Infrastructure.Service;
 
 public class LeafClientService : ILeafService
 {
+    #region Ctor and Private Fields
     public LeafClientService(
         ILeafSettings settings,
         IDtoToVo<LeafDto, Plumbing> dtoTranslate,
@@ -29,10 +30,10 @@ public class LeafClientService : ILeafService
         _factory = factory;
         _repo = repo;
         _file = file;
+        _client = _factory.CreateClient(_settings.LeafName!);
         _throttle = new(_settings.LeafConcurrentMax);
     }
 
-    #region Private
     private readonly ILogger<LeafClientService> _logger;
     private readonly ILeafSettings _settings;
     private readonly IDtoToVo<LeafDto, Plumbing> _dto;
@@ -40,17 +41,15 @@ public class LeafClientService : ILeafService
     private readonly IHttpClientFactory _factory;
     private readonly IPlumbingRepository _repo;
     private readonly IFileService _file;
-    private HttpClient? _client;
-    private HttpClient Client => _client ??= _factory.CreateClient(_settings.LeafName!);
+    private readonly HttpClient _client;
     private readonly SemaphoreSlim _throttle;
     private Uri LeafThreadUrl(int offset = 0, int limit = 1000) =>
         new($"{_settings.LeafThreadsEndpoint}?limit={limit}&offset={offset}");
     private Uri LeafMessagesUrl(string thread, int limit = 10, string type = "sms") =>
-        new($"{_settings.LeafThreadsEndpoint}/{thread}{_settings.LeafMessagesEndpoint}?limit={limit}&type={type}&offset=0");
+        new($"{_settings.LeafThreadsEndpoint}/{thread}/{_settings.LeafMessagesEndpoint}?limit={limit}&type={type}&offset=0");
     private static async void Wait(int sleepInterval = 500) => await Task.Delay(sleepInterval);
-    private async Task<Result<T>> GetSingleAsync<T>(Uri url, HttpClient client)
+    private static async Task<Result<T>> GetSingleAsync<T>(Uri url, HttpClient client)
     {
-        await _throttle.WaitAsync();
         try
         {
             HttpResponseMessage response = await client.GetAsync(url);
@@ -67,10 +66,6 @@ public class LeafClientService : ILeafService
         catch (Exception ex)
         {
             return Result.Failure<T>(ex.Message);
-        }
-        finally
-        {
-            _throttle.Release();
         }
     }
     #endregion
@@ -118,11 +113,12 @@ public class LeafClientService : ILeafService
                 break;
             }
 
+            await _throttle.WaitAsync();
             try
             {
                 // Call the api
                 Uri newurl = LeafThreadUrl(offset, limit);
-                Result<List<LeafDto>> result = await GetSingleAsync<List<LeafDto>>(newurl, Client);
+                Result<List<LeafDto>> result = await GetSingleAsync<List<LeafDto>>(newurl, _client);
 
                 // Unwrap result
                 if (result.IsSuccess)
@@ -145,6 +141,7 @@ public class LeafClientService : ILeafService
                 errorCount++;
                 _logger.LogError(e, "Exception occurred while calling API. Offset {Offset}. Error Count: {ErrorCount}. Error Limit: {ErrorLimit}", offset, errorCount, errorLimit);
             }
+            finally { _throttle.Release(); }
         }
 
         if (raw.Count > 0)
@@ -224,7 +221,7 @@ public class LeafClientService : ILeafService
                 try
                 {
                     Uri uri = LeafMessagesUrl(leaf.uuid!);
-                    return await GetSingleAsync<List<Message>>(uri, Client);
+                    return await GetSingleAsync<List<Message>>(uri, _client);
                 }
                 finally
                 {
