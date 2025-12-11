@@ -21,6 +21,10 @@ public static class InjectTranslation
         RegisterServices(services, typeof(IVoToDto<,>));
         RegisterServices(services, typeof(IVoToEntity<,>));
 
+        // Complex translations
+        RegisterServices(services, typeof(IEntityToVo<,,>));
+        RegisterServices(services, typeof(IVoToEntity<,,>));
+
         return services;
     }
     private static void RegisterServices(IServiceCollection services, Type iface)
