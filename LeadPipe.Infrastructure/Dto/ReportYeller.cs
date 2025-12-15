@@ -1,7 +1,7 @@
 ﻿namespace LeadPipe.Infrastructure.Dto;
 
 #pragma warning disable IDE1006 // Naming Styles
-public class YellerReport
+public class ReportYeller
 {
     public required string event_id { get; set; }
     public required long event_time { get; set; }
