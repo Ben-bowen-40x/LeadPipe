@@ -6,9 +6,9 @@ using LeadPipe.Infrastructure.Interfaces.Core;
 namespace LeadPipe.Infrastructure.Service;
 
 [SourceKey(Source.Yeller)]
-public class YellerClientReporter : IReport<YellerReport>
+public class YellerClientReporter : IReport<ReportYeller>
 {
-    public Task<Result> ReportData(List<YellerReport> d)
+    public Task<Result> ReportData(List<ReportYeller> d)
     {
         throw new NotImplementedException();
     }

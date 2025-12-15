@@ -21,7 +21,6 @@ public static class InjectInfrastructure
     {
         // Format: services.AddScoped<Interface, Class>();
 
-        // *****************************************
         #region ADD DATA
         // *****************************************
 
@@ -45,7 +44,8 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<ILoadData<Plumbing>, YellerLoadData>(Source.Yeller);
 
         // Transformers
-        services.AddScoped<ITransform<Plumbing, YellerReport>, YellerTransform>();
+        services.AddScoped<ITransform<Plumbing, ReportYeller>, YellerTransform>();
+        services.AddScoped<ITransform<Plumbing, ReportFilePlumbing>, PlumbingTransform>();
 
         // Data sources with file locations
         services.AddScoped<IDataSourceAsync<CalliDto>>(sp =>
@@ -81,8 +81,7 @@ public static class InjectInfrastructure
             ));
         #endregion
 
-        // *****************************************
-        // ADD SERVICES
+        #region ADD SERVICES
         // *****************************************
 
         // Loggers 
@@ -101,7 +100,7 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IUpdateService<Plumbing>, YellerUpdateService>(Source.Yeller);
 
         // Keyed Report services
-        services.AddKeyedScoped<IReport<YellerReport>, YellerClientReporter>(Source.Yeller);
+        services.AddKeyedScoped<IReport<ReportYeller>, YellerClientReporter>(Source.Yeller);
 
         // Scoped services
         services.AddScoped<ICsvRwService, CsvRwService>();
@@ -114,8 +113,9 @@ public static class InjectInfrastructure
         services.AddScoped<IYellerService, YellerClientService>();
         services.AddScoped<IYellerReportService, YellerReportService>();
 
-        // *****************************************
-        // Add CLIENTS
+        #endregion
+
+        #region ADD CLIENTS
         // *****************************************
 
         // Add Leaf Client
@@ -141,6 +141,8 @@ public static class InjectInfrastructure
             c.DefaultRequestHeaders.Add("Accept", "application/json");
             c.DefaultRequestHeaders.Add("Authorization", settings.YellerToken!);
         });
+
+        #endregion
 
         return services;
     }
