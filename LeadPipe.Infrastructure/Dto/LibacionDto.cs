@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Infrastructure.Dto;
 
-internal class LibacionDto
+public class LibacionDto
 {
     [Name("Date")]
     public string? Date { get; set; }
