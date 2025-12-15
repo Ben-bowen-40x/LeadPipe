@@ -22,7 +22,7 @@ public static class InjectInfrastructure
         // Format: services.AddScoped<Interface, Class>();
 
         // *****************************************
-        // ADD DATA
+        #region ADD DATA
         // *****************************************
 
         // Data Persistence
@@ -79,6 +79,7 @@ public static class InjectInfrastructure
                 sp.GetRequiredService<IJsonRwService>(),
                 sp.GetRequiredService<ILogger<PanFileDataSource>>()
             ));
+        #endregion
 
         // *****************************************
         // ADD SERVICES
