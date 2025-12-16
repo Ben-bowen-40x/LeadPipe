@@ -48,4 +48,5 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public int YellerConcurrentMax { get; set; }
     public string? YellerFinalEndpoint { get; set; }
     public string? YellerPrelimId { get; set; }
+    public string? CalliReportLoc { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 }
