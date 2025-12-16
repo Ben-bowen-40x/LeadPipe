@@ -26,5 +26,5 @@ public abstract class TransformPlumbingGeneric<TReport>(
 
         return entities.Select(TransformLink).ToList();
     }
-    public abstract TReport TransformLink(SubsPlumbingLink link);
+    protected abstract TReport TransformLink(SubsPlumbingLink link);
 }

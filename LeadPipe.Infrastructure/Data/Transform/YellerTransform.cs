@@ -13,7 +13,7 @@ internal sealed class YellerTransform(
 {
     const string currency = "USD";
     const string country = "us";
-    public override ReportYeller TransformLink(SubsPlumbingLink link)
+    protected override ReportYeller TransformLink(SubsPlumbingLink link)
     {
         long eventTime = link.SubsEntity.UnixDate;
         UserData user = new() { ph = [link.SubsEntity.Number.ToString(), link.SubsEntity.Number2.ToString()], country = [country] };

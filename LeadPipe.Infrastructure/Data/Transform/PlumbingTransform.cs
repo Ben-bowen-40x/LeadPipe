@@ -12,7 +12,7 @@ public sealed class PlumbingTransform(
     ) : TransformPlumbingGeneric<ReportFilePlumbing>(repo, voToEntity)
 {
     private const string dateFormat = "yyyy-MM-dd HH:mm:ss";
-    public override ReportFilePlumbing TransformLink(SubsPlumbingLink link)
+    protected override ReportFilePlumbing TransformLink(SubsPlumbingLink link)
     {
         long phoneNumber = link.PlumbingEntity.PhoneNumber;
 
