@@ -5,13 +5,13 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Infrastructure.Service.Update;
 
-[SourceKey(Source.Yeller)]
-internal sealed class YellerUpdateService(
-    IDataSourceAsync<YellerDto> source,
-    IDtoToVo<YellerDto, Plumbing> dtoToVo,
+[SourceKey(Source.Leaf)]
+internal sealed class LeafUpdateService(
+    IDataSourceAsync<LeafDto> source,
+    IDtoToVo<LeafDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
     IDataPersistence<PlumbingEntity> persistence
-    ) : UpdateService<YellerDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
+    ) : UpdateService<LeafDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
 { }

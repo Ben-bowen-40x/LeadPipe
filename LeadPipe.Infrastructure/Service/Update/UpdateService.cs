@@ -3,7 +3,7 @@ using LeadPipe.Application.Service;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Infrastructure.Service.Update;
 
 public abstract class UpdateService<TDto, TVo, TEntity>(
     IDataSourceAsync<TDto> source,

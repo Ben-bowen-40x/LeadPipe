@@ -2,7 +2,7 @@
 using LeadPipe.Application.Service;
 using LeadPipe.Infrastructure.Interfaces.Core;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Infrastructure.Service.Report;
 
 internal abstract class ReportService<TVo, TReport>(
     ILoadData<TVo> load,
