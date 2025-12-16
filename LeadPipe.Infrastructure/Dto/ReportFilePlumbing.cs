@@ -28,7 +28,7 @@ public class ReportFilePlumbingMap : ClassMap<ReportFilePlumbing>
         Map(m => m.SubCxlDate).Index(index++).Name(ReportFilePlumbing.SubCxlDateName);
     }
 }
-public class ReportFilePlumbing : ClassMap<ReportFilePlumbing>
+public class ReportFilePlumbing
 {
     [Name(PhoneNumberName)]
     public long PhoneNumber { get; set; }
