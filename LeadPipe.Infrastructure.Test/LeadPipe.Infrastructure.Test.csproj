@@ -28,10 +28,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="FileManipulationTests\TestFileLoc\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\LeadPipe.Infrastructure.MySql\LeadPipe.Infrastructure.MySql.csproj" />
 	  <ProjectReference Include="..\LeadPipe.Infrastructure.Sqlite\LeadPipe.Infrastructure.Sqlite.csproj" />
 	</ItemGroup>
