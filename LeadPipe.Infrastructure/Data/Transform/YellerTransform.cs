@@ -1,6 +1,8 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using CSharpFunctionalExtensions;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -9,11 +11,25 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 internal sealed class YellerTransform(
     ISubsPlumbingLinkRepository spRepo,
     IVoToEntity<Plumbing, PlumbingEntity> toEntity
-    ) : TransformPlumbingGeneric<ReportYeller>(spRepo, toEntity)
+    ) : ITransform<Plumbing, ReportYeller>
 {
-    const string currency = "USD";
-    const string country = "us";
-    protected override ReportYeller TransformLink(SubsPlumbingLink link)
+    private readonly ISubsPlumbingLinkRepository _repo = spRepo;
+    private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = toEntity;
+    private const string currency = "USD";
+    private const string country = "us";
+    public async Task<Result<List<ReportYeller>>> TransformAsync(List<Plumbing> data)
+    {
+        List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
+        Result<List<SubsPlumbingLink>> links = await _repo.GetAllAsync(e);
+        List<SubsPlumbingLink>? entities = links.IsSuccess
+            ? links.Value
+            : null;
+        if (entities is null)
+            return Result.Failure<List<ReportYeller>>(links.Error);
+
+        return entities.Select(TransformLink).ToList();
+    }
+    private static ReportYeller TransformLink(SubsPlumbingLink link)
     {
         long eventTime = link.SubsEntity.UnixDate;
         UserData user = new() { ph = [link.SubsEntity.Number.ToString(), link.SubsEntity.Number2.ToString()], country = [country] };

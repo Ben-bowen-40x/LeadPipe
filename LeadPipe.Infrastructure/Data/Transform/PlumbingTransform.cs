@@ -1,6 +1,8 @@
-﻿using LeadPipe.Domain.ValueObjects;
+﻿using CSharpFunctionalExtensions;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -9,10 +11,24 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 public sealed class PlumbingTransform(
     ISubsPlumbingLinkRepository repo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity
-    ) : TransformPlumbingGeneric<ReportFilePlumbing>(repo, voToEntity)
+    ) : ITransform<Plumbing, ReportFilePlumbing>
 {
+    private readonly ISubsPlumbingLinkRepository _repo = repo;
+    private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = voToEntity;
     private const string dateFormat = "yyyy-MM-dd HH:mm:ss";
-    protected override ReportFilePlumbing TransformLink(SubsPlumbingLink link)
+    public async Task<Result<List<ReportFilePlumbing>>> TransformAsync(List<Plumbing> data)
+    {
+        List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
+        Result<List<SubsPlumbingLink>> links = await _repo.GetAllAsync(e);
+        List<SubsPlumbingLink>? entities = links.IsSuccess
+            ? links.Value
+            : null;
+        if (entities is null)
+            return Result.Failure<List<ReportFilePlumbing>>(links.Error);
+
+        return entities.Select(TransformLink).ToList();
+    }
+    private static ReportFilePlumbing TransformLink(SubsPlumbingLink link)
     {
         long phoneNumber = link.PlumbingEntity.PhoneNumber;
 

@@ -1,8 +1,9 @@
 ﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Data.Source;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class PlumbingEntity : IEntity
+public class PlumbingEntity : ISourceEntity
 {
     public long Id { get; set; }
     public long PhoneNumber { get; set; }

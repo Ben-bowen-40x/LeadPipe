@@ -1,5 +1,6 @@
 ﻿using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Data.Load;
 using LeadPipe.Infrastructure.Data.Persistence;
 using LeadPipe.Infrastructure.Data.Source;
 using LeadPipe.Infrastructure.Data.Transform;
@@ -43,11 +44,20 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<YellerDto>, YellerDataSource>();
 
         // Keyed Sources
-        services.AddKeyedScoped<ILoadData<Plumbing>, YellerLoadData>(Source.Yeller);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadYeller>(Source.Yeller);
 
         // Transformers
         services.AddScoped<ITransform<Plumbing, ReportYeller>, YellerTransform>();
         services.AddScoped<ITransform<Plumbing, ReportFilePlumbing>, PlumbingTransform>();
+
+        // Loaders
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadCalli>(Source.Calli);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLab>(Source.Lab);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLeaf>(Source.Leaf);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLeased>(Source.Leased);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadLibacion>(Source.Libacion);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadPan>(Source.Pan);
+        services.AddKeyedScoped<ILoadData<Plumbing>, LoadYeller>(Source.Yeller);
 
         // Data sources with file locations
         services.AddScoped<IDataSourceAsync<CalliDto>>(sp =>
