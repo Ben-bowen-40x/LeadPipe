@@ -9,6 +9,8 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Service;
+using LeadPipe.Infrastructure.Service.Report;
+using LeadPipe.Infrastructure.Service.Update;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -101,6 +103,7 @@ public static class InjectInfrastructure
 
         // Keyed Report services
         services.AddKeyedScoped<IReport<ReportYeller>, YellerClientReporter>(Source.Yeller);
+        services.AddKeyedScoped<IReport<ReportFilePlumbing>, CalliReportService>(Source.Calli);
 
         // Scoped services
         services.AddScoped<ICsvRwService, CsvRwService>();
@@ -111,7 +114,6 @@ public static class InjectInfrastructure
         services.AddScoped<ILeafService, LeafClientService>();
         services.AddScoped<IPlumbingAssociationService, PlumbingAssociationService>();
         services.AddScoped<IYellerService, YellerClientService>();
-        services.AddScoped<IYellerReportService, YellerReportService>();
 
         #endregion
 
