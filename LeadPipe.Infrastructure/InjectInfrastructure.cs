@@ -102,8 +102,12 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IUpdateService<Plumbing>, YellerUpdateService>(Source.Yeller);
 
         // Keyed Report services
+        services.AddKeyedScoped<IReportService<Plumbing>, CalliReportService>(Source.Calli);
+        services.AddKeyedScoped<IReportService<Plumbing>, YellerReportService>(Source.Yeller);
+
+        // Non-keyed report services
         services.AddKeyedScoped<IReport<ReportYeller>, YellerClientReporter>(Source.Yeller);
-        services.AddKeyedScoped<IReport<ReportFilePlumbing>, CalliReportService>(Source.Calli);
+        services.AddKeyedScoped<IReport<ReportFilePlumbing>, CalliReporter>(Source.Calli);
 
         // Scoped services
         services.AddScoped<ICsvRwService, CsvRwService>();

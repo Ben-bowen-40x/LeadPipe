@@ -14,6 +14,7 @@ internal class PlumbingToPlumbingEntity : IVoToEntity<Plumbing, PlumbingEntity>
             Date = plumbing.Date.UtcDateTime,
             UnixDate = plumbing.Date.ToUnixTimeSeconds(),
             Contents = plumbing.Contents,
+            MetaData = plumbing.MetaData,
             Source = plumbing.Source,
         };
         return result;

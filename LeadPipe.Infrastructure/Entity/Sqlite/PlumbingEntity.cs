@@ -10,6 +10,7 @@ public class PlumbingEntity : IEntity
     public long UnixDate { get; set; }
     public string? Contents { get; set; }
     public Source Source { get; set; }
+    public required string MetaData { get; set; }
 
     public ICollection<SubsPlumbingLink> SubsPlumbingLinks { get; set; } = [];
     public ICollection<PlumbingCallLink> PlumbingCallLinks { get; set; } = [];

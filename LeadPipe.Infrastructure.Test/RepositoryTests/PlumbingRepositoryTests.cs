@@ -1,7 +1,8 @@
-﻿using LeadPipe.Domain.ValueObjects;
-using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Sqlite.Repository;
+﻿using CSharpFunctionalExtensions;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Sqlite.Repository;
+using Org.BouncyCastle.Asn1.Cms;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
@@ -16,8 +17,8 @@ public class PlumbingRepositoryTests
 
         var entities = new List<PlumbingEntity>
         {
-            new() { Id = 1, PhoneNumber = 12345 },
-            new() { Id = 2, PhoneNumber = 67890 }
+            new() { Id = 1, PhoneNumber = 12345, MetaData = string.Empty  },
+            new() { Id = 2, PhoneNumber = 67890, MetaData = string.Empty  }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -44,7 +45,7 @@ public class PlumbingRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new PlumbingRepository(context);
 
-        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345, Source = Source.Test };
+        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -53,7 +54,7 @@ public class PlumbingRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.PlumbingEntities.Add(new PlumbingEntity { Id = 1, PhoneNumber = 12345 });
+        context.PlumbingEntities.Add(new PlumbingEntity { Id = 1, PhoneNumber = 12345, MetaData = string.Empty });
         await context.SaveChangesAsync();
 
         var repo = new PlumbingRepository(context);
@@ -67,7 +68,7 @@ public class PlumbingRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345 };
+        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345, MetaData = string.Empty };
         context.PlumbingEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -93,12 +94,12 @@ public class PlumbingRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345 };
+        var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345, MetaData = string.Empty };
         context.PlumbingEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
         var repo = new PlumbingRepository(context);
-        var updatedPlumbing = new PlumbingEntity { Id = 1, PhoneNumber = 99999 };
+        var updatedPlumbing = new PlumbingEntity { Id = 1, PhoneNumber = 99999, MetaData = string.Empty };
 
         var result = await repo.UpdateAsync(updatedPlumbing);
         var reloaded = await repo.GetByIdAsync(1);
@@ -112,7 +113,7 @@ public class PlumbingRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext());
-        var updatedPlumbing = new PlumbingEntity { Id = 99, PhoneNumber = 11111 };
+        var updatedPlumbing = new PlumbingEntity { Id = 99, PhoneNumber = 11111, MetaData = string.Empty };
 
         var result = await repo.UpdateAsync(updatedPlumbing);
 
@@ -135,13 +136,13 @@ public class PlumbingRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new PlumbingRepository(context);
 
-        var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test };
+        var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         await repo.AddAsync(entity);
 
         // Attempt to add the same entity again
         var duplicates = new List<PlumbingEntity>
         {
-            new() { PhoneNumber = 12345, Source = Source.Test }
+            new() { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty  }
         };
 
         var result = await repo.AddRangeAsync(duplicates);
@@ -159,14 +160,14 @@ public class PlumbingRepositoryTests
         var repo = new PlumbingRepository(context);
 
         // Existing entity in database
-        var existing = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test };
+        var existing = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         await repo.AddAsync(existing);
 
         // New batch contains one existing + one new
         var batch = new List<PlumbingEntity>
         {
-            new() { PhoneNumber = 12345, Source = Source.Test }, // duplicate
-            new() { PhoneNumber = 67890, Source = Source.Test }  // new
+            new() { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty  }, // duplicate
+            new() { PhoneNumber = 67890, Source = Source.Test, MetaData = string.Empty  }  // new
         };
 
         var result = await repo.AddRangeAsync(batch);
@@ -185,11 +186,11 @@ public class PlumbingRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new PlumbingRepository(context);
 
-        var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test };
+        var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         await repo.AddAsync(entity);
 
         // Same phone number but different source -> should be added
-        var newEntity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test2 };
+        var newEntity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test2, MetaData = string.Empty };
 
         var result = await repo.AddRangeAsync([newEntity]);
 

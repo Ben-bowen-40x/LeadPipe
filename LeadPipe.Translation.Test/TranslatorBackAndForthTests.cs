@@ -30,6 +30,7 @@ public class TranslatorBackAndForthTests
             PhoneNumber: new PhoneNumber(dto.Phone),
             Date: expectedDate,
             Contents: dto.PestProblem,
+            MetaData: "Test",
             Source: Source.Calli
         );
 
@@ -80,6 +81,7 @@ public class TranslatorBackAndForthTests
             PhoneNumber: new PhoneNumber(dto.prospect.cellphone),
             Date: expectedDate,
             Contents: dto.messages[0].message!,
+            MetaData: "Test",
             Source: Source.Leaf
         );
 

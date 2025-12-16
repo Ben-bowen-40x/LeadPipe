@@ -13,8 +13,8 @@ public class SubsPlumbLinkRepositoryTests
 
         var links = new List<SubsPlumbingLink>
         {
-            new() { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() },
-            new() { SubsId = 2, SubsEntity = new(), PlumbingId = 2, MatchingSubPhone = 67890, PlumbingEntity = new() }
+            new() { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() { MetaData = string.Empty } },
+            new() { SubsId = 2, SubsEntity = new(), PlumbingId = 2, MatchingSubPhone = 67890, PlumbingEntity = new() { MetaData = string.Empty } }
         };
 
         var result = await repo.AddRangeAsync(links);
@@ -53,7 +53,7 @@ public class SubsPlumbLinkRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         var repo = new SubsPlumbingLinkRepository(context);
 
-        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() };
+        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() { MetaData = string.Empty } };
         var result = await repo.AddAsync(link);
 
         Assert.True(result.IsSuccess);
@@ -63,7 +63,7 @@ public class SubsPlumbLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnLink_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SubsPlumbingLinks.Add(new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() });
+        context.SubsPlumbingLinks.Add(new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() { MetaData = string.Empty } });
         await context.SaveChangesAsync();
 
         var repo = new SubsPlumbingLinkRepository(context);
@@ -87,12 +87,12 @@ public class SubsPlumbLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateLink()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() };
+        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() { MetaData = string.Empty } };
         context.SubsPlumbingLinks.Add(link);
         await context.SaveChangesAsync();
 
         var repo = new SubsPlumbingLinkRepository(context);
-        var updatedLink = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 67890, PlumbingEntity = new() };
+        var updatedLink = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 67890, PlumbingEntity = new() { MetaData = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedLink);
         var reloaded = await repo.GetByIdAsync(1);
@@ -106,7 +106,7 @@ public class SubsPlumbLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new SubsPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext());
-        var updatedLink = new SubsPlumbingLink { SubsId = 99, SubsEntity = new(), PlumbingId = 99, MatchingSubPhone = 11111, PlumbingEntity = new() };
+        var updatedLink = new SubsPlumbingLink { SubsId = 99, SubsEntity = new(), PlumbingId = 99, MatchingSubPhone = 11111, PlumbingEntity = new() { MetaData = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedLink);
 
@@ -118,7 +118,7 @@ public class SubsPlumbLinkRepositoryTests
     public async Task DeleteAsync_ShouldRemoveLink()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() };
+        var link = new SubsPlumbingLink { SubsId = 1, SubsEntity = new(), PlumbingId = 1, MatchingSubPhone = 12345, PlumbingEntity = new() { MetaData = string.Empty } };
         context.SubsPlumbingLinks.Add(link);
         await context.SaveChangesAsync();
 

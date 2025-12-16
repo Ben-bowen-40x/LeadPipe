@@ -45,10 +45,12 @@ internal class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
 
         string contents = string.Join(" <|> ", contentsStr);
 
+        string metadata = string.Empty;
         return new(
             PhoneNumber: number,
             Date: date,
             Contents: contents,
+            MetaData: metadata,
             Source.Yeller
         );
     }

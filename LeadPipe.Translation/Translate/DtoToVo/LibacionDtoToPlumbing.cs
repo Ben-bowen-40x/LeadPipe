@@ -20,6 +20,8 @@ public sealed class LibacionDtoToPlumbing : IDtoToVo<LibacionDto, Plumbing>
             ? string.Empty
             : data.Message;
 
-        return new Plumbing(PhoneNumber: number, Date: date, Contents: contents, Source.Libacion);
+        string metadata = data.Commercial.ToString();
+
+        return new Plumbing(PhoneNumber: number, Date: date, Contents: contents, MetaData: $"Is Commercial: {metadata}", Source.Libacion);
     }
 }

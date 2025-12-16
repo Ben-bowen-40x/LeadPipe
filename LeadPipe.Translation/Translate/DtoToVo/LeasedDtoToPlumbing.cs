@@ -29,7 +29,9 @@ public class LeasedDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeasedDto, Pl
             ? string.Empty
             : data.Contents;
 
-        Plumbing result = new(PhoneNumber: number, Date: date, Contents: contents, Source: Source.Leased);
+        string metadata = data.Lead is string l ? l : string.Empty;
+
+        Plumbing result = new(PhoneNumber: number, Date: date, Contents: contents, MetaData: $"Is a lead?: {metadata}", Source: Source.Leased);
         return result;
     }
 }

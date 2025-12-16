@@ -24,22 +24,31 @@ internal class LeafDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeafDto, Plum
 
         // Contents 
         string content = string.Empty;
+        List<string> metastr = [];
         if (v.messages is not null)
         {
             var soonest = DateTime.MaxValue;
             Message soonestMsg = new() { creation = soonest, message = null };
-            foreach (var m in v.messages)
+            foreach (Message m in v.messages)
+            {
+                // Find soonest message
                 if (m.creation < soonest)
                 {
                     soonest = m.creation;
                     soonestMsg = m;
                 }
+
+                // Find message source
+                if (m.source is not null)
+                    metastr.Add(m.source);
+            }
             content = soonestMsg.message is null
                 ? string.Empty
                 : soonestMsg.message;
         }
+        string metadata = metastr.Count == 0 ? string.Empty : string.Join(" | ", metastr);
 
-        Plumbing result = new(PhoneNumber: number, Date: date, Contents: content, Source: Source.Leaf);
+        Plumbing result = new(PhoneNumber: number, Date: date, Contents: content, MetaData: metadata, Source: Source.Leaf);
         return result;
     }
 }
