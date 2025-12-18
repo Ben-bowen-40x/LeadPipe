@@ -8,7 +8,7 @@ namespace LeadPipe.Infrastructure.Service.Report;
 [SourceKey(Source.Leaf)]
 internal sealed class LeafReportService(
     [FromKeyedServices(Source.Leaf)] ILoadData<Plumbing> load,
-    ITransform<Plumbing, ReportFilePlumbing> transform,
-    [FromKeyedServices(Source.Leaf)] IReport<ReportFilePlumbing> report
-    ) : ReportService<Plumbing, ReportFilePlumbing>(load, transform, report)
+    ITransform<Plumbing, ReportPlumbing> transform,
+    [FromKeyedServices(Source.Leaf)] IReport<ReportPlumbing> report
+    ) : ReportService<Plumbing, ReportPlumbing>(load, transform, report)
 { }

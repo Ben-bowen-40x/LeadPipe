@@ -4,32 +4,32 @@ using System;
 
 namespace LeadPipe.Infrastructure.Dto;
 
-public class ReportFilePlumbingMap : ClassMap<ReportFilePlumbing>
+public class ReportFilePlumbingMap : ClassMap<ReportPlumbing>
 {
     public ReportFilePlumbingMap()
     {
         int index = 0;
-        Map(m => m.PhoneNumber).Index(index++).Name(ReportFilePlumbing.PhoneNumberName);
-        Map(m => m.Date).Index(index++).Name(ReportFilePlumbing.DateName);
-        Map(m => m.FormattedDate).Index(index++).Name(ReportFilePlumbing.FormattedDateName);
-        Map(m => m.Message).Index(index++).Name(ReportFilePlumbing.MessageName);
-        Map(m => m.Source).Index(index++).Name(ReportFilePlumbing.SourceName);
-        Map(m => m.MetaData).Index(index++).Name(ReportFilePlumbing.MetaDataName);
-        Map(m => m.MsgBeforeCust).Index(index++).Name(ReportFilePlumbing.MsgBeforeCustName);
-        Map(m => m.IsSale).Index(index++).Name(ReportFilePlumbing.IsSaleName);
-        Map(m => m.CustomerId).Index(index++).Name(ReportFilePlumbing.CustomerIdName);
-        Map(m => m.SubId).Index(index++).Name(ReportFilePlumbing.SubIdName);
-        Map(m => m.SubActive).Index(index++).Name(ReportFilePlumbing.SubActiveName);
-        Map(m => m.Completed).Index(index++).Name(ReportFilePlumbing.CompletedName);
-        Map(m => m.CustDate).Index(index++).Name(ReportFilePlumbing.CustDateName);
-        Map(m => m.FormattedCustDate).Index(index++).Name(ReportFilePlumbing.FormattedCustDateName);
-        Map(m => m.CustCxlDate).Index(index++).Name(ReportFilePlumbing.CustCxlDateName);
-        Map(m => m.SubDate).Index(index++).Name(ReportFilePlumbing.SubDateName);
-        Map(m => m.FormattedSubDate).Index(index++).Name(ReportFilePlumbing.FormattedSubDateName);
-        Map(m => m.SubCxlDate).Index(index++).Name(ReportFilePlumbing.SubCxlDateName);
+        Map(m => m.PhoneNumber).Index(index++).Name(ReportPlumbing.PhoneNumberName);
+        Map(m => m.Date).Index(index++).Name(ReportPlumbing.DateName);
+        Map(m => m.FormattedDate).Index(index++).Name(ReportPlumbing.FormattedDateName);
+        Map(m => m.Message).Index(index++).Name(ReportPlumbing.MessageName);
+        Map(m => m.Source).Index(index++).Name(ReportPlumbing.SourceName);
+        Map(m => m.MetaData).Index(index++).Name(ReportPlumbing.MetaDataName);
+        Map(m => m.MsgBeforeCust).Index(index++).Name(ReportPlumbing.MsgBeforeCustName);
+        Map(m => m.IsSale).Index(index++).Name(ReportPlumbing.IsSaleName);
+        Map(m => m.CustomerId).Index(index++).Name(ReportPlumbing.CustomerIdName);
+        Map(m => m.SubId).Index(index++).Name(ReportPlumbing.SubIdName);
+        Map(m => m.SubActive).Index(index++).Name(ReportPlumbing.SubActiveName);
+        Map(m => m.Completed).Index(index++).Name(ReportPlumbing.CompletedName);
+        Map(m => m.CustDate).Index(index++).Name(ReportPlumbing.CustDateName);
+        Map(m => m.FormattedCustDate).Index(index++).Name(ReportPlumbing.FormattedCustDateName);
+        Map(m => m.CustCxlDate).Index(index++).Name(ReportPlumbing.CustCxlDateName);
+        Map(m => m.SubDate).Index(index++).Name(ReportPlumbing.SubDateName);
+        Map(m => m.FormattedSubDate).Index(index++).Name(ReportPlumbing.FormattedSubDateName);
+        Map(m => m.SubCxlDate).Index(index++).Name(ReportPlumbing.SubCxlDateName);
     }
 }
-public class ReportFilePlumbing
+public class ReportPlumbing
 {
     [Name(PhoneNumberName)]
     public long PhoneNumber { get; set; }
