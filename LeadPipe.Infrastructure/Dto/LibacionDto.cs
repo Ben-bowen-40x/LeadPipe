@@ -15,5 +15,5 @@ public class LibacionDto
     [Name("Message")]
     public string? Message { get; set; }
     [Name("Commercial?")]
-    public bool Commercial { get; set; }
+    public string? Commercial { get; set; }
 }
