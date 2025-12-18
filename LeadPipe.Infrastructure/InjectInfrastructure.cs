@@ -49,8 +49,8 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<ILoadData<Plumbing>, LoadYeller>(Source.Yeller);
 
         // Transformers
-        services.AddScoped<ITransform<Plumbing, ReportYeller>, YellerTransform>();
-        services.AddScoped<ITransform<Plumbing, ReportFilePlumbing>, PlumbingTransform>();
+        services.AddScoped<ITransform<Plumbing, ReportYeller>, TransformYellerReport>();
+        services.AddScoped<ITransform<Plumbing, ReportPlumbing>, TransformPlumbingReport>();
 
         // Loaders
         services.AddKeyedScoped<ILoadData<Plumbing>, LoadCalli>(Source.Calli);
@@ -95,7 +95,7 @@ public static class InjectInfrastructure
 
         // Non-keyed report services
         services.AddKeyedScoped<IReport<ReportYeller>, YellerClientReporter>(Source.Yeller);
-        services.AddKeyedScoped<IReport<ReportFilePlumbing>, CalliReporter>(Source.Calli);
+        services.AddKeyedScoped<IReport<ReportPlumbing>, CalliReporter>(Source.Calli);
 
         // Scoped services
         services.AddScoped<ICsvRwService, CsvRwService>();

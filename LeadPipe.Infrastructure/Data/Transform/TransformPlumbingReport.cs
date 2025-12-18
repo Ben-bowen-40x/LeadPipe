@@ -8,15 +8,15 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Data.Transform;
 
-public sealed class PlumbingTransform(
+public sealed class TransformPlumbingReport(
     ISubsPlumbingLinkRepository repo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity
-    ) : ITransform<Plumbing, ReportFilePlumbing>
+    ) : ITransform<Plumbing, ReportPlumbing>
 {
     private readonly ISubsPlumbingLinkRepository _repo = repo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = voToEntity;
     private const string dateFormat = "yyyy-MM-dd HH:mm:ss";
-    public async Task<Result<List<ReportFilePlumbing>>> TransformAsync(List<Plumbing> data)
+    public async Task<Result<List<ReportPlumbing>>> TransformAsync(List<Plumbing> data)
     {
         List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
         Result<List<SubsPlumbingLink>> links = await _repo.GetAllAsync(e);
@@ -24,11 +24,11 @@ public sealed class PlumbingTransform(
             ? links.Value
             : null;
         if (entities is null)
-            return Result.Failure<List<ReportFilePlumbing>>(links.Error);
+            return Result.Failure<List<ReportPlumbing>>(links.Error);
 
         return entities.Select(TransformLink).ToList();
     }
-    private static ReportFilePlumbing TransformLink(SubsPlumbingLink link)
+    private static ReportPlumbing TransformLink(SubsPlumbingLink link)
     {
         long phoneNumber = link.PlumbingEntity.PhoneNumber;
 
@@ -63,7 +63,7 @@ public sealed class PlumbingTransform(
         bool msgBeforeCust = date < custDate && date < subDate;
         bool isSale = msgBeforeCust && completed;
 
-        ReportFilePlumbing result = new()
+        ReportPlumbing result = new()
         {
             MsgBeforeCust = msgBeforeCust,
             IsSale = isSale,

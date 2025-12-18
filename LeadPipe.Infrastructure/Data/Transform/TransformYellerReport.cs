@@ -8,7 +8,7 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Data.Transform;
 
-internal sealed class YellerTransform(
+internal sealed class TransformYellerReport(
     ISubsPlumbingLinkRepository spRepo,
     IVoToEntity<Plumbing, PlumbingEntity> toEntity
     ) : ITransform<Plumbing, ReportYeller>
