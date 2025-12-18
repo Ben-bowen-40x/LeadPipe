@@ -9,7 +9,6 @@ namespace LeadPipe.Infrastructure.Service.Report;
 [SourceKey(Source.Yeller)]
 public sealed class YellerClientReporter : IReport<ReportYeller>
 {
-    private readonly IHttpClientFactory _factory;
     private readonly IYellerSettings _settings;
     private readonly HttpClient _client;
 
@@ -18,9 +17,8 @@ public sealed class YellerClientReporter : IReport<ReportYeller>
         IYellerSettings settings
     )
     {
-        _factory = factory;
         _settings = settings;
-        _client = _factory.CreateClient(_settings.YellerName!);
+        _client = factory.CreateClient(_settings.YellerName!);
     }
 
     public Task<Result> ReportData(List<ReportYeller> d)
