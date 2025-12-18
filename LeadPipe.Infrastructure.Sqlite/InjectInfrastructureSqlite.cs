@@ -2,6 +2,7 @@
 using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using LeadPipe.Infrastructure.Sqlite.Repository;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,17 +14,24 @@ public static class InjectInfrastructureSqlite
 {
     public static IServiceCollection AddInfrastructureSqlite(this IServiceCollection services, IDwhSettings settings)
     {
-        // Add Databases
+        if (string.IsNullOrWhiteSpace(settings.PlumbingConnectionString))
+            throw new InvalidOperationException(
+                "PlumbingConnectionString is not configured.");
+
         services.AddDbContext<PlumbingContext>(options =>
         {
-            string? connectionString = settings.PlumbingContext!;
-            options.UseSqlite(connectionString);
+            var cs = settings.PlumbingConnectionString;
+
+            var dataSource =
+                new SqliteConnectionStringBuilder(cs).DataSource;
+
+            Directory.CreateDirectory(Path.GetDirectoryName(dataSource)!);
+
+            options.UseSqlite(cs);
         });
 
-        // Logger
         services.AddTransient<PlumbingRepository>();
 
-        // Add Repositories
         services.AddScoped<ICallRepository, CallRepository>();
         services.AddScoped<IPlumbingCallLinkRepository, PlumbingCallLinkRepository>();
         services.AddScoped<IPlumbingRepository, PlumbingRepository>();
@@ -34,4 +42,5 @@ public static class InjectInfrastructureSqlite
 
         return services;
     }
+
 }

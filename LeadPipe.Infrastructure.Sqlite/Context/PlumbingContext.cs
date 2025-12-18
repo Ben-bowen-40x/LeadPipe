@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.Sqlite.Context;
 
-public class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbContext(options)
+public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbContext(options)
 {
 #pragma warning disable IDE0079
     public DbSet<SyncStateEntity> SyncState { get; set; }

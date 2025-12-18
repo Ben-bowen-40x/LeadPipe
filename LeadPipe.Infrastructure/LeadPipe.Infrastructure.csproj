@@ -12,6 +12,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.8" />
     <PackageReference Include="MySql.EntityFrameworkCore" Version="*" />
@@ -20,6 +21,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LeadPipe.Application\LeadPipe.Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include=".info\plumbing.db" />
   </ItemGroup>
 
 </Project>

@@ -16,7 +16,21 @@ internal static class ConfigureCommandLine
         Settings settings = new();
         configuration.Bind(settings);
 
-        typeof(Settings).GetInterfaces().ToList().ForEach(t => services.AddSingleton(t, settings));
+        // ConnectionStrings
+        settings.PlumbingConnectionString =
+            configuration.GetConnectionString("Plumbing");
+
+        settings.MySqlConnectionString =
+            configuration.GetConnectionString("MySql");
+
+        // register once
+        services.AddSingleton(settings);
+
+        // expose via interfaces
+        typeof(Settings)
+            .GetInterfaces()
+            .ToList()
+            .ForEach(i => services.AddSingleton(i, settings));
 
         services.AddLogging(builder =>
         {

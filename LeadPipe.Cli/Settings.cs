@@ -31,7 +31,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? LeafThreadsEndpoint { get; set; }
     public string? LeafMessagesEndpoint { get; set; }
     public int LeafConcurrentMax { get; set; }
-    public string? PlumbingContext { get; set; }
+    public string? PlumbingConnectionString { get; set; }
     public string? MySqlConnectionString { get; set; }
     public string? Schema1 { get; set; }
     public string? Schema2 { get; set; }

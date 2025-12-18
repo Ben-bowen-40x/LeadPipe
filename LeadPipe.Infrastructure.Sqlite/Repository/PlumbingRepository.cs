@@ -63,3 +63,29 @@ public class PlumbingRepository(
     }
 
 }
+/*Microsoft.Data.Sqlite.SqliteException
+  HResult=0x80004005
+  Message=SQLite Error 14: 'unable to open database file'.
+  Source=Microsoft.Data.Sqlite
+  StackTrace:
+   at Microsoft.Data.Sqlite.SqliteException.ThrowExceptionForRC(Int32 rc, sqlite3 db)
+   at Microsoft.Data.Sqlite.SqliteConnectionInternal..ctor(SqliteConnectionStringBuilder connectionOptions, SqliteConnectionPool pool)
+   at Microsoft.Data.Sqlite.SqliteConnectionPool.GetConnection()
+   at Microsoft.Data.Sqlite.SqliteConnectionFactory.GetConnection(SqliteConnection outerConnection)
+   at Microsoft.Data.Sqlite.SqliteConnection.Open()
+   at System.Data.Common.DbConnection.OpenAsync(CancellationToken cancellationToken)
+--- End of stack trace from previous location ---
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.<OpenInternalAsync>d__70.MoveNext()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.<OpenInternalAsync>d__70.MoveNext()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalConnection.<OpenAsync>d__66.MoveNext()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.<ExecuteReaderAsync>d__18.MoveNext()
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.<InitializeReaderAsync>d__21.MoveNext()
+   at Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable`1.AsyncEnumerator.<MoveNextAsync>d__20.MoveNext()
+   at System.Runtime.CompilerServices.ConfiguredValueTaskAwaitable`1.ConfiguredValueTaskAwaiter.GetResult()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.<ToListAsync>d__67`1.MoveNext()
+   at Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.<ToListAsync>d__67`1.MoveNext()
+   at LeadPipe.Infrastructure.Sqlite.Repository.PlumbingRepository.<AddRangeAsync>d__3.MoveNext() in C:\Users\benjamin.bowen\Repos\LeadPipe\LeadPipe.Infrastructure.Sqlite\Repository\PlumbingRepository.cs:line 39
+
+  This exception was originally thrown at this call stack:
+    [External Code]
+    LeadPipe.Infrastructure.Sqlite.Repository.PlumbingRepository.AddRangeAsync(System.Collections.Generic.List<LeadPipe.Infrastructure.Entity.Sqlite.PlumbingEntity>) in PlumbingRepository.cs*/

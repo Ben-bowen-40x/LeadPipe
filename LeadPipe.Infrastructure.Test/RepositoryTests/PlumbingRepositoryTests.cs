@@ -2,18 +2,19 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Repository;
-using Org.BouncyCastle.Asn1.Cms;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
 public class PlumbingRepositoryTests
 {
-
+    private readonly ILogger<PlumbingRepository> logger = Substitute.For<ILogger<PlumbingRepository>>();
     [Fact]
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
 
         var entities = new List<PlumbingEntity>
         {
@@ -31,7 +32,7 @@ public class PlumbingRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
 
@@ -43,7 +44,7 @@ public class PlumbingRepositoryTests
     public async Task AddAsync_ShouldAddPlumbingEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
 
         var plumbing = new PlumbingEntity { Id = 1, PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         Result result = await repo.AddAsync(plumbing);
@@ -57,7 +58,7 @@ public class PlumbingRepositoryTests
         context.PlumbingEntities.Add(new PlumbingEntity { Id = 1, PhoneNumber = 12345, MetaData = string.Empty });
         await context.SaveChangesAsync();
 
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
         var result = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
@@ -72,7 +73,7 @@ public class PlumbingRepositoryTests
         context.PlumbingEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
         var result = await repo.DeleteAsync(1);
         var reloaded = await repo.GetByIdAsync(1);
 
@@ -83,7 +84,7 @@ public class PlumbingRepositoryTests
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
-        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext());
+        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var result = await repo.GetByIdAsync(99);
 
         Assert.False(result.IsSuccess);
@@ -98,7 +99,7 @@ public class PlumbingRepositoryTests
         context.PlumbingEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
         var updatedPlumbing = new PlumbingEntity { Id = 1, PhoneNumber = 99999, MetaData = string.Empty };
 
         var result = await repo.UpdateAsync(updatedPlumbing);
@@ -112,7 +113,7 @@ public class PlumbingRepositoryTests
     [Fact]
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
-        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext());
+        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var updatedPlumbing = new PlumbingEntity { Id = 99, PhoneNumber = 11111, MetaData = string.Empty };
 
         var result = await repo.UpdateAsync(updatedPlumbing);
@@ -124,7 +125,7 @@ public class PlumbingRepositoryTests
     [Fact]
     public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
     {
-        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext());
+        var repo = new PlumbingRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var result = await repo.DeleteAsync(99);
 
         Assert.True(result.IsSuccess);
@@ -134,7 +135,7 @@ public class PlumbingRepositoryTests
     public async Task AddRangeAsync_ShouldNotAddDuplicates_WhenEntitiesExist()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
 
         var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         await repo.AddAsync(entity);
@@ -157,7 +158,7 @@ public class PlumbingRepositoryTests
     public async Task AddRangeAsync_ShouldAddOnlyNewEntities_WhenMixedWithExisting()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
 
         // Existing entity in database
         var existing = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
@@ -184,7 +185,7 @@ public class PlumbingRepositoryTests
     public async Task AddRangeAsync_ShouldNotAddDuplicates_WhenEntitiesHaveSamePhoneNumberButDifferentSource()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new PlumbingRepository(context);
+        var repo = new PlumbingRepository(context, logger);
 
         var entity = new PlumbingEntity { PhoneNumber = 12345, Source = Source.Test, MetaData = string.Empty };
         await repo.AddAsync(entity);
