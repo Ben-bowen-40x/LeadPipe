@@ -1,5 +1,6 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
+using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
@@ -36,6 +37,10 @@ public static class InjectTranslation
         services.AddScoped<IEntityToVo<CallEntity, Call>, CallEntityToCall>();
         services.AddScoped<IEntityToVo<PlumbingEntity, Plumbing>, PlumbingEntityToPlumbing>();
         services.AddScoped<IEntityToVo<SubsEntity, Sandwich>, SubsToSandwich>();
+
+        // IEntityToVo<,,>
+        services.AddScoped<IEntityToVo<CallMySqlEntity, Call>, CallMySqlEntityToCall>();
+
         // IVoToDto
         services.AddScoped<IVoToDto<Plumbing, LabDto>, PlumbingToLabDto>();
         services.AddScoped<IVoToDto<Plumbing, LeafDto>, PlumbingToLeafDto>();
