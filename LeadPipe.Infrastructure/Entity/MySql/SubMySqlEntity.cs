@@ -13,5 +13,7 @@ public class SubMySqlEntity
     public DateTime dateCancelled { get; set; }
     public int soldBy2 { get; set; }
     public int soldBy3 { get; set; }
+
+    public CustomerMySqlEntity? customer { get; set; }
 #pragma warning restore IDE1006 // Naming Styles
 }

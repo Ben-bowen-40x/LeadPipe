@@ -1,15 +1,11 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.MySql;
+using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 
 public interface ICustomerMySqlRepository
 {
-    Task<Result<CustomerMySqlEntity>> AddAsync(CustomerMySqlEntity entity);
-    Task<Result<List<CustomerMySqlEntity>>> AddRangeAsync(List<CustomerMySqlEntity> entities);
-    Task<Result<bool>> DeleteAsync(CustomerMySqlEntity entity);
-    Task<Result<bool>> DeleteAsync(long id);
-    Task<Result<List<CustomerMySqlEntity>>> GetAllAsync();
-    Task<Result<CustomerMySqlEntity>> GetByIdAsync(long id);
-    Task<Result<CustomerMySqlEntity>> UpdateAsync(CustomerMySqlEntity entity);
+    Task<Result<List<CustomerMySqlEntity>>> FindAsync(Expression<Func<CustomerMySqlEntity, bool>> predicate, bool includeSubscriptions);
+    Task<Result<CustomerMySqlEntity>> GetByIdAsync(int id, bool includeSubscriptions);
 }

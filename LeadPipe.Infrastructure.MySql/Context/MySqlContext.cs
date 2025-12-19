@@ -30,16 +30,14 @@ public class MySqlContext : DbContext
             entity.ToTable("calls", schema: _settings.Schema2);
             entity.HasKey(x => x.call_id);
 
-            // One-to-one with Summary
-            entity.HasOne<SummaryMySqlEntity>()
+            entity.HasMany(c => c.summaries)
                   .WithOne()
-                  .HasForeignKey<SummaryMySqlEntity>(s => s.call_id)
+                  .HasForeignKey(s => s.call_id)
                   .OnDelete(DeleteBehavior.NoAction);
 
-            // One-to-one with Transcription
-            entity.HasOne<TranscriptionMySqlEntity>()
+            entity.HasMany(c => c.transcriptions)
                   .WithOne()
-                  .HasForeignKey<TranscriptionMySqlEntity>(s => s.call_id)
+                  .HasForeignKey(t => t.call_id)
                   .OnDelete(DeleteBehavior.NoAction);
         });
 
@@ -63,12 +61,12 @@ public class MySqlContext : DbContext
             entity.ToTable("customer", schema: _settings.Schema1);
             entity.HasKey(x => x.customerID);
 
-            // One-to-many with Subscriptions
-            entity.HasMany<SubMySqlEntity>()
-                  .WithOne()
+            entity.HasMany(c => c.subscriptions)
+                  .WithOne(s => s.customer)
                   .HasForeignKey(s => s.customerID)
                   .OnDelete(DeleteBehavior.NoAction);
         });
+
 
         // SUBSCRIPTION ENTITY
         modelBuilder.Entity<SubMySqlEntity>(entity =>

@@ -7,17 +7,24 @@ using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;
 
-
 public class CallMySqlRepository(MySqlContext context) : ICallMySqlRepository
 {
-    private readonly MySqlContext _context = context;
     private readonly DbSet<CallMySqlEntity> _set = context.Set<CallMySqlEntity>();
 
-    public async Task<Result<List<CallMySqlEntity>>> FindAsync(Expression<Func<CallMySqlEntity, bool>> predicate)
+    public async Task<Result<List<CallMySqlEntity>>> FindAsync(Expression<Func<CallMySqlEntity, bool>> predicate, bool includeDetails = true)
     {
         try
         {
-            var list = await _set.Where(predicate).ToListAsync();
+            IQueryable<CallMySqlEntity> query = _set.AsNoTracking();
+
+            if (includeDetails)
+            {
+                query = query
+                    .Include(c => c.summaries)
+                    .Include(c => c.transcriptions);
+            }
+
+            var list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
         catch (Exception ex)
@@ -26,58 +33,21 @@ public class CallMySqlRepository(MySqlContext context) : ICallMySqlRepository
         }
     }
 
-    public async Task<Result<CallMySqlEntity>> AddAsync(CallMySqlEntity entity)
+    public async Task<Result<CallMySqlEntity>> GetByIdAsync(long id, bool includeDetails = true)
     {
-        await _set.AddAsync(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(entity);
-    }
+        IQueryable<CallMySqlEntity> query = _set.AsNoTracking();
 
-    public async Task<Result<List<CallMySqlEntity>>> AddRangeAsync(List<CallMySqlEntity> entities)
-    {
-        if (entities is null || entities.Count == 0)
-            return Result.Failure<List<CallMySqlEntity>>("No entities provided.");
+        if (includeDetails)
+        {
+            query = query
+                .Include(c => c.summaries)
+                .Include(c => c.transcriptions);
+        }
 
-        await _set.AddRangeAsync(entities);
-        await _context.SaveChangesAsync();
+        var found = await query.SingleOrDefaultAsync(c => c.call_id == id);
 
-        return Result.Success(entities);
-    }
-
-    public async Task<Result<bool>> DeleteAsync(long id)
-    {
-        var entity = await _set.FindAsync(id);
-        if (entity is null)
-            return Result.Success(false);
-
-        _set.Remove(entity);
-        await _context.SaveChangesAsync();
-
-        return Result.Success(true);
-    }
-
-    public async Task<Result<bool>> DeleteAsync(CallMySqlEntity entity)
-        => await DeleteAsync(entity.call_id);
-
-    public async Task<Result<List<CallMySqlEntity>>> GetAllAsync()
-        => Result.Success(await _set.ToListAsync());
-
-    public async Task<Result<CallMySqlEntity>> GetByIdAsync(long id)
-    {
-        var found = await _set.FindAsync(id);
         return found is null
             ? Result.Failure<CallMySqlEntity>($"Entity with id {id} was not found")
             : Result.Success(found);
-    }
-
-    public async Task<Result<CallMySqlEntity>> UpdateAsync(CallMySqlEntity entity)
-    {
-        var exists = await _set.FindAsync(entity.call_id);
-        if (exists is null)
-            return Result.Failure<CallMySqlEntity>("The desired entity does not exist");
-
-        _context.Entry(exists).CurrentValues.SetValues(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(entity);
     }
 }

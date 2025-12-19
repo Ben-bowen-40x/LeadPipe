@@ -10,5 +10,6 @@ public class CustomerMySqlEntity
     public DateTime dateAdded { get; set; }
     public DateTime dateCancelled { get; set; }
 
+    public ICollection<SubMySqlEntity> subscriptions { get; set; } = [];
 #pragma warning restore IDE1006 // Naming Styles
 }

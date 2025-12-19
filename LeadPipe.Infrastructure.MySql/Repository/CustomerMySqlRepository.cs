@@ -9,14 +9,20 @@ namespace LeadPipe.Infrastructure.MySql.Repository;
 
 public class CustomerMySqlRepository(MySqlContext context) : ICustomerMySqlRepository
 {
-    private readonly MySqlContext _context = context;
     private readonly DbSet<CustomerMySqlEntity> _set = context.Set<CustomerMySqlEntity>();
 
-    public async Task<Result<List<CustomerMySqlEntity>>> FindAsync(Expression<Func<CustomerMySqlEntity, bool>> predicate)
+    public async Task<Result<List<CustomerMySqlEntity>>> FindAsync(Expression<Func<CustomerMySqlEntity, bool>> predicate, bool includeSubscriptions = true)
     {
         try
         {
-            var list = await _set.Where(predicate).ToListAsync();
+            IQueryable<CustomerMySqlEntity> query = _set.AsNoTracking();
+
+            if (includeSubscriptions)
+            {
+                query = query.Include(c => c.subscriptions);
+            }
+
+            var list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
         catch (Exception ex)
@@ -24,56 +30,21 @@ public class CustomerMySqlRepository(MySqlContext context) : ICustomerMySqlRepos
             return Result.Failure<List<CustomerMySqlEntity>>(ex.Message);
         }
     }
-    public async Task<Result<CustomerMySqlEntity>> AddAsync(CustomerMySqlEntity entity)
+
+    public async Task<Result<CustomerMySqlEntity>> GetByIdAsync(int id, bool includeSubscriptions = true)
     {
-        await _set.AddAsync(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(entity);
-    }
+        IQueryable<CustomerMySqlEntity> query = _set.AsNoTracking();
 
-    public async Task<Result<List<CustomerMySqlEntity>>> AddRangeAsync(List<CustomerMySqlEntity> entities)
-    {
-        if (entities is null || entities.Count == 0)
-            return Result.Failure<List<CustomerMySqlEntity>>("No entities provided.");
+        if (includeSubscriptions)
+        {
+            query = query.Include(c => c.subscriptions);
+        }
 
-        await _set.AddRangeAsync(entities);
-        await _context.SaveChangesAsync();
-        return Result.Success(entities);
-    }
+        var found = await query.SingleOrDefaultAsync(c => c.customerID == id);
 
-    public async Task<Result<bool>> DeleteAsync(long id)
-    {
-        var entity = await _set.FindAsync((int)id);
-        if (entity is null)
-            return Result.Success(false);
-
-        _set.Remove(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(true);
-    }
-
-    public async Task<Result<bool>> DeleteAsync(CustomerMySqlEntity entity)
-        => await DeleteAsync(entity.customerID);
-
-    public async Task<Result<List<CustomerMySqlEntity>>> GetAllAsync()
-        => Result.Success(await _set.ToListAsync());
-
-    public async Task<Result<CustomerMySqlEntity>> GetByIdAsync(long id)
-    {
-        var found = await _set.FindAsync((int)id);
         return found is null
             ? Result.Failure<CustomerMySqlEntity>($"Entity with id {id} was not found")
             : Result.Success(found);
     }
-
-    public async Task<Result<CustomerMySqlEntity>> UpdateAsync(CustomerMySqlEntity entity)
-    {
-        var exists = await _set.FindAsync(entity.customerID);
-        if (exists is null)
-            return Result.Failure<CustomerMySqlEntity>("The desired entity does not exist");
-
-        _context.Entry(exists).CurrentValues.SetValues(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(entity);
-    }
 }
+

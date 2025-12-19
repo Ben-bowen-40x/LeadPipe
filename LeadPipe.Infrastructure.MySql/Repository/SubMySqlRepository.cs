@@ -9,14 +9,20 @@ namespace LeadPipe.Infrastructure.MySql.Repository;
 
 public class SubMySqlRepository(MySqlContext context) : ISubMySqlRepository
 {
-    private readonly MySqlContext _context = context;
     private readonly DbSet<SubMySqlEntity> _set = context.Set<SubMySqlEntity>();
 
-    public async Task<Result<List<SubMySqlEntity>>> FindAsync(Expression<Func<SubMySqlEntity, bool>> predicate)
+    public async Task<Result<List<SubMySqlEntity>>> FindAsync(Expression<Func<SubMySqlEntity, bool>> predicate, bool includeCustomer = true)
     {
         try
         {
-            var list = await _set.Where(predicate).ToListAsync();
+            IQueryable<SubMySqlEntity> query = _set.AsNoTracking();
+
+            if (includeCustomer)
+            {
+                query = query.Include(s => s.customer);
+            }
+
+            var list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
         catch (Exception ex)
@@ -25,56 +31,20 @@ public class SubMySqlRepository(MySqlContext context) : ISubMySqlRepository
         }
     }
 
-    public async Task<Result<SubMySqlEntity>> AddAsync(SubMySqlEntity entity)
+    public async Task<Result<SubMySqlEntity>> GetByIdAsync(int id, bool includeCustomer = true)
     {
-        await _set.AddAsync(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(entity);
-    }
+        IQueryable<SubMySqlEntity> query = _set.AsNoTracking();
 
-    public async Task<Result<List<SubMySqlEntity>>> AddRangeAsync(List<SubMySqlEntity> entities)
-    {
-        if (entities is null || entities.Count == 0)
-            return Result.Failure<List<SubMySqlEntity>>("No entities provided.");
+        if (includeCustomer)
+        {
+            query = query.Include(s => s.customer);
+        }
 
-        await _set.AddRangeAsync(entities);
-        await _context.SaveChangesAsync();
-        return Result.Success(entities);
-    }
+        var found = await query.SingleOrDefaultAsync(s => s.subscriptionID == id);
 
-    public async Task<Result<bool>> DeleteAsync(long id)
-    {
-        var entity = await _set.FindAsync((int)id);
-        if (entity is null)
-            return Result.Success(false);
-
-        _set.Remove(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(true);
-    }
-
-    public async Task<Result<bool>> DeleteAsync(SubMySqlEntity entity)
-        => await DeleteAsync(entity.subscriptionID);
-
-    public async Task<Result<List<SubMySqlEntity>>> GetAllAsync()
-        => Result.Success(await _set.ToListAsync());
-
-    public async Task<Result<SubMySqlEntity>> GetByIdAsync(long id)
-    {
-        var found = await _set.FindAsync((int)id);
         return found is null
             ? Result.Failure<SubMySqlEntity>($"Entity with id {id} was not found")
             : Result.Success(found);
     }
-
-    public async Task<Result<SubMySqlEntity>> UpdateAsync(SubMySqlEntity entity)
-    {
-        var exists = await _set.FindAsync(entity.subscriptionID);
-        if (exists is null)
-            return Result.Failure<SubMySqlEntity>("The desired entity does not exist");
-
-        _context.Entry(exists).CurrentValues.SetValues(entity);
-        await _context.SaveChangesAsync();
-        return Result.Success(entity);
-    }
 }
+
