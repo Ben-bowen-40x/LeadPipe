@@ -124,4 +124,43 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
         }
     }
 
+    public async Task<Result<T>> UpsertAsync(T entity)
+    {
+        try
+        {
+            T? existing = await _set.FindAsync(entity.Id);
+
+            if (existing is null)
+            {
+                await _set.AddAsync(entity);
+            }
+            else
+            {
+                _context.Entry(existing).CurrentValues.SetValues(entity);
+            }
+
+            await _context.SaveChangesAsync();
+            return Result.Success(entity);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<T>(ex.Message);
+        }
+    }
+
+    public async Task<Result<List<T>>> UpsertRangeAsync(List<T> entities)
+    {
+        foreach (var entity in entities)
+        {
+            T? existing = await _set.FindAsync(entity.Id);
+            if (existing is null)
+                await _set.AddAsync(entity);
+            else
+                _context.Entry(existing).CurrentValues.SetValues(entity);
+        }
+
+        await _context.SaveChangesAsync();
+        return Result.Success(entities);
+    }
+
 }

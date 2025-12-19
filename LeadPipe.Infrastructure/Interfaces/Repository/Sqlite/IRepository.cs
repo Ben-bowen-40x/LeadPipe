@@ -14,4 +14,6 @@ public interface IRepository<T> where T : class, IEntity
     Task<Result<List<T>>> GetAllAsync();
     Task<Result<T>> GetByIdAsync(long id);
     Task<Result<T>> UpdateAsync(T entity);
+    Task<Result<List<T>>> UpsertRangeAsync(List<T> entities);
+    Task<Result<T>> UpsertAsync(T entity);
 }
