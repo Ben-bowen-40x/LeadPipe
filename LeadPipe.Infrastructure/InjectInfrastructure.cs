@@ -29,7 +29,6 @@ public static class InjectInfrastructure
         // Data Persistence
         services.AddScoped<IDataPersistence<CallEntity>, CallEntityPersistence>();
         services.AddScoped<IDataPersistence<CallMySqlEntity>, CallMySqlPersistence>();
-        services.AddScoped<IDataPersistence<CustomerMySqlEntity>, CustomerMySqlEntityPersistence>();
         services.AddScoped<IDataPersistence<PlumbingCallLink>, PlumbingCallLinkPersistence>();
         services.AddScoped<IDataPersistence<PlumbingEntity>, PlumbingPersistence>();
         services.AddScoped<IDataPersistence<SubMySqlEntity>, SubMySqlEntityPersistence>();
@@ -77,7 +76,6 @@ public static class InjectInfrastructure
         services.AddTransient<LeafClientService>();
         services.AddTransient<YellerClientService>();
 
-        // Keyed Services
         // Keyed update services
         services.AddKeyedScoped<IUpdateService<Plumbing>, CalliUpdateFromFileService>(Source.Calli);
         services.AddKeyedScoped<IUpdateService<Plumbing>, LabUpdateService>(Source.Lab);
@@ -86,6 +84,9 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IUpdateService<Plumbing>, LeasedUpdateFromFileService>(Source.Leased);
         services.AddKeyedScoped<IUpdateService<Plumbing>, PanUpdateFromFileService>(Source.Pan);
         services.AddKeyedScoped<IUpdateService<Plumbing>, YellerUpdateService>(Source.Yeller);
+
+        // Nonkeyed update services
+        services.AddScoped<IUpdateService<Call>, CallsUpdateService>();
 
         // Keyed Report services
         services.AddKeyedScoped<IReportService<Plumbing>, CalliReportService>(Source.Calli);
@@ -103,7 +104,7 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IReport<ReportPlumbing>, LeafReporter>(Source.Leaf);
         services.AddKeyedScoped<IReport<ReportPlumbing>, LibacionReporter>(Source.Libacion);
         services.AddKeyedScoped<IReport<ReportPlumbing>, PanReporter>(Source.Pan);
-        services.AddKeyedScoped<IReport<ReportPlumbing>, YellerReporter>(Source.Yeller);        
+        services.AddKeyedScoped<IReport<ReportPlumbing>, YellerReporter>(Source.Yeller);
 
         services.AddScoped<IReport<ReportYeller>, YellerClientReporter>();
 
