@@ -25,9 +25,10 @@ internal sealed class CallsUpdateService(
         if (callsResult.IsFailure)
             return Result.Failure<List<Call>>(callsResult.Error);
 
-        return callsResult.IsSuccess
+        Result<List<Call>> value = callsResult.IsSuccess
             ? Result.Success(callsResult.Value.Select(_eToVo.Translate).ToList())
             : Result.Failure<List<Call>>(callsResult.Error);
+        return value;
     }
 
     public async Task<Result> SaveDataAsync(List<Call> data)
@@ -39,7 +40,7 @@ internal sealed class CallsUpdateService(
 
     public async Task<Result<List<Call>>> UpdateDataAsync()
     {
-        var callsResult = await _call.RefreshAsync();
+        Result<List<CallMySqlEntity>> callsResult = await _call.RefreshAsync();
         if (callsResult.IsFailure)
             return Result.Failure<List<Call>>(callsResult.Error);
 
