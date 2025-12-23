@@ -28,13 +28,13 @@ public static class InjectInfrastructure
 
         // Data Persistence
         services.AddScoped<IDataPersistence<CallEntity>, CallEntityPersistence>();
-        services.AddScoped<IDataPersistence<CallMySqlEntity>, CallMySqlPersistence>();
         services.AddScoped<IDataPersistence<PlumbingCallLink>, PlumbingCallLinkPersistence>();
         services.AddScoped<IDataPersistence<PlumbingEntity>, PlumbingPersistence>();
-        services.AddScoped<IDataPersistence<SubMySqlEntity>, SubMySqlEntityPersistence>();
         services.AddScoped<IDataPersistence<CallSubsLink>, SubsCallLinkPersistence>();
+        services.AddScoped<IDataPersistence<SubsEntity>, SubsEntityPersistence>();
         services.AddScoped<IDataPersistence<SubsPlumbingLink>, SubsPlumbingLinkPersistence>();
-
+        services.AddScoped<IDataPersistence<Call>, CallPersistence>();
+        services.AddScoped<IDataPersistence<Sandwich>, SandwichPersistence>();
 
         // Keyed Sources
         services.AddKeyedScoped<ILoadData<Plumbing>, LoadCalli>(Source.Calli);
@@ -67,6 +67,7 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<LibacionDto>, LibacionFileDataSource>();
         services.AddScoped<IDataSourceAsync<PanDto>, PanFileDataSource>();
         services.AddScoped<IDataSourceAsync<CallMySqlEntity>, CallMySqlDataSource>();
+        services.AddScoped<IDataSourceAsync<SubMySqlEntity>, SubMySqlDataSource>();
         #endregion
 
         // *****************************************
@@ -88,6 +89,7 @@ public static class InjectInfrastructure
 
         // Nonkeyed update services
         services.AddScoped<IUpdateService<Call>, CallsUpdateService>();
+        services.AddScoped<IUpdateService<Sandwich>, SandwichUpdateService>();
 
         // Keyed Report services
         services.AddKeyedScoped<IReportService<Plumbing>, CalliReportService>(Source.Calli);
