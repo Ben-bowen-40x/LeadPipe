@@ -150,17 +150,29 @@ public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IR
 
     public async Task<Result<List<T>>> UpsertRangeAsync(List<T> entities)
     {
-        foreach (var entity in entities)
+        if (entities.Count == 0)
+            return Result.Success(entities);
+
+        long[] ids = [.. entities.Select(e => e.Id)];
+
+        Dictionary<long, T> existingEntities = await _set
+            .Where(e => ids.Contains(e.Id))
+            .ToDictionaryAsync(e => e.Id);
+
+        try
         {
-            T? existing = await _set.FindAsync(entity.Id);
-            if (existing is null)
-                await _set.AddAsync(entity);
-            else
-                _context.Entry(existing).CurrentValues.SetValues(entity);
+            _context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+            foreach (T entity in entities)
+                if (existingEntities.TryGetValue(entity.Id, out var existing))
+                    _context.Entry(existing).CurrentValues.SetValues(entity);
+                else
+                    await _set.AddAsync(entity);
+            await _context.SaveChangesAsync();
+            return Result.Success(entities);
         }
+        catch (Exception ex) { return Result.Failure<List<T>>(ex.Message); }
+        finally { _context.ChangeTracker.AutoDetectChangesEnabled = true; }
 
-        await _context.SaveChangesAsync();
-        return Result.Success(entities);
     }
-
 }
