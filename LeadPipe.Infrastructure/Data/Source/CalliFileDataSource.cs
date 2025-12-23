@@ -6,6 +6,6 @@ using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Data.Source;
 
-public class CalliFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<CalliFileDataSource> logging)
+public sealed class CalliFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<CalliFileDataSource> logging)
     : FileDataSource<CalliDto, CalliFileDataSource>(new FileInfo(settings.CalliSourceLoc!), csv, json, logging), IDataSourceAsync<CalliDto>
 { }
