@@ -66,6 +66,7 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<LeasedDto>, LeasedFileDataSource>();
         services.AddScoped<IDataSourceAsync<LibacionDto>, LibacionFileDataSource>();
         services.AddScoped<IDataSourceAsync<PanDto>, PanFileDataSource>();
+        services.AddScoped<IDataSourceAsync<CallMySqlEntity>, CallMySqlDataSource>();
         #endregion
 
         // *****************************************
