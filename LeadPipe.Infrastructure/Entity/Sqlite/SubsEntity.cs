@@ -18,6 +18,7 @@ public class SubsEntity : IEntity
     public bool SubActive { get; set; }
     public bool Complete { get; set; }
     public decimal Value { get; set; }
+    public string? Type { get; set; }
     public string? Seller { get; set; }
     public string? Seller2 { get; set; }
     public string? Seller3 { get; set; }
