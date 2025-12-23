@@ -10,14 +10,12 @@ namespace LeadPipe.Infrastructure.Service;
 internal sealed class CallsUpdateService(
     IDataSourceAsync<CallMySqlEntity> call,
     IEntityToVo<CallMySqlEntity, Call> eToVo,
-    IVoToEntity<Call, CallMySqlEntity> voToE,
-    IDataPersistence<CallMySqlEntity> persistence
+    IDataPersistence<Call> persistence
     ) : IUpdateService<Call>
 {
     private readonly IDataSourceAsync<CallMySqlEntity> _call = call;
     private readonly IEntityToVo<CallMySqlEntity, Call> _eToVo = eToVo;
-    private readonly IVoToEntity<Call, CallMySqlEntity> _voToE = voToE;
-    private readonly IDataPersistence<CallMySqlEntity> _persistence = persistence;
+    private readonly IDataPersistence<Call> _persistence = persistence;
     public async Task<Result<List<Call>>> GetDataAsync()
     {
         // Retrieve all data from source
@@ -33,8 +31,7 @@ internal sealed class CallsUpdateService(
 
     public async Task<Result> SaveDataAsync(List<Call> data)
     {
-        List<CallMySqlEntity> calls = [.. data.Select(_voToE.Translate)];
-        Result saved = await _persistence.SaveAsync(calls);
+        Result saved = await _persistence.SaveAsync(data);
         return saved;
     }
 
