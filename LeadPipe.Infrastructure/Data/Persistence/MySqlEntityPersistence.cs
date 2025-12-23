@@ -6,6 +6,10 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Data.Persistence;
 
+//TODO: MySqlEntityPersistence should be replaced
+// IE: We should never save MySqlEntityPersistence, because the translations are weird, and we'll just be translating like this:
+// Mysqlentity => Vo => SqliteEntity when we should be translating like this
+// Vo => SqliteEntity and then using the existing SqliteEntity persistence methods.
 internal abstract class MySqlEntityPersistence<TRepo, TEntity, TMySqlEntity, TVo>(
         TRepo repo,
         IEntityToVo<TMySqlEntity, TVo> eToVo,
