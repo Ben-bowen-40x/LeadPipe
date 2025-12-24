@@ -19,7 +19,7 @@ public static class InjectInfrastructureMySql
         {
             options.UseMySql(
                 settings.MySqlConnectionString,
-                ServerVersion.AutoDetect(settings.MySqlConnectionString!)
+                ServerVersion.AutoDetect(settings.MySqlConnectionString)
             );
         });
 
