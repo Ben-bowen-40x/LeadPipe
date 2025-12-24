@@ -10,6 +10,7 @@ public static class InjectApplication
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
         // Format: services.AddScoped<Interface, Class>();  
+        services.AddScoped<IUpdateAndReportAllManager, UpdateAndReportAllManager>();
 
         // Add Update managers
         services.AddScoped<IUpdateCalliManager, UpdateCalliManager>();
