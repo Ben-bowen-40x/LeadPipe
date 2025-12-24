@@ -19,9 +19,9 @@ public class SubsEntity : IEntity
     public bool Complete { get; set; }
     public decimal Value { get; set; }
     public string? Type { get; set; }
-    public string? Seller { get; set; }
-    public string? Seller2 { get; set; }
-    public string? Seller3 { get; set; }
+    public int Seller { get; set; }
+    public int Seller2 { get; set; }
+    public int Seller3 { get; set; }
 
     // Navigation properties
     public ICollection<SubsPlumbingLink> SubsPlumbingLinks { get; set; } = [];

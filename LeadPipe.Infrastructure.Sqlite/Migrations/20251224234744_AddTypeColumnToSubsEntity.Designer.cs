@@ -3,6 +3,7 @@ using System;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LeadPipe.Infrastructure.Sqlite.Migrations
 {
     [DbContext(typeof(PlumbingContext))]
-    partial class PlumbingContextModelSnapshot : ModelSnapshot
+    [Migration("20251224234744_AddTypeColumnToSubsEntity")]
+    partial class AddTypeColumnToSubsEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");

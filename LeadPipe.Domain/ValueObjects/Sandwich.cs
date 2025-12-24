@@ -14,6 +14,6 @@ public record Sandwich(
     bool Complete, 
     string? Type, 
     decimal Value, 
-    string? Seller, 
-    string? Seller2, 
-    string? Seller3);
+    int Seller, 
+    int Seller2, 
+    int Seller3);

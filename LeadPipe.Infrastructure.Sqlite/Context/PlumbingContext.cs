@@ -29,6 +29,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         sub.HasKey(s => s.Id);
         sub.HasIndex(s => s.Number);
         sub.HasIndex(s => s.Number2);
+        sub.Property(s => s.Type);
 
         // PlumbingEntity
         var plumb = modelBuilder.Entity<PlumbingEntity>();
