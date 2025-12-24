@@ -13,7 +13,7 @@ public sealed class SubMySqlDataSource(
     public async Task<Result<List<SubMySqlEntity>>> LoadAsync()
     {
         DateTime twentyTwelve = new(new DateOnly(2012, 1, 1), new TimeOnly(0), DateTimeKind.Utc);
-        Result<List<SubMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded <= twentyTwelve, true);
+        Result<List<SubMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded >= twentyTwelve, true);
         return found;
     }
 

@@ -13,7 +13,7 @@ public sealed class CallMySqlDataSource(
     public async Task<Result<List<CallMySqlEntity>>> LoadAsync()
     {
         DateTime dateFilter = DateTime.UtcNow.AddYears(-2);
-        Result<List<CallMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc <= dateFilter, true);
+        Result<List<CallMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= dateFilter, true);
         return found;
     }
 
