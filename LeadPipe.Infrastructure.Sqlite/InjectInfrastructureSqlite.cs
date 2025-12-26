@@ -18,7 +18,7 @@ public static class InjectInfrastructureSqlite
             throw new InvalidOperationException(
                 "PlumbingConnectionString is not configured.");
 
-        services.AddDbContext<PlumbingContext>(options =>
+        services.AddDbContext<PlumbingContext>((sp, options) =>
         {
             var cs = settings.PlumbingConnectionString;
 
@@ -28,6 +28,7 @@ public static class InjectInfrastructureSqlite
             Directory.CreateDirectory(Path.GetDirectoryName(dataSource)!);
 
             options.UseSqlite(cs)
+                .AddInterceptors(new SqlitePragmaInterceptor())
                 .LogTo(Console.WriteLine, LogLevel.Information)
                 .EnableSensitiveDataLogging();
         });

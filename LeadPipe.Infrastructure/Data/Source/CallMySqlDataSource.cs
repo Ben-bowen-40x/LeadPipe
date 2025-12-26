@@ -16,7 +16,7 @@ public sealed class CallMySqlDataSource(
     private readonly ICallRepository _calls = calls;
     public async Task<Result<List<CallMySqlEntity>>> LoadAsync()
     {
-        DateTime dateFilter = DateTime.UtcNow.AddYears(-2);
+        DateTime dateFilter = DateTime.UtcNow.AddYears(-1);
         Result<List<CallMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= dateFilter, true);
         return found;
     }
