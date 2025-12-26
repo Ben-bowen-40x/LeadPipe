@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Sqlite.Repository;
 using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Sqlite.Repository;
+using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests;
 
@@ -11,7 +12,10 @@ public class SubsPlumbingLinkRepositoryTests
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new SubsPlumbingLinkRepository(context);
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(context, logger);
 
         var entities = new List<SubsPlumbingLink>
         {
@@ -29,7 +33,10 @@ public class SubsPlumbingLinkRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new SubsPlumbingLinkRepository(context);
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
 
@@ -41,7 +48,10 @@ public class SubsPlumbingLinkRepositoryTests
     public async Task AddAsync_ShouldAddSubsPlumbingLink()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var repo = new SubsPlumbingLinkRepository(context);
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(context, logger);
 
         var plumbing = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } };
         Result result = await repo.AddAsync(plumbing);
@@ -55,7 +65,10 @@ public class SubsPlumbingLinkRepositoryTests
         context.SubsPlumbingLinks.Add(new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } });
         await context.SaveChangesAsync();
 
-        var repo = new SubsPlumbingLinkRepository(context);
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(context, logger);
         var result = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
@@ -70,7 +83,10 @@ public class SubsPlumbingLinkRepositoryTests
         context.SubsPlumbingLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var repo = new SubsPlumbingLinkRepository(context);
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(context, logger);
         var result = await repo.DeleteAsync(1);
         var reloaded = await repo.GetByIdAsync(1);
 
@@ -81,7 +97,10 @@ public class SubsPlumbingLinkRepositoryTests
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
-        var repo = new SubsPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext());
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var result = await repo.GetByIdAsync(99);
 
         Assert.False(result.IsSuccess);
@@ -96,7 +115,10 @@ public class SubsPlumbingLinkRepositoryTests
         context.SubsPlumbingLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var repo = new SubsPlumbingLinkRepository(context);
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(context, logger);
         var updatedSubsPlumbingLink = new SubsPlumbingLink { Id = 1, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsPlumbingLink);
@@ -110,7 +132,10 @@ public class SubsPlumbingLinkRepositoryTests
     [Fact]
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
-        var repo = new SubsPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext());
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var updatedSubsPlumbingLink = new SubsPlumbingLink { Id = 99, SubsEntity = new(), PlumbingEntity = new() { MetaData = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsPlumbingLink);
@@ -122,7 +147,10 @@ public class SubsPlumbingLinkRepositoryTests
     [Fact]
     public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
     {
-        var repo = new SubsPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext());
+        var logger = LoggerFactory.Create(builder => builder.AddConsole())
+                          .CreateLogger<SubsPlumbingLinkRepository>();
+
+        var repo = new SubsPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var result = await repo.DeleteAsync(99);
 
         Assert.True(result.IsSuccess);
