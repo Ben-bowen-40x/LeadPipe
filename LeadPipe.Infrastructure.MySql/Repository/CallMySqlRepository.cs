@@ -22,13 +22,6 @@ public class CallMySqlRepository(MySqlSchema2Context context) : ICallMySqlReposi
                 query = query
                     .Include(c => c.summaries)
                     .Include(c => c.transcriptions);
-
-                // If this query ever takes a long time, this will be helpful
-                //query = _set
-                //    .AsNoTracking()
-                //    .AsSplitQuery() // If there are a lot of calls and many summaries and transcriptions for each call
-                //    .Include(c => c.summaries)
-                //    .Include(c => c.transcriptions);
             }
 
             List<CallMySqlEntity> list = await query.Where(predicate).ToListAsync();
