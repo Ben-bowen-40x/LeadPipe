@@ -3,16 +3,18 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System.Data;
 using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public abstract class PlumbingContextRepository<T>(PlumbingContext context) : IRepository<T> where T : class, IEntity
+public abstract class PlumbingContextRepository<T, T2>(PlumbingContext context, ILogger<T2> logger)
+    : IRepository<T> where T : class, IEntity
 {
     protected readonly PlumbingContext _context = context;
     protected readonly DbSet<T> _set = context.Set<T>();
-
+    internal readonly ILogger<T2> _logger = logger;
     public async Task<Result<List<T>>> FindAsync(Expression<Func<T, bool>> predicate)
     {
         try

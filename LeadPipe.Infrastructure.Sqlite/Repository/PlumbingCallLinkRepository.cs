@@ -5,12 +5,13 @@ using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public sealed class PlumbingCallLinkRepository(PlumbingContext context) 
-    : PlumbingContextRepository<PlumbingCallLink>(context), IPlumbingCallLinkRepository
+public sealed class PlumbingCallLinkRepository(PlumbingContext context, ILogger<PlumbingCallLinkRepository> logger)
+    : PlumbingContextRepository<PlumbingCallLink, PlumbingCallLinkRepository>(context, logger), IPlumbingCallLinkRepository
 {
     public override async Task<Result<List<PlumbingCallLink>>> UpsertRangeAsync(List<PlumbingCallLink> entities)
     {
@@ -64,7 +65,7 @@ public sealed class PlumbingCallLinkRepository(PlumbingContext context)
             }
 
             await transaction.CommitAsync();
-            
+
             _logger.LogDebug("PlumbingCallLink upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
 
             return Result.Success(uniqueEntities);

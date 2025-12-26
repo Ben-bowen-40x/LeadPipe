@@ -5,11 +5,13 @@ using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public sealed class SubsRepository(PlumbingContext context) : PlumbingContextRepository<SubsEntity>(context), ISubsRepository
+public sealed class SubsRepository(PlumbingContext context, ILogger<SubsRepository> logger)
+    : PlumbingContextRepository<SubsEntity, SubsRepository>(context, logger), ISubsRepository
 {
     public override async Task<Result<List<SubsEntity>>> UpsertRangeAsync(List<SubsEntity> entities)
     {

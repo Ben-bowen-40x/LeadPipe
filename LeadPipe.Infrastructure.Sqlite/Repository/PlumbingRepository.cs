@@ -12,10 +12,9 @@ using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingRepository> logger) 
-    : PlumbingContextRepository<PlumbingEntity>(context), IPlumbingRepository
+public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingRepository> logger)
+    : PlumbingContextRepository<PlumbingEntity, PlumbingRepository>(context, logger), IPlumbingRepository
 {
-    private readonly ILogger<PlumbingRepository> _logger = logger;
     public async Task<Result<List<PlumbingEntity>>> GetAllAsync(Source source)
     {
         try
