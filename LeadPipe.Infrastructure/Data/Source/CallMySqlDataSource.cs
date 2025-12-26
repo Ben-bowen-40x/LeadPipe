@@ -29,7 +29,7 @@ public sealed class CallMySqlDataSource(
             return await LoadAsync();
 
         DateOnly mostRecent = DateOnly.FromDateTime(callsResult.Value.Max(m => m.CallDate));
-        DateTime mostRecentDate = new(mostRecent, new TimeOnly(0)); 
+        DateTime mostRecentDate = new DateTime(mostRecent, new TimeOnly(0)) - TimeSpan.FromDays(7); 
         Result<List<CallMySqlEntity>> found = await _repo.FindAsync(c => c.called_at_utc >= mostRecentDate, includeDetails: true);
         return found;
     }
