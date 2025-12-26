@@ -23,88 +23,172 @@ public sealed class SubsRepository(PlumbingContext context, ILogger<SubsReposito
             .GroupBy(e => e.Number)
             .Select(g => g.Last())];
 
-        const int parametersPerRow = 19;
-        const int batchSize = 999 / parametersPerRow; // Max rows per batch
-        var batches = uniqueEntities
-            .Select((e, i) => new { e, i })
-            .GroupBy(x => x.i / batchSize)
-            .Select(g => g.Select(x => x.e).ToList())
-            .ToList();
+        int batchSize = 50; // Reasonable start given 19 columns per row
+        const int minBatchSize = 1;
+        int stagedCount = 0;
+        int skipped = 0;
 
         try
         {
-            await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            foreach (var batch in batches)
+            // Temp table for staging
+            await _context.Database.ExecuteSqlRawAsync("""
+                CREATE TEMP TABLE IF NOT EXISTS temp_subs_entities (
+                    CustomerId INTEGER,
+                    Date TEXT,
+                    UnixDate INTEGER,
+                    SubDate TEXT,
+                    UnixSubDate INTEGER,
+                    Number INTEGER NOT NULL PRIMARY KEY,
+                    Number2 INTEGER,
+                    CancelDate TEXT,
+                    UnixCancelDate INTEGER,
+                    SubCancelDate TEXT,
+                    UnixSubCancelDate INTEGER,
+                    Active INTEGER,
+                    SubActive INTEGER,
+                    Complete INTEGER,
+                    Value REAL,
+                    Type TEXT,
+                    Seller INTEGER,
+                    Seller2 INTEGER,
+                    Seller3 INTEGER
+                ) WITHOUT ROWID;
+            """);
+
+            int index = 0;
+
+            while (index < uniqueEntities.Count)
             {
-                StringBuilder sqlBuilder = new();
-                sqlBuilder.Append(
-                    "INSERT INTO SubsEntities " +
-                    "(CustomerId, Date, UnixDate, SubDate, UnixSubDate, Number, Number2, CancelDate, UnixCancelDate, SubCancelDate, UnixSubCancelDate, Active, SubActive, Complete, Value, Type, Seller, Seller2, Seller3) VALUES ");
+                int take = Math.Min(batchSize, uniqueEntities.Count - index);
+                var batch = uniqueEntities.GetRange(index, take);
 
-                List<SqliteParameter> parameters = new List<SqliteParameter>();
-                for (int i = 0; i < batch.Count; i++)
+                try
                 {
-                    SubsEntity e = batch[i];
-                    sqlBuilder.Append(
-                        "(" +
-                        $"@CustomerId{i}, @Date{i}, @UnixDate{i}, @SubDate{i}, @UnixSubDate{i}, @Number{i}, @Number2{i}, @CancelDate{i}, @UnixCancelDate{i}, @SubCancelDate{i}, @UnixSubCancelDate{i}, @Active{i}, @SubActive{i}, @Complete{i}, @Value{i}, @Type{i}, @Seller{i}, @Seller2{i}, @Seller3{i}" +
-                        ")");
-                    if (i < batch.Count - 1)
-                        sqlBuilder.Append(", ");
+                    InsertBatch(batch);
+                    stagedCount += batch.Count;
+                    index += take;
 
-                    parameters.AddRange(
-                    [
-                        new SqliteParameter($"@CustomerId{i}", e.CustomerId),
-                        new SqliteParameter($"@Date{i}", e.Date),
-                        new SqliteParameter($"@UnixDate{i}", e.UnixDate),
-                        new SqliteParameter($"@SubDate{i}", e.SubDate),
-                        new SqliteParameter($"@UnixSubDate{i}", e.UnixSubDate),
-                        new SqliteParameter($"@Number{i}", e.Number),
-                        new SqliteParameter($"@Number2{i}", e.Number2),
-                        new SqliteParameter($"@CancelDate{i}", e.CancelDate),
-                        new SqliteParameter($"@UnixCancelDate{i}", e.UnixCancelDate),
-                        new SqliteParameter($"@SubCancelDate{i}", e.SubCancelDate),
-                        new SqliteParameter($"@UnixSubCancelDate{i}", e.UnixSubCancelDate),
-                        new SqliteParameter($"@Active{i}", e.Active),
-                        new SqliteParameter($"@SubActive{i}", e.SubActive),
-                        new SqliteParameter($"@Complete{i}", e.Complete),
-                        new SqliteParameter($"@Value{i}", e.Value),
-                        new SqliteParameter($"@Type{i}", (object?)e.Type ?? DBNull.Value),
-                        new SqliteParameter($"@Seller{i}", e.Seller),
-                        new SqliteParameter($"@Seller2{i}", e.Seller2),
-                        new SqliteParameter($"@Seller3{i}", e.Seller3)
-                    ]);
+                    if (batchSize < 50)
+                        batchSize = Math.Min(batchSize * 2, 50);
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Batch insert failed (size={BatchSize}). Reducing batch size.", batchSize);
 
-                sqlBuilder.AppendLine(
-                    " ON CONFLICT(Number) DO UPDATE SET " +
-                    "CustomerId = excluded.CustomerId, " +
-                    "Date = excluded.Date, " +
-                    "UnixDate = excluded.UnixDate, " +
-                    "SubDate = excluded.SubDate, " +
-                    "UnixSubDate = excluded.UnixSubDate, " +
-                    "Number2 = excluded.Number2, " +
-                    "CancelDate = excluded.CancelDate, " +
-                    "UnixCancelDate = excluded.UnixCancelDate, " +
-                    "SubCancelDate = excluded.SubCancelDate, " +
-                    "UnixSubCancelDate = excluded.UnixSubCancelDate, " +
-                    "Active = excluded.Active, " +
-                    "SubActive = excluded.SubActive, " +
-                    "Complete = excluded.Complete, " +
-                    "Value = excluded.Value, " +
-                    "Type = excluded.Type, " +
-                    "Seller = excluded.Seller, " +
-                    "Seller2 = excluded.Seller2, " +
-                    "Seller3 = excluded.Seller3;");
+                    if (batchSize == minBatchSize)
+                    {
+                        var row = batch[0];
+                        _logger.LogError(
+                            "Row insert failed: Number={Number}, CustomerId={CustomerId}",
+                            row.Number, row.CustomerId);
 
-                await _context.Database.ExecuteSqlRawAsync(sqlBuilder.ToString(), parameters);
+                        index++;
+                        batchSize = 25;
+                        skipped++;
+                    }
+                    else
+                    {
+                        batchSize = Math.Max(minBatchSize, batchSize / 2);
+                    }
+                }
             }
 
+            // ---- Phase 1: UPDATE existing rows ----
+            int updated = await _context.Database.ExecuteSqlRawAsync("""
+                UPDATE SubsEntities
+                SET
+                    CustomerId = t.CustomerId,
+                    Date = t.Date,
+                    UnixDate = t.UnixDate,
+                    SubDate = t.SubDate,
+                    UnixSubDate = t.UnixSubDate,
+                    Number2 = t.Number2,
+                    CancelDate = t.CancelDate,
+                    UnixCancelDate = t.UnixCancelDate,
+                    SubCancelDate = t.SubCancelDate,
+                    UnixSubCancelDate = t.UnixSubCancelDate,
+                    Active = t.Active,
+                    SubActive = t.SubActive,
+                    Complete = t.Complete,
+                    Value = t.Value,
+                    Type = t.Type,
+                    Seller = t.Seller,
+                    Seller2 = t.Seller2,
+                    Seller3 = t.Seller3
+                FROM temp_subs_entities t
+                WHERE t.Number = SubsEntities.Number;
+            """);
+
+            // ---- Phase 2: INSERT missing rows ----
+            int inserted = await _context.Database.ExecuteSqlRawAsync("""
+                INSERT INTO SubsEntities (
+                    CustomerId, Date, UnixDate, SubDate, UnixSubDate, Number, Number2, CancelDate, UnixCancelDate,
+                    SubCancelDate, UnixSubCancelDate, Active, SubActive, Complete, Value, Type, Seller, Seller2, Seller3
+                )
+                SELECT *
+                FROM temp_subs_entities t
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM SubsEntities s WHERE s.Number = t.Number
+                );
+            """);
+
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_subs_entities;");
             await transaction.CommitAsync();
-            _logger.LogDebug("SubsEntity upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
+
+            _logger.LogInformation(
+                "SubsEntity upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                entities.Count, uniqueEntities.Count, stagedCount, updated, inserted, skipped);
+
             return Result.Success(uniqueEntities);
         }
-        catch (Exception ex) { return Result.Failure<List<SubsEntity>>(ex.Message); }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SubsEntity upsert failed");
+            return Result.Failure<List<SubsEntity>>(ex.Message);
+        }
+
+        void InsertBatch(List<SubsEntity> batch)
+        {
+            var sql = new StringBuilder();
+            sql.Append("INSERT INTO temp_subs_entities VALUES ");
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                var e = batch[i];
+                sql.Append("(")
+                   .Append($"{e.CustomerId}, ")
+                   .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}', ")
+                   .Append($"{e.UnixDate}, ")
+                   .Append($"'{e.SubDate:yyyy-MM-dd HH:mm:ss}', ")
+                   .Append($"{e.UnixSubDate}, ")
+                   .Append($"{e.Number}, ")
+                   .Append($"{e.Number2}, ")
+                   .Append($"'{e.CancelDate:yyyy-MM-dd HH:mm:ss}', ")
+                   .Append($"{e.UnixCancelDate}, ")
+                   .Append($"'{e.SubCancelDate:yyyy-MM-dd HH:mm:ss}', ")
+                   .Append($"{e.UnixSubCancelDate}, ")
+                   .Append($"{(e.Active ? 1 : 0)}, ")
+                   .Append($"{(e.SubActive ? 1 : 0)}, ")
+                   .Append($"{(e.Complete ? 1 : 0)}, ")
+                   .Append($"{e.Value}, ")
+                   .Append($"'{e.Type?.Replace("'", "''") ?? ""}', ")
+                   .Append($"{e.Seller}, ")
+                   .Append($"{e.Seller2}, ")
+                   .Append($"{e.Seller3}")
+                   .Append(")");
+
+                if (i < batch.Count - 1)
+                    sql.Append(", ");
+            }
+
+            sql.Append(';');
+            _context.Database.ExecuteSqlRaw(sql.ToString());
+        }
     }
 }
