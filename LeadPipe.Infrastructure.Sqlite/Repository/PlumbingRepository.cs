@@ -88,11 +88,10 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
 
         const int parametersPerRow = 6;
         const int batchSize = 999 / parametersPerRow; // Max rows per batch
-        var batches = uniqueEntities
+        List<List<PlumbingEntity>> batches = [.. uniqueEntities
             .Select((e, i) => new { e, i })
             .GroupBy(x => x.i / batchSize)
-            .Select(g => g.Select(x => x.e).ToList())
-            .ToList();
+            .Select(g => g.Select(x => x.e).ToList())];
 
         try
         {
@@ -109,9 +108,7 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
                 for (int i = 0; i < batch.Count; i++)
                 {
                     PlumbingEntity e = batch[i];
-                    sqlBuilder.Append(
-                        $"(@PhoneNumber{i}, @Date{i}, @UnixDate{i}, @Contents{i}, @Source{i}, @MetaData{i})"
-                        );
+                    sqlBuilder.Append($"(@PhoneNumber{i}, @Date{i}, @UnixDate{i}, @Contents{i}, @Source{i}, @MetaData{i})");
                     if (i < batch.Count - 1)
                         sqlBuilder.Append(", ");
 

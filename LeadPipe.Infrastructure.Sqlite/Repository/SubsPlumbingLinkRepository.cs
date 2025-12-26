@@ -64,7 +64,7 @@ public class SubsPlumbingLinkRepository(PlumbingContext context) : PlumbingConte
             }
 
             await transaction.CommitAsync();
-
+            _logger.LogDebug("SubsPlumbingLink upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
             return Result.Success(uniqueEntities);
         }
         catch (Exception ex) { return Result.Failure<List<SubsPlumbingLink>>(ex.Message); }

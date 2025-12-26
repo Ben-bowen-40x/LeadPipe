@@ -100,7 +100,7 @@ public sealed class SubsRepository(PlumbingContext context) : PlumbingContextRep
             }
 
             await transaction.CommitAsync();
-
+            _logger.LogDebug("SubsEntity upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
             return Result.Success(uniqueEntities);
         }
         catch (Exception ex) { return Result.Failure<List<SubsEntity>>(ex.Message); }

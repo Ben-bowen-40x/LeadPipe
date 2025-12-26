@@ -24,21 +24,21 @@ public sealed class PlumbingCallLinkRepository(PlumbingContext context)
 
         const int parametersPerRow = 2;
         const int batchSize = 999 / parametersPerRow; // Max rows per batch
-        var batches = uniqueEntities
+        List<List<PlumbingCallLink>> batches = [.. uniqueEntities
             .Select((e, i) => new { e, i })
             .GroupBy(x => x.i / batchSize)
-            .Select(g => g.Select(x => x.e).ToList())
-            .ToList();
+            .Select(g => g.Select(x => x.e).ToList())];
 
         try
         {
             await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
 
-            foreach (var batch in batches)
+            foreach (List<PlumbingCallLink>? batch in batches)
             {
                 StringBuilder sqlBuilder = new();
-                sqlBuilder.Append("INSERT INTO PlumbingCallLinks " +
-                                  "(PlumbingId, CallId) VALUES ");
+                sqlBuilder.Append(
+                    "INSERT INTO PlumbingCallLinks " +
+                    "(PlumbingId, CallId) VALUES ");
 
                 List<SqliteParameter> parameters = [];
                 for (int i = 0; i < batch.Count; i++)
@@ -50,19 +50,23 @@ public sealed class PlumbingCallLinkRepository(PlumbingContext context)
 
                     parameters.AddRange(
                     [
-                    new SqliteParameter($"@PlumbingId{i}", e.PlumbingId),
-                    new SqliteParameter($"@CallId{i}", e.CallId)
+                        new SqliteParameter($"@PlumbingId{i}", e.PlumbingId),
+                        new SqliteParameter($"@CallId{i}", e.CallId)
                     ]);
                 }
 
-                sqlBuilder.AppendLine(" ON CONFLICT(PlumbingId, CallId) DO UPDATE SET " +
-                                      "PlumbingId=excluded.PlumbingId, " +
-                                      "CallId=excluded.CallId;"); // Currently only keys, but keeps conflict-safe
+                sqlBuilder.AppendLine(
+                    " ON CONFLICT(PlumbingId, CallId) DO UPDATE SET " +
+                    "PlumbingId=excluded.PlumbingId, " +
+                    "CallId=excluded.CallId;"); // Currently only keys, but keeps conflict-safe
 
                 await _context.Database.ExecuteSqlRawAsync(sqlBuilder.ToString(), parameters);
             }
 
             await transaction.CommitAsync();
+            
+            _logger.LogDebug("PlumbingCallLink upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
+
             return Result.Success(uniqueEntities);
         }
         catch (Exception ex) { return Result.Failure<List<PlumbingCallLink>>(ex.Message); }

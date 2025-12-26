@@ -23,11 +23,10 @@ public sealed class SubsCallLinkRepository(PlumbingContext context) : PlumbingCo
 
         const int parametersPerRow = 3;
         const int batchSize = 999 / parametersPerRow; // Max rows per batch
-        var batches = uniqueEntities
+        List<List<CallSubsLink>> batches = [.. uniqueEntities
             .Select((e, i) => new { e, i })
             .GroupBy(x => x.i / batchSize)
-            .Select(g => g.Select(x => x.e).ToList())
-            .ToList();
+            .Select(g => g.Select(x => x.e).ToList())];
 
         try
         {
@@ -64,6 +63,8 @@ public sealed class SubsCallLinkRepository(PlumbingContext context) : PlumbingCo
             }
 
             await transaction.CommitAsync();
+
+            _logger.LogDebug("SubsCallLink upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
 
             return Result.Success(uniqueEntities);
         }
