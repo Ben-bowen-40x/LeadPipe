@@ -17,13 +17,13 @@ internal abstract class ValueObjectUpdateService<TEntity, TVo>(
     public async Task<Result<List<TVo>>> GetDataAsync()
     {
         // Retrieve all data from source
-        Result<List<TEntity>> callsResult = await _source.LoadAsync();
-        if (callsResult.IsFailure)
-            return Result.Failure<List<TVo>>(callsResult.Error);
+        Result<List<TEntity>> result = await _source.LoadAsync();
+        if (result.IsFailure)
+            return Result.Failure<List<TVo>>(result.Error);
 
-        Result<List<TVo>> value = callsResult.IsSuccess
-            ? Result.Success(callsResult.Value.Select(_eToVo.Translate).ToList())
-            : Result.Failure<List<TVo>>(callsResult.Error);
+        Result<List<TVo>> value = result.IsSuccess
+            ? Result.Success(result.Value.Select(_eToVo.Translate).ToList())
+            : Result.Failure<List<TVo>>(result.Error);
         return value;
     }
 
@@ -35,12 +35,12 @@ internal abstract class ValueObjectUpdateService<TEntity, TVo>(
 
     public async Task<Result<List<TVo>>> UpdateDataAsync()
     {
-        Result<List<TEntity>> callsResult = await _source.RefreshAsync();
-        if (callsResult.IsFailure)
-            return Result.Failure<List<TVo>>(callsResult.Error);
+        Result<List<TEntity>> result = await _source.RefreshAsync();
+        if (result.IsFailure)
+            return Result.Failure<List<TVo>>(result.Error);
 
-        return callsResult.IsSuccess
-            ? Result.Success(callsResult.Value.Select(_eToVo.Translate).ToList())
-            : Result.Failure<List<TVo>>(callsResult.Error);
+        return result.IsSuccess
+            ? Result.Success(result.Value.Select(_eToVo.Translate).ToList())
+            : Result.Failure<List<TVo>>(result.Error);
     }
 }
