@@ -90,7 +90,7 @@ internal class PlumbingAssociationService(
     {
         var result = await _subsPlumbingRepo.GetAllAsync();
         return result.IsSuccess
-            ? result.Value.Select(l => (l.SubsId, l.PlumbingId)).ToHashSet()
+            ? [.. result.Value.Select(l => (l.SubsId, l.PlumbingId))]
             : [];
     }
 
@@ -98,7 +98,7 @@ internal class PlumbingAssociationService(
     {
         var result = await _subsCallRepo.GetAllAsync();
         return result.IsSuccess
-            ? result.Value.Select(l => (l.SubsId, l.CallId)).ToHashSet()
+            ? [.. result.Value.Select(l => (l.SubsId, l.CallId))]
             : [];
     }
 
@@ -106,7 +106,7 @@ internal class PlumbingAssociationService(
     {
         var result = await _plumbingCallRepo.GetAllAsync();
         return result.IsSuccess
-            ? result.Value.Select(l => (l.PlumbingId, l.CallId)).ToHashSet()
+            ? [.. result.Value.Select(l => (l.PlumbingId, l.CallId))]
             : [];
     }
     private static List<SubsPlumbingLink> GenerateSubsPlumbingLinks(
