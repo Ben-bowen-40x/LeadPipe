@@ -40,6 +40,12 @@ internal static class ConfigureCommandLine
             builder.AddDebug();
             builder.AddConsole();
         });
-        services.AddTranslation(settings).AddInfrastructure(settings).AddInfrastructureMySql(settings).AddInfrastructureSqlite(settings).AddApplication();
+
+        services
+            .AddTranslation(settings)
+            .AddInfrastructure(settings)
+            .AddInfrastructureMySql(settings)
+            .AddInfrastructureSqlite(settings)
+            .AddApplication();
     }
 }
