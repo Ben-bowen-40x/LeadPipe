@@ -31,7 +31,6 @@ public static class InjectInfrastructureMySql
             .EnableSensitiveDataLogging();
         });
 
-
         // Register MySqlContext for Schema2 
         if (string.IsNullOrWhiteSpace(settings.Schema2ConnectionString))
             throw new InvalidOperationException("MySqlConnectionString for Schema2 is missing.");
@@ -45,7 +44,7 @@ public static class InjectInfrastructureMySql
                 {
                     mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 })
-            .LogTo(Console.WriteLine,LogLevel.Information)
+            .LogTo(Console.WriteLine, LogLevel.Information)
             .EnableSensitiveDataLogging();
         });
 
