@@ -2,74 +2,177 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
-public sealed class PlumbingCallLinkRepository(PlumbingContext context, ILogger<PlumbingCallLinkRepository> logger)
-    : PlumbingContextRepository<PlumbingCallLink, PlumbingCallLinkRepository>(context, logger), IPlumbingCallLinkRepository
+public sealed class PlumbingCallLinkRepository(
+    PlumbingContext context,
+    ILogger<PlumbingCallLinkRepository> logger)
+    : PlumbingContextRepository<PlumbingCallLink, PlumbingCallLinkRepository>(context, logger),
+      IPlumbingCallLinkRepository
 {
-    public override async Task<Result<List<PlumbingCallLink>>> UpsertRangeAsync(List<PlumbingCallLink> entities)
+    public override async Task<Result<List<PlumbingCallLink>>> UpsertRangeAsync(
+        List<PlumbingCallLink> entities)
     {
         if (entities.Count == 0)
             return Result.Success(new List<PlumbingCallLink>());
 
-        // Deduplicate in-memory by (PlumbingId, CallId)
-        List<PlumbingCallLink> uniqueEntities = [.. entities
-            .GroupBy(e => (e.PlumbingId, e.CallId))
-            .Select(g => g.Last())];
+        // Deduplicate in-memory
+        List<PlumbingCallLink> uniqueEntities =
+        [
+            .. entities
+                .GroupBy(e => (e.PlumbingId, e.CallId))
+                .Select(g => g.Last())
+        ];
 
-        const int parametersPerRow = 2;
-        const int batchSize = 999 / parametersPerRow; // Max rows per batch
-        List<List<PlumbingCallLink>> batches = [.. uniqueEntities
-            .Select((e, i) => new { e, i })
-            .GroupBy(x => x.i / batchSize)
-            .Select(g => g.Select(x => x.e).ToList())];
+        int batchSize = 200;
+        const int minBatchSize = 1;
 
         try
         {
-            await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
 
-            foreach (List<PlumbingCallLink>? batch in batches)
+            // Temp table (connection-scoped)
+            await _context.Database.ExecuteSqlRawAsync("""
+            CREATE TEMP TABLE IF NOT EXISTS temp_plumbing_call_links (
+                PlumbingId INTEGER NOT NULL,
+                CallId INTEGER NOT NULL,
+                PRIMARY KEY (PlumbingId, CallId)
+            ) WITHOUT ROWID;
+            """);
+
+            int index = 0;
+            int stagedCount = 0;
+            int skipped = 0;
+
+            while (index < uniqueEntities.Count)
             {
-                StringBuilder sqlBuilder = new();
-                sqlBuilder.Append(
-                    "INSERT INTO PlumbingCallLinks " +
-                    "(PlumbingId, CallId) VALUES ");
+                int take = Math.Min(batchSize, uniqueEntities.Count - index);
+                var batch = uniqueEntities.GetRange(index, take);
 
-                List<SqliteParameter> parameters = [];
-                for (int i = 0; i < batch.Count; i++)
+                try
                 {
-                    PlumbingCallLink e = batch[i];
-                    sqlBuilder.Append($"(@PlumbingId{i}, @CallId{i})");
-                    if (i < batch.Count - 1)
-                        sqlBuilder.Append(", ");
+                    InsertBatch(batch);
+                    stagedCount += batch.Count;
+                    index += take;
 
-                    parameters.AddRange(
-                    [
-                        new SqliteParameter($"@PlumbingId{i}", e.PlumbingId),
-                        new SqliteParameter($"@CallId{i}", e.CallId)
-                    ]);
+                    if (batchSize < 200)
+                        batchSize = Math.Min(batchSize * 2, 200);
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Batch insert failed (size={BatchSize}). Reducing batch size.",
+                        batchSize);
 
-                sqlBuilder.AppendLine(
-                    " ON CONFLICT(PlumbingId, CallId) DO UPDATE SET " +
-                    "PlumbingId=excluded.PlumbingId, " +
-                    "CallId=excluded.CallId;"); // Currently only keys, but keeps conflict-safe
+                    if (batchSize == minBatchSize)
+                    {
+                        var row = batch[0];
 
-                await _context.Database.ExecuteSqlRawAsync(sqlBuilder.ToString(), parameters);
+                        _logger.LogError(
+                            "Row insert failed: PlumbingId={PlumbingId}, CallId={CallId}",
+                            row.PlumbingId,
+                            row.CallId);
+
+                        index++;
+                        skipped++;
+                        batchSize = 100;
+                    }
+                    else
+                    {
+                        batchSize = Math.Max(minBatchSize, batchSize / 2);
+                    }
+                }
             }
+
+            // ---- Phase 1: UPDATE (no-op but keeps symmetry & metrics) ----
+            int updated = await _context.Database.ExecuteSqlRawAsync("""
+            UPDATE PlumbingCallLinks
+            SET
+                PlumbingId = (
+                    SELECT t.PlumbingId
+                    FROM temp_plumbing_call_links t
+                    WHERE t.PlumbingId = PlumbingCallLinks.PlumbingId
+                      AND t.CallId = PlumbingCallLinks.CallId
+                ),
+                CallId = (
+                    SELECT t.CallId
+                    FROM temp_plumbing_call_links t
+                    WHERE t.PlumbingId = PlumbingCallLinks.PlumbingId
+                      AND t.CallId = PlumbingCallLinks.CallId
+                )
+            WHERE EXISTS (
+                SELECT 1
+                FROM temp_plumbing_call_links t
+                WHERE t.PlumbingId = PlumbingCallLinks.PlumbingId
+                  AND t.CallId = PlumbingCallLinks.CallId
+            );
+            """);
+
+            // ---- Phase 2: INSERT missing rows ----
+            int inserted = await _context.Database.ExecuteSqlRawAsync("""
+            INSERT INTO PlumbingCallLinks (PlumbingId, CallId)
+            SELECT
+                t.PlumbingId,
+                t.CallId
+            FROM temp_plumbing_call_links t
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM PlumbingCallLinks p
+                WHERE p.PlumbingId = t.PlumbingId
+                  AND p.CallId = t.CallId
+            );
+            """);
+
+            await _context.Database.ExecuteSqlRawAsync(
+                "DELETE FROM temp_plumbing_call_links;");
 
             await transaction.CommitAsync();
 
-            _logger.LogDebug("PlumbingCallLink upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
+            _logger.LogInformation(
+                "PlumbingCallLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                entities.Count,
+                uniqueEntities.Count,
+                stagedCount,
+                updated,
+                inserted,
+                skipped);
 
             return Result.Success(uniqueEntities);
         }
-        catch (Exception ex) { return Result.Failure<List<PlumbingCallLink>>(ex.Message); }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "PlumbingCallLink upsert failed");
+            return Result.Failure<List<PlumbingCallLink>>(ex.ToString());
+        }
+
+        // ---- Local helper ----
+        void InsertBatch(List<PlumbingCallLink> batch)
+        {
+            var sql = new StringBuilder();
+            sql.Append("INSERT INTO temp_plumbing_call_links VALUES ");
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                var e = batch[i];
+
+                sql.Append($"({e.PlumbingId}, {e.CallId})");
+
+                if (i < batch.Count - 1)
+                    sql.Append(", ");
+            }
+
+            sql.Append(';');
+            _context.Database.ExecuteSqlRaw(sql.ToString());
+        }
     }
 }
