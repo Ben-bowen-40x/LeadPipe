@@ -85,59 +85,153 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             .GroupBy(e => (e.PhoneNumber, e.Source))
             .Select(g => g.Last())];
 
-        const int parametersPerRow = 6;
-        const int batchSize = 999 / parametersPerRow; // Max rows per batch
-        List<List<PlumbingEntity>> batches = [.. uniqueEntities
-            .Select((e, i) => new { e, i })
-            .GroupBy(x => x.i / batchSize)
-            .Select(g => g.Select(x => x.e).ToList())];
+        int batchSize = 200;
+        const int minBatchSize = 1;
+        int skipped = 0;
+        int stagedCount = 0;
 
         try
         {
-            await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            foreach (List<PlumbingEntity> batch in batches)
+            // Temp table for staging
+            await _context.Database.ExecuteSqlRawAsync("""
+                CREATE TEMP TABLE IF NOT EXISTS temp_plumbings (
+                    PhoneNumber INTEGER NOT NULL,
+                    Date TEXT NOT NULL,
+                    UnixDate INTEGER NOT NULL,
+                    Contents TEXT,
+                    Source TEXT NOT NULL,
+                    MetaData TEXT NOT NULL,
+                    PRIMARY KEY (PhoneNumber, Source)
+                ) WITHOUT ROWID;
+            """);
+
+            int index = 0;
+
+            while (index < uniqueEntities.Count)
             {
-                StringBuilder sqlBuilder = new();
-                sqlBuilder.Append(
-                    "INSERT INTO PlumbingEntities " +
-                    "(PhoneNumber, Date, UnixDate, Contents, Source, MetaData) VALUES ");
+                int take = Math.Min(batchSize, uniqueEntities.Count - index);
+                var batch = uniqueEntities.GetRange(index, take);
 
-                List<SqliteParameter> parameters = [];
-                for (int i = 0; i < batch.Count; i++)
+                try
                 {
-                    PlumbingEntity e = batch[i];
-                    sqlBuilder.Append($"(@PhoneNumber{i}, @Date{i}, @UnixDate{i}, @Contents{i}, @Source{i}, @MetaData{i})");
-                    if (i < batch.Count - 1)
-                        sqlBuilder.Append(", ");
+                    InsertBatch(batch);
+                    stagedCount += batch.Count;
+                    index += take;
 
-                    parameters.AddRange(
-                    [
-                        new SqliteParameter($"@PhoneNumber{i}", e.PhoneNumber),
-                        new SqliteParameter($"@Date{i}", e.Date),
-                        new SqliteParameter($"@UnixDate{i}", e.UnixDate),
-                        new SqliteParameter($"@Contents{i}", (object?)e.Contents ?? DBNull.Value),
-                        new SqliteParameter($"@Source{i}", e.Source.ToString()),
-                        new SqliteParameter($"@MetaData{i}", e.MetaData)
-                    ]);
+                    // Gradually scale back up after success
+                    if (batchSize < 200)
+                        batchSize = Math.Min(batchSize * 2, 200);
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Batch insert failed (size={BatchSize}). Reducing batch size.", batchSize);
 
-                sqlBuilder.AppendLine(
-                    " ON CONFLICT(PhoneNumber, Source) DO UPDATE SET " +
-                    "Date = excluded.Date, " +
-                    "UnixDate = excluded.UnixDate, " +
-                    "Contents = excluded.Contents, " +
-                    "MetaData = excluded.MetaData;");
+                    if (batchSize == minBatchSize)
+                    {
+                        var row = batch[0];
+                        _logger.LogError(
+                            "Row insert failed: Phone={Phone}, Date={Date}, Contents={Contents}, Source={Source}, MetaData={MetaData}",
+                            row.PhoneNumber, row.Date, row.Contents, row.Source, row.MetaData);
 
-                await _context.Database.ExecuteSqlRawAsync(sqlBuilder.ToString(), parameters);
+                        index++;
+                        batchSize = 100;
+                        skipped++;
+                    }
+                    else
+                    {
+                        batchSize = Math.Max(minBatchSize, batchSize / 2);
+                    }
+                }
             }
 
+            // ---- Phase 1: UPDATE existing rows ----
+            int updated = await _context.Database.ExecuteSqlRawAsync("""
+                UPDATE PlumbingEntities
+                SET
+                    Date = (SELECT t.Date FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source),
+                    UnixDate = (SELECT t.UnixDate FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source),
+                    Contents = (SELECT t.Contents FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source),
+                    MetaData = (SELECT t.MetaData FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source)
+                WHERE EXISTS (
+                    SELECT 1 FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source
+                );
+            """);
+
+            // ---- Phase 2: INSERT missing rows ----
+            int inserted = await _context.Database.ExecuteSqlRawAsync("""
+                INSERT INTO PlumbingEntities
+                    (PhoneNumber, Date, UnixDate, Contents, Source, MetaData)
+                SELECT
+                    t.PhoneNumber,
+                    t.Date,
+                    t.UnixDate,
+                    t.Contents,
+                    t.Source,
+                    t.MetaData
+                FROM temp_plumbings t
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM PlumbingEntities c WHERE c.PhoneNumber = t.PhoneNumber AND c.Source = t.Source
+                );
+            """);
+
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_plumbings;");
             await transaction.CommitAsync();
 
-            _logger.LogDebug("Plumbing upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
+            _logger.LogInformation(
+                "PlumbingEntity upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                entities.Count, uniqueEntities.Count, stagedCount, updated, inserted, skipped);
 
             return Result.Success(uniqueEntities);
         }
-        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>(ex.Message); }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "PlumbingEntity upsert failed");
+            return Result.Failure<List<PlumbingEntity>>(ex.Message);
+        }
+
+        void InsertBatch(List<PlumbingEntity> batch)
+        {
+            var sql = new StringBuilder();
+            sql.Append("INSERT INTO temp_plumbings VALUES ");
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                var e = batch[i];
+                sql.Append($"""
+                    (
+                        {e.PhoneNumber},
+                        '{e.Date:yyyy-MM-dd HH:mm:ss}',
+                        {e.UnixDate},
+                        '{Clean(e.Contents)}',
+                        '{e.Source}',
+                        '{Clean(e.MetaData)}'
+                    )
+                """);
+
+                if (i < batch.Count - 1)
+                    sql.Append(", ");
+            }
+
+            sql.Append(';');
+            _context.Database.ExecuteSqlRaw(sql.ToString());
+        }
+    }
+
+    private static string Clean(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return string.Empty;
+
+        // Remove embedded nulls
+        value = value.Replace("\0", string.Empty);
+
+        // Escape single quotes for raw SQL
+        return value.Replace("'", "''");
     }
 }
