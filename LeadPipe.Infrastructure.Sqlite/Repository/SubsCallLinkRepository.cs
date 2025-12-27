@@ -23,53 +23,128 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
             .GroupBy(e => (e.SubsId, e.CallId))
             .Select(g => g.Last())];
 
-        const int parametersPerRow = 3;
-        const int batchSize = 999 / parametersPerRow; // Max rows per batch
-        List<List<CallSubsLink>> batches = [.. uniqueEntities
-            .Select((e, i) => new { e, i })
-            .GroupBy(x => x.i / batchSize)
-            .Select(g => g.Select(x => x.e).ToList())];
+        int batchSize = 200;
+        const int minBatchSize = 1;
+        int stagedCount = 0;
+        int skipped = 0;
 
         try
         {
-            await using IDbContextTransaction transaction = await _context.Database.BeginTransactionAsync();
+            await using var transaction = await _context.Database.BeginTransactionAsync();
 
-            foreach (List<CallSubsLink> batch in batches)
+            // Temp table for staging
+            await _context.Database.ExecuteSqlRawAsync("""
+                CREATE TEMP TABLE IF NOT EXISTS temp_subs_call_links (
+                    SubsId INTEGER NOT NULL,
+                    CallId INTEGER NOT NULL,
+                    MatchingNumber INTEGER NOT NULL,
+                    PRIMARY KEY (SubsId, CallId)
+                ) WITHOUT ROWID;
+            """);
+
+            int index = 0;
+
+            while (index < uniqueEntities.Count)
             {
-                StringBuilder sqlBuilder = new();
-                sqlBuilder.Append(
-                    "INSERT INTO CallSubsLinks " +
-                    "(SubsId, CallId, MatchingNumber) VALUES ");
+                int take = Math.Min(batchSize, uniqueEntities.Count - index);
+                var batch = uniqueEntities.GetRange(index, take);
 
-                List<SqliteParameter> parameters = new List<SqliteParameter>();
-                for (int i = 0; i < batch.Count; i++)
+                try
                 {
-                    CallSubsLink e = batch[i];
-                    sqlBuilder.Append($"(@SubsId{i}, @CallId{i}, @MatchingNumber{i})");
-                    if (i < batch.Count - 1)
-                        sqlBuilder.Append(", ");
+                    InsertBatch(batch);
+                    stagedCount += batch.Count;
+                    index += take;
 
-                    parameters.AddRange(
-                    [
-                        new SqliteParameter($"@SubsId{i}", e.SubsId),
-                        new SqliteParameter($"@CallId{i}", e.CallId),
-                        new SqliteParameter($"@MatchingNumber{i}", e.MatchingNumber)
-                    ]);
+                    if (batchSize < 200)
+                        batchSize = Math.Min(batchSize * 2, 200);
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Batch insert failed (size={BatchSize}). Reducing batch size.", batchSize);
 
-                sqlBuilder.AppendLine(
-                    " ON CONFLICT(SubsId, CallId) DO UPDATE SET " +
-                    "MatchingNumber = excluded.MatchingNumber;");
+                    if (batchSize == minBatchSize)
+                    {
+                        var row = batch[0];
+                        _logger.LogError(
+                            "Row insert failed: SubsId={SubsId}, CallId={CallId}, MatchingNumber={MatchingNumber}",
+                            row.SubsId, row.CallId, row.MatchingNumber);
 
-                await _context.Database.ExecuteSqlRawAsync(sqlBuilder.ToString(), parameters);
+                        index++;
+                        batchSize = 100;
+                        skipped++;
+                    }
+                    else
+                    {
+                        batchSize = Math.Max(minBatchSize, batchSize / 2);
+                    }
+                }
             }
 
+            // ---- Phase 1: UPDATE existing rows ----
+            int updated = await _context.Database.ExecuteSqlRawAsync("""
+                UPDATE CallSubsLinks
+                SET MatchingNumber = (
+                    SELECT t.MatchingNumber
+                    FROM temp_subs_call_links t
+                    WHERE t.SubsId = CallSubsLinks.SubsId
+                      AND t.CallId = CallSubsLinks.CallId
+                )
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM temp_subs_call_links t
+                    WHERE t.SubsId = CallSubsLinks.SubsId
+                      AND t.CallId = CallSubsLinks.CallId
+                );
+            """);
+
+            // ---- Phase 2: INSERT missing rows ----
+            int inserted = await _context.Database.ExecuteSqlRawAsync("""
+                INSERT INTO CallSubsLinks (SubsId, CallId, MatchingNumber)
+                SELECT t.SubsId, t.CallId, t.MatchingNumber
+                FROM temp_subs_call_links t
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM CallSubsLinks c
+                    WHERE c.SubsId = t.SubsId
+                      AND c.CallId = t.CallId
+                );
+            """);
+
+            await _context.Database.ExecuteSqlRawAsync("DELETE FROM temp_subs_call_links;");
             await transaction.CommitAsync();
 
-            _logger.LogDebug("SubsCallLink upsert completed: Total={Total}, Unique={Unique}", entities.Count, uniqueEntities.Count);
+            _logger.LogInformation(
+                "CallSubsLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                entities.Count, uniqueEntities.Count, stagedCount, updated, inserted, skipped);
 
             return Result.Success(uniqueEntities);
         }
-        catch (Exception ex) { return Result.Failure<List<CallSubsLink>>(ex.Message); }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "CallSubsLink upsert failed");
+            return Result.Failure<List<CallSubsLink>>(ex.Message);
+        }
+
+        void InsertBatch(List<CallSubsLink> batch)
+        {
+            var sql = new StringBuilder();
+            sql.Append("INSERT INTO temp_subs_call_links VALUES ");
+
+            for (int i = 0; i < batch.Count; i++)
+            {
+                var e = batch[i];
+                sql.Append($"({e.SubsId}, {e.CallId}, {e.MatchingNumber})");
+
+                if (i < batch.Count - 1)
+                    sql.Append(", ");
+            }
+
+            sql.Append(';');
+            _context.Database.ExecuteSqlRaw(sql.ToString());
+        }
     }
 }
