@@ -2,9 +2,7 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 using System.Text;
 
@@ -82,29 +80,29 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
 
             // ---- Phase 1: UPDATE existing rows ----
             int updated = await _context.Database.ExecuteSqlRawAsync("""
-                UPDATE CallSubsLinks
+                UPDATE SubsCallLinks
                 SET MatchingNumber = (
                     SELECT t.MatchingNumber
                     FROM temp_subs_call_links t
-                    WHERE t.SubsId = CallSubsLinks.SubsId
-                      AND t.CallId = CallSubsLinks.CallId
+                    WHERE t.SubsId = SubsCallLinks.SubsId
+                      AND t.CallId = SubsCallLinks.CallId
                 )
                 WHERE EXISTS (
                     SELECT 1
                     FROM temp_subs_call_links t
-                    WHERE t.SubsId = CallSubsLinks.SubsId
-                      AND t.CallId = CallSubsLinks.CallId
+                    WHERE t.SubsId = SubsCallLinks.SubsId
+                      AND t.CallId = SubsCallLinks.CallId
                 );
             """);
 
             // ---- Phase 2: INSERT missing rows ----
             int inserted = await _context.Database.ExecuteSqlRawAsync("""
-                INSERT INTO CallSubsLinks (SubsId, CallId, MatchingNumber)
+                INSERT INTO SubsCallLinks (SubsId, CallId, MatchingNumber)
                 SELECT t.SubsId, t.CallId, t.MatchingNumber
                 FROM temp_subs_call_links t
                 WHERE NOT EXISTS (
                     SELECT 1
-                    FROM CallSubsLinks c
+                    FROM SubsCallLinks c
                     WHERE c.SubsId = t.SubsId
                       AND c.CallId = t.CallId
                 );
@@ -114,7 +112,7 @@ public sealed class SubsCallLinkRepository(PlumbingContext context, ILogger<Subs
             await transaction.CommitAsync();
 
             _logger.LogInformation(
-                "CallSubsLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                "SubsCallLink upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 entities.Count, uniqueEntities.Count, stagedCount, updated, inserted, skipped);
 
             return Result.Success(uniqueEntities);
