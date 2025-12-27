@@ -19,6 +19,13 @@
     // Data
     "Data update and report": {
       "commandName": "Project",
+      "commandLineArgs": "data -r",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update only": {
+      "commandName": "Project",
       "commandLineArgs": "data",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
