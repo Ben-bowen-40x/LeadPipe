@@ -7,8 +7,8 @@ namespace LeadPipe.Application.Manager;
 
 public interface IUpdateAndReportAllManager
 {
-    Task<Result> Manage();
-    Task<Result> Manage(Source source);
+    Task<Result> Manage(bool includeReport);
+    Task<Result> Manage(Source source, bool includeReport);
 }
 
 internal sealed class UpdateAndReportAllManager(
@@ -116,7 +116,7 @@ internal sealed class UpdateAndReportAllManager(
             yellerReportResult
         );
     }
-    public async Task<Result> Manage(Source source)
+    public async Task<Result> Manage(Source source, bool includeReport)
     {
         Result<List<Call>> callsUpdateResult = await _callsUpdate.ManageAsync();
         Result<List<Sandwich>> sandwichUpdateResult = await _sandwichUpdate.ManageAsync();
@@ -133,6 +133,8 @@ internal sealed class UpdateAndReportAllManager(
             _ => Result.Failure<List<Plumbing>>($"Unknown source: {source}")
         };
 
+        if (includeReport)
+        {
         Result associate = await _associate.ManageAsync();
         
         Result combined = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult, sourceUpdateResult, associate);
@@ -152,5 +154,7 @@ internal sealed class UpdateAndReportAllManager(
             : Result.Failure<List<Plumbing>>(combined.Error);
         
         return sourceReportResult;
+    }
+        else return sourceUpdateResult;
     }
 }
