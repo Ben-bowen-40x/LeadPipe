@@ -174,9 +174,3 @@ internal sealed class UpdateAndReportAllManager(
         else return sourceUpdateResult;
     }
 }
-
-public interface IReportAndUpdateManager
-{
-    Task<Result> Manage(Source source, bool refresh);
-    Task<Result> Manage(bool refresh);
-}
