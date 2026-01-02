@@ -4,11 +4,10 @@ using LeadPipe.Domain.ValueObjects;
 
 namespace LeadPipe.Application.Manager;
 
-
 public interface IUpdateAndReportAllManager
 {
-    Task<Result> Manage(bool includeReport);
-    Task<Result> Manage(Source source, bool includeReport);
+    Task<Result> Manage(UpdateReportManagement manage);
+    Task<Result> Manage(Source source, UpdateReportManagement manage);
 }
 
 internal sealed class UpdateAndReportAllManager(
@@ -33,6 +32,8 @@ internal sealed class UpdateAndReportAllManager(
     IReportYellerManager yellerReport
     ) : IUpdateAndReportAllManager
 {
+
+    #region Fields
     private readonly IUpdateCalliManager _calliUpdate = calliUpdate;
     private readonly IUpdateCallsManager _callsUpdate = callsUpdate;
     private readonly IUpdateLabManager _labUpdate = labUpdate;
@@ -53,85 +54,35 @@ internal sealed class UpdateAndReportAllManager(
     private readonly IReportPanManager _panReport = panReport;
     private readonly IReportYellerManager _yellerReport = yellerReport;
     private const string ErrorMessagesSeparator = " | ";
-    public async Task<Result> Manage(bool includeReport)
+    #endregion
+
+    public async Task<Result> Manage(UpdateReportManagement manage)
     {
-        // Updaters
-        Result<List<Call>> callsUpdateResult = await _callsUpdate.ManageAsync();
-        Result<List<Sandwich>> sandwichUpdateResult = await _sandwichUpdate.ManageAsync();
-
-        // Plumbing updaters
-        Result<List<Plumbing>> calliUpdateResult = await _calliUpdate.ManageAsync();
-        Result<List<Plumbing>> labUpdateResult = await _labUpdate.ManageAsync();
-        Result<List<Plumbing>> leafUpdateResult = await _leafUpdate.ManageAsync();
-        Result<List<Plumbing>> leasedUpdateResult = await _leasedUpdate.ManageAsync();
-        Result<List<Plumbing>> libacionUpdateResult = await _libacionUpdate.ManageAsync();
-        Result<List<Plumbing>> panUpdateResult = await _panUpdate.ManageAsync();
-        Result<List<Plumbing>> yellerUpdateResult = await _yellerUpdate.ManageAsync();
-
-        if (includeReport)
-        {
-            Result associated = await _associate.ManageAsync();
-
-            Result associatedCallsSandwich = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult,
-                associated);
-
-            // We can't do the reporters because this step must succeed first
-            if (associatedCallsSandwich.IsFailure)
-                return Result.Failure(associatedCallsSandwich.Error);
-
-            // Reporters
-            Result<List<Plumbing>> calliReportResult = calliUpdateResult.IsSuccess
-                ? await _calliReport.ManageAsync()
-                : Result.Failure<List<Plumbing>>(calliUpdateResult.Error);
-            Result<List<Plumbing>> labReportResult = labUpdateResult.IsSuccess
-                ? await _labReport.ManageAsync()
-                : Result.Failure<List<Plumbing>>(labUpdateResult.Error);
-            Result<List<Plumbing>> leafReportResult = leafUpdateResult.IsSuccess
-                ? await _leafReport.ManageAsync()
-                : Result.Failure<List<Plumbing>>(leafUpdateResult.Error);
-            Result<List<Plumbing>> leasedReportResult = leasedUpdateResult.IsSuccess
-                ? await _leasedReport.ManageAsync()
-                : Result.Failure<List<Plumbing>>(leasedUpdateResult.Error);
-            Result<List<Plumbing>> libacionReportResult = libacionUpdateResult.IsSuccess
-                ? await _libacionReport.ManageAsync()
-                : Result.Failure<List<Plumbing>>(libacionUpdateResult.Error);
-            Result<List<Plumbing>> panReportResult = panUpdateResult.IsSuccess
-                ? await _panReport.ManageAsync()
-                : Result.Failure<List<Plumbing>>(panUpdateResult.Error);
-            Result<List<Plumbing>> yellerReportResult = yellerUpdateResult.IsSuccess
-                ? await _yellerReport.ManageAsync()
-                : Result.Failure<List<Plumbing>>(yellerUpdateResult.Error);
-
-            return Result.Combine(ErrorMessagesSeparator,
-                calliUpdateResult,
-                labUpdateResult,
-                leafUpdateResult,
-                leasedUpdateResult,
-                libacionUpdateResult,
-                panUpdateResult,
-                yellerUpdateResult,
-                calliReportResult,
-                labReportResult,
-                leafReportResult,
-                leasedReportResult,
-                libacionReportResult,
-                panReportResult,
-                yellerReportResult
-            );
-        }
-        return Result.Combine(
-            callsUpdateResult,
-            sandwichUpdateResult,
-            calliUpdateResult,
-            labUpdateResult,
-            leafUpdateResult,
-            leasedUpdateResult,
-            libacionUpdateResult,
-            panUpdateResult,
-            yellerUpdateResult
-            );
+        Result manager = await Manage(source: Source.Test, manage);
+        return manager;
     }
-    public async Task<Result> Manage(Source source, bool includeReport)
+    public async Task<Result> Manage(Source source, UpdateReportManagement manage)
+    {
+        if (manage.Update && manage.Report)
+        {
+            var update = await ManageUpdate(source);
+            var report = await ManageReport(source);
+            return Result.Combine(ErrorMessagesSeparator, update, report);
+        }
+        else if (manage.Update)
+        {
+            var update = await ManageUpdate(source);
+            return update;
+        }
+        else if (manage.Report)
+        {
+            var report = await ManageReport(source);
+            return report;
+        }
+        else return Result.Failure($"{nameof(UpdateReportManagement)} was malformed: {manage}");
+    }
+
+    private async Task<Result> ManageUpdate(Source source)
     {
         Result<List<Call>> callsUpdateResult = await _callsUpdate.ManageAsync();
         Result<List<Sandwich>> sandwichUpdateResult = await _sandwichUpdate.ManageAsync();
@@ -145,31 +96,91 @@ internal sealed class UpdateAndReportAllManager(
             Source.Libacion => await _libacionUpdate.ManageAsync(),
             Source.Pan => await _panUpdate.ManageAsync(),
             Source.Yeller => await _yellerUpdate.ManageAsync(),
-            _ => Result.Failure<List<Plumbing>>($"Unknown source: {source}")
+            _ => await UpdateAllAsync()
         };
 
-        if (includeReport)
+        Result associate = await _associate.ManageAsync();
+
+        Result combined = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult, sourceUpdateResult, associate);
+        return combined;
+
+        async Task<Result<List<Plumbing>>> UpdateAllAsync()
         {
-            Result associate = await _associate.ManageAsync();
+            Result<List<Plumbing>> calliUpdate = await _calliUpdate.ManageAsync();
+            Result<List<Plumbing>> labUpdate = await _labUpdate.ManageAsync();
+            Result<List<Plumbing>> leafUpdate = await _leafUpdate.ManageAsync();
+            Result<List<Plumbing>> leasedUpdate = await _leasedUpdate.ManageAsync();
+            Result<List<Plumbing>> libacionUpdate = await _libacionUpdate.ManageAsync();
+            Result<List<Plumbing>> panUpdate = await _panUpdate.ManageAsync();
+            Result<List<Plumbing>> yellerUpdate = await _yellerUpdate.ManageAsync();
+            Result combine = Result.Combine(ErrorMessagesSeparator,
+                calliUpdate,
+                labUpdate,
+                leafUpdate,
+                leasedUpdate,
+                libacionUpdate,
+                panUpdate,
+                yellerUpdate);
 
-            Result combined = Result.Combine(ErrorMessagesSeparator, callsUpdateResult, sandwichUpdateResult, sourceUpdateResult, associate);
-
-            Result<List<Plumbing>> sourceReportResult = combined.IsSuccess
-                ? source switch
-                {
-                    Source.Calli => await _calliReport.ManageAsync(),
-                    Source.Lab => await _labReport.ManageAsync(),
-                    Source.Leaf => await _leafReport.ManageAsync(),
-                    Source.Leased => await _leasedReport.ManageAsync(),
-                    Source.Libacion => await _libacionReport.ManageAsync(),
-                    Source.Pan => await _panReport.ManageAsync(),
-                    Source.Yeller => await _yellerReport.ManageAsync(),
-                    _ => Result.Failure<List<Plumbing>>($"Unknown source: {source}")
-                }
-                : Result.Failure<List<Plumbing>>(combined.Error);
-
-            return sourceReportResult;
+            if (combine.IsFailure)
+                return Result.Failure<List<Plumbing>>(combine.Error);
+            return Result.Success<List<Plumbing>>([
+                .. calliUpdate.Value,
+                .. labUpdate.Value,
+                .. leafUpdate.Value,
+                .. leasedUpdate.Value,
+                .. libacionUpdate.Value,
+                .. panUpdate.Value,
+                .. yellerUpdate.Value,
+                ]);
         }
-        else return sourceUpdateResult;
     }
+    private async Task<Result> ManageReport(Source source)
+    {
+        Result<List<Plumbing>> reportResult = source switch
+        {
+            Source.Calli => await _calliReport.ManageAsync(),
+            Source.Lab => await _labReport.ManageAsync(),
+            Source.Leaf => await _leafReport.ManageAsync(),
+            Source.Leased => await _leasedReport.ManageAsync(),
+            Source.Libacion => await _libacionReport.ManageAsync(),
+            Source.Pan => await _panReport.ManageAsync(),
+            Source.Yeller => await _yellerReport.ManageAsync(),
+            _ => await ReportAllAsync()
+        };
+        return reportResult;
+
+        async Task<Result<List<Plumbing>>> ReportAllAsync()
+        {
+            Result<List<Plumbing>> calliReport = await _calliReport.ManageAsync();
+            Result<List<Plumbing>> labReport = await _labReport.ManageAsync();
+            Result<List<Plumbing>> leafReport = await _leafReport.ManageAsync();
+            Result<List<Plumbing>> leasedReport = await _leasedReport.ManageAsync();
+            Result<List<Plumbing>> libacionReport = await _libacionReport.ManageAsync();
+            Result<List<Plumbing>> panReport = await _panReport.ManageAsync();
+            Result<List<Plumbing>> yellerReport = await _yellerReport.ManageAsync();
+            Result combine = Result.Combine(ErrorMessagesSeparator,
+                calliReport,
+                labReport,
+                leafReport,
+                leasedReport,
+                libacionReport,
+                panReport,
+                yellerReport);
+
+            if (combine.IsFailure)
+                return Result.Failure<List<Plumbing>>(combine.Error);
+            return Result.Success<List<Plumbing>>([
+                .. calliReport.Value,
+                .. labReport.Value,
+                .. leafReport.Value,
+                .. leasedReport.Value,
+                .. libacionReport.Value,
+                .. panReport.Value,
+                .. yellerReport.Value,
+                ]);
+        }
+
+    }
+
 }

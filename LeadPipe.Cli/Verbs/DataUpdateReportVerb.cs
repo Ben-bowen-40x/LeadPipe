@@ -24,8 +24,10 @@ internal class DataUpdateReportVerb : IVerbAsync
         Yeller
         """)]
     public Source Source { get; set; } = Source.Test;
-    [Option('r', "report", Required = false, HelpText = "Whether to include the report in the update")]
-    public bool IncludeReport { get; set; } = false;
+    [Option('r', "report", Required = false, HelpText = "Whether to perform the report.")]
+    public bool Report { get; set; } = false;
+    [Option('u', "update", Required = false, HelpText = "Whether to update.")]
+    public bool Update { get; set; } = false;
 
     #endregion
 
@@ -34,9 +36,12 @@ internal class DataUpdateReportVerb : IVerbAsync
     public async Task<int> Run(IServiceProvider service)
     {
         IUpdateAndReportAllManager manager = service.GetRequiredService<IUpdateAndReportAllManager>();
+        UpdateReportManagement m = !Update && !Report 
+            ? new(Update: true, Report: true) 
+            : new(Update: Update, Report: Report);
         Result result = Source == Source.Test
-            ? await manager.Manage(IncludeReport)
-            : await manager.Manage(Source, IncludeReport);
+            ? await manager.Manage(m)
+            : await manager.Manage(Source, m);
 
         int code = result.IsSuccess ? 0 : 1;
         Environment.ExitCode = code;
