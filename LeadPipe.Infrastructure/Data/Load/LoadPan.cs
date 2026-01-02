@@ -7,5 +7,5 @@ namespace LeadPipe.Infrastructure.Data.Load;
 
 [SourceKey(Domain.ValueObjects.Source.Pan)]
 public sealed class LoadPan(IPlumbingRepository repo, IEntityToVo<PlumbingEntity, Plumbing> eToVo) :
-    LoadData<Plumbing, PlumbingEntity>(repo, eToVo, Domain.ValueObjects.Source.Calli)
+    LoadData<Plumbing, PlumbingEntity>(repo, eToVo, Domain.ValueObjects.Source.Pan)
 { }
