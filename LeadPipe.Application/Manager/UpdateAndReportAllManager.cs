@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.UpdateReportPipeline;
 using LeadPipe.Domain.ValueObjects;
+using System.Runtime.CompilerServices;
 
 namespace LeadPipe.Application.Manager;
 
