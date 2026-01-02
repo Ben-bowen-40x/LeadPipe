@@ -24,7 +24,7 @@ internal class CsvRwService : ICsvRwService
         NewLine = Environment.NewLine
     };
     private static string CsvException(string path, Exception ex, string action)
-        => $"Failed to perform the following action on the csv file: {action}\nFile path: {path}\nException message: {ex.Message}";
+        => $"Failed to perform the following action on the csv file: {action}\nFile path: {path}\nException: {ex}";
     #endregion
 
     #region Public

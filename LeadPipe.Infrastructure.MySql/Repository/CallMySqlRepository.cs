@@ -27,7 +27,7 @@ public class CallMySqlRepository(MySqlSchema2Context context) : ICallMySqlReposi
             List<CallMySqlEntity> list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
-        catch (Exception ex) { return Result.Failure<List<CallMySqlEntity>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<CallMySqlEntity>>(ex.ToString()); }
     }
 
     public async Task<Result<CallMySqlEntity>> GetByIdAsync(long id, bool includeDetails = true)

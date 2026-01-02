@@ -16,7 +16,7 @@ internal class JsonRwService : IJsonRwService
         }
         catch (Exception ex)
         {
-            return Result.Failure<List<T>>(ex.Message);
+            return Result.Failure<List<T>>(ex.ToString());
         }
     }
     public Result WriteToFile<T>(FileInfo path, List<T> items)
@@ -33,7 +33,7 @@ internal class JsonRwService : IJsonRwService
         }
         catch (Exception ex)
         {
-            return Result.Failure(ex.Message);
+            return Result.Failure(ex.ToString());
         }
     }
 
@@ -47,7 +47,7 @@ internal class JsonRwService : IJsonRwService
         }
         catch (Exception ex)
         {
-            return Result.Failure<List<T>>($"The error occurred in the {nameof(Deserialize)} method.\nThis is the error: {ex.Message}");
+            return Result.Failure<List<T>>($"The error occurred in the {nameof(Deserialize)} method.\nThis is the error: {ex}");
         }
     }
     private static Result<string> Serialize<T>(IEnumerable<T> objects)
@@ -59,7 +59,7 @@ internal class JsonRwService : IJsonRwService
         }
         catch (Exception ex)
         {
-            return Result.Failure<string>($"The error occurred in the {nameof(Serialize)} method.\nThis is the error: {ex.Message}");
+            return Result.Failure<string>($"The error occurred in the {nameof(Serialize)} method.\nThis is the error: {ex}");
         }
     }
     #endregion

@@ -65,7 +65,7 @@ public class LeafClientService : ILeafService
         }
         catch (Exception ex)
         {
-            return Result.Failure<T>(ex.Message);
+            return Result.Failure<T>(ex.ToString());
         }
     }
     #endregion

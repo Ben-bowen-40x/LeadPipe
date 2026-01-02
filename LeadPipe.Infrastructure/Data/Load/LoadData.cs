@@ -19,11 +19,13 @@ public abstract class LoadData<TVo, TEntity>(
     {
         try
         {
-            Result<List<TEntity>> result = await _repo.FindAsync(e => e.Source == _source);
-            return result.IsSuccess
-                ? Result.Success(result.Value.Select(_eToVo.Translate).ToList())
-                : Result.Failure<List<TVo>>(result.Error);
+            Result<List<TEntity>> found = await _repo.FindAsync(e => e.Source == _source);
+            List<TVo> translate = [.. found.Value.Select(_eToVo.Translate)];
+            Result<List<TVo>> result = found.IsSuccess
+                ? Result.Success(translate)
+                : Result.Failure<List<TVo>>(found.Error);
+            return result;
         }
-        catch (Exception ex) { return Result.Failure<List<TVo>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<TVo>>(ex.ToString()); }
     }
 }

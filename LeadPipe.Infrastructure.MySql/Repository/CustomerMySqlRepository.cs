@@ -23,7 +23,7 @@ public class CustomerMySqlRepository(MySqlSchemaContext context) : ICustomerMySq
             List<CustomerMySqlEntity> list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
-        catch (Exception ex) { return Result.Failure<List<CustomerMySqlEntity>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<CustomerMySqlEntity>>(ex.ToString()); }
     }
 
     public async Task<Result<CustomerMySqlEntity>> GetByIdAsync(int id, bool includeSubscriptions = true)

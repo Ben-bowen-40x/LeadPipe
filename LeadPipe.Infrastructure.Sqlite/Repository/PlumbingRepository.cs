@@ -24,7 +24,7 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
                 .ToListAsync();
             return Result.Success(plumbing);
         }
-        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>(ex.ToString()); }
     }
     public override async Task<Result<List<PlumbingEntity>>> AddRangeAsync(List<PlumbingEntity> entities)
     {
@@ -72,7 +72,7 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
 
             return Result.Success(toInsert);
         }
-        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>($"Failed to save Plumbing entities: {ex.Message}"); }
+        catch (Exception ex) { return Result.Failure<List<PlumbingEntity>>($"Failed to save Plumbing entities: {ex}"); }
     }
 
     public override async Task<Result<List<PlumbingEntity>>> UpsertRangeAsync(List<PlumbingEntity> entities)
@@ -192,7 +192,7 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
         catch (Exception ex)
         {
             _logger.LogError(ex, "PlumbingEntity upsert failed");
-            return Result.Failure<List<PlumbingEntity>>(ex.Message);
+            return Result.Failure<List<PlumbingEntity>>(ex.ToString());
         }
 
         void InsertBatch(List<PlumbingEntity> batch)

@@ -150,7 +150,7 @@ public sealed class SubsRepository(PlumbingContext context, ILogger<SubsReposito
         catch (Exception ex)
         {
             _logger.LogError(ex, "SubsEntity upsert failed");
-            return Result.Failure<List<SubsEntity>>(ex.Message);
+            return Result.Failure<List<SubsEntity>>(ex.ToString());
         }
 
         void InsertBatch(List<SubsEntity> batch)

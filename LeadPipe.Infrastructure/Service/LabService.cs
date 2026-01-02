@@ -120,7 +120,7 @@ internal class LabService : ILabService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception fetching page {Page}: {Message}", page, ex.Message);
-            return Result.Failure<List<LabDto>>($"Exception fetching page {page}: {ex.Message}");
+            return Result.Failure<List<LabDto>>($"Exception fetching page {page}: {ex}");
         }
         finally
         {

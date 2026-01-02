@@ -28,6 +28,8 @@ internal class DataUpdateReportVerb : IVerbAsync
     public bool Report { get; set; } = false;
     [Option('u', "update", Required = false, HelpText = "Whether to update.")]
     public bool Update { get; set; } = false;
+    [Option('R', "refresh", Required = false, HelpText = "Whether or not to perform a data refresh. If refresh, the process is likely to take less time, but the data may not be full.")]
+    public bool Refresh { get; set; } = false;
 
     #endregion
 
@@ -35,13 +37,13 @@ internal class DataUpdateReportVerb : IVerbAsync
 
     public async Task<int> Run(IServiceProvider service)
     {
-        IUpdateAndReportAllManager manager = service.GetRequiredService<IUpdateAndReportAllManager>();
-        UpdateReportManagement m = !Update && !Report 
-            ? new(Update: true, Report: true) 
-            : new(Update: Update, Report: Report);
+        var manager = service.GetRequiredService<IReportAndUpdateManager>();
+        UpdateReportManagement m = !Update && !Report
+            ? new(Update: true, Report: true)
+            : new(Update, Report);
         Result result = Source == Source.Test
-            ? await manager.Manage(m)
-            : await manager.Manage(Source, m);
+            ? await manager.Manage(Refresh, m)
+            : await manager.Manage(Source, Refresh, m);
 
         if (result.IsFailure)
             Console.WriteLine(result.Error);

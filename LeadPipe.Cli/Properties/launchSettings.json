@@ -24,16 +24,30 @@
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only": {
+    "Data update only | Get all data": {
       "commandName": "Project",
       "commandLineArgs": "data -u",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update and report": {
+    "Data update only | Refresh data": {
+      "commandName": "Project",
+      "commandLineArgs": "data -Ru",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update and report | Get all data": {
       "commandName": "Project",
       "commandLineArgs": "data",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update and report | Refresh data": {
+      "commandName": "Project",
+      "commandLineArgs": "data -R",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }

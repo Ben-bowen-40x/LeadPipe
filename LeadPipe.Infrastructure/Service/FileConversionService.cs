@@ -29,7 +29,7 @@ internal class FileConversionService(
         }
         catch (Exception ex)
         {
-            return Result.Failure<FileInfo>(ex.Message);
+            return Result.Failure<FileInfo>(ex.ToString());
         }
     }
     public Result<FileInfo> SaveToJson<T>(Result<List<T>> input, FileInfo jsonFile)
@@ -47,7 +47,7 @@ internal class FileConversionService(
         }
         catch (Exception ex)
         {
-            return Result.Failure<FileInfo>(ex.Message);
+            return Result.Failure<FileInfo>(ex.ToString());
         }
     }
 }
