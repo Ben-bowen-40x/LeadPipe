@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Infrastructure.Factory;
 
-internal class ReportSourceFactory(IServiceProvider provider) : IReportSourceFactory
+internal sealed class ReportSourceFactory(IServiceProvider provider) : IReportSourceFactory
 {
     private readonly IServiceProvider _provider = provider;
     public IReportService<Plumbing> GetService(Source source)
