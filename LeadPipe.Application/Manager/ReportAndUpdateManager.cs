@@ -4,24 +4,23 @@ using LeadPipe.Domain.ValueObjects;
 
 namespace LeadPipe.Application.Manager;
 
-
 public interface IReportAndUpdateManager
 {
     Task<Result> Manage(Source source, bool refresh, UpdateReportManagement manage);
     Task<Result> Manage(bool refresh, UpdateReportManagement manage);
 }
 internal class ReportAndUpdateManager(
-    IUpdateService<Call> updateCall,
-    IUpdateService<Sandwich> updateSandwich,
     IUpdateSourceFactory update,
     IReportSourceFactory report,
+    IUpdateService<Call> updateCall,
+    IUpdateService<Sandwich> updateSandwich,
     IPlumbingAssociationService plumb
     ) : IReportAndUpdateManager
 {
-    private readonly IUpdateService<Call> _updateCall = updateCall;
-    private readonly IUpdateService<Sandwich> _updateSandwich = updateSandwich;
     private readonly IUpdateSourceFactory _update = update;
     private readonly IReportSourceFactory _report = report;
+    private readonly IUpdateService<Call> _updateCall = updateCall;
+    private readonly IUpdateService<Sandwich> _updateSandwich = updateSandwich;
     private readonly IPlumbingAssociationService _plumb = plumb;
 
     public async Task<Result> Manage(Source source, bool refresh, UpdateReportManagement manage)
@@ -30,28 +29,13 @@ internal class ReportAndUpdateManager(
         {
             // Update
             IUpdateService<Plumbing> updateService = _update.GetService(source);
-            Result<List<Plumbing>> updateData = refresh
-                ? await updateService.UpdateDataAsync()
-                : await updateService.GetDataAsync();
-            Result savedData = updateData.IsSuccess
-                ? await updateService.SaveDataAsync(updateData.Value)
-                : updateData;
+            Result savedData = await UpdatedAndSaved(refresh, updateService);
 
             // Call data
-            Result<List<Call>> callData = refresh
-                ? await _updateCall.UpdateDataAsync()
-                : await _updateCall.GetDataAsync();
-            Result savedCall = callData.IsSuccess
-                ? await _updateCall.SaveDataAsync(callData.Value)
-                : callData;
+            Result savedCall = await UpdatedAndSaved(refresh, _updateCall);
 
             // Sandwich data
-            Result<List<Sandwich>> sandwichData = refresh
-                ? await _updateSandwich.UpdateDataAsync()
-                : await _updateSandwich.GetDataAsync();
-            Result savedSandwich = sandwichData.IsSuccess
-                ? await _updateSandwich.SaveDataAsync(sandwichData.Value)
-                : sandwichData;
+            Result savedSandwich = await UpdatedAndSaved(refresh, _updateSandwich);
 
             // Associate
             Result associated = await _plumb.SaveLinksAsync();
@@ -77,23 +61,16 @@ internal class ReportAndUpdateManager(
 
     public async Task<Result> Manage(bool refresh, UpdateReportManagement manage)
     {
+        if (!manage.Report && !manage.Update)
+            return Result.Failure($"Malformed management. 'Update' and 'Report' cannot both be false. Update: {manage.Update}. Report: {manage.Report}.");
+
         if (manage.Update)
         {
             // Call data
-            Result<List<Call>> callData = refresh
-                ? await _updateCall.UpdateDataAsync()
-                : await _updateCall.GetDataAsync();
-            Result savedCall = callData.IsSuccess
-                ? await _updateCall.SaveDataAsync(callData.Value)
-                : callData;
+            Result savedCall = await UpdatedAndSaved(refresh, _updateCall);
 
             // Sandwich data
-            Result<List<Sandwich>> sandwichData = refresh
-                ? await _updateSandwich.UpdateDataAsync()
-                : await _updateSandwich.GetDataAsync();
-            Result savedSandwich = sandwichData.IsSuccess
-                ? await _updateSandwich.SaveDataAsync(sandwichData.Value)
-                : sandwichData;
+            Result savedSandwich = await UpdatedAndSaved(refresh, _updateSandwich);
 
             // Associate
             Result associated = await _plumb.SaveLinksAsync();
@@ -112,20 +89,13 @@ internal class ReportAndUpdateManager(
             {
                 IUpdateService<Plumbing> update = _update.GetService(source);
 
-                // Get data 
-                Result<List<Plumbing>> data = refresh
-                    ? await update.UpdateDataAsync()
-                    : await update.GetDataAsync();
-
                 // Save Data
-                Result saved = data.IsSuccess
-                    ? await update.SaveDataAsync(data.Value)
-                    : data;
+                Result saved = await UpdatedAndSaved(refresh, update);
 
-                if (data.IsFailure || saved.IsFailure)
+                if (saved.IsFailure)
                 {
-                    result.Add(Result.Combine(" | ", data, saved));
-                    continue;
+                    result.Add(saved);
+                    continue; // If we're updating and reporting, we can't do the report if the save failed
                 }
             }
 
@@ -135,20 +105,24 @@ internal class ReportAndUpdateManager(
                 IReportService<Plumbing> report = _report.GetService(source);
                 Result<List<Plumbing>> reportData = await report.GetDataAsync();
                 Result reported = reportData.IsSuccess
-                    ? await report.SendReportAsync(reportData.Value)
+                    ? await report.ReportAsync(reportData.Value)
                     : reportData;
                 result.Add(reported);
             }
 
-            if (!manage.Report && !manage.Update)
-            {
-                result.Add(Result.Failure(
-                    $"Malformed management. 'Update' and 'Report' cannot both be false. Update: {manage.Update}. Report: {manage.Report}."));
-                break;
-            }
         }
 
         // Return result
         return Result.Combine(" | ", [.. result]);
+    }
+    private static async Task<Result> UpdatedAndSaved<T>(bool refresh, IUpdateService<T> updateService)
+    {
+        Result<List<T>> updateData = refresh
+            ? await updateService.UpdateDataAsync()
+            : await updateService.GetDataAsync();
+        Result savedData = updateData.IsSuccess
+            ? await updateService.SaveDataAsync(updateData.Value)
+            : updateData;
+        return savedData;
     }
 }
