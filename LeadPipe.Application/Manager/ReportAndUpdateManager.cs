@@ -27,7 +27,7 @@ internal class ReportAndUpdateManager(
     {
         if (manage.Update)
         {
-            // Update
+            // Plumbing data
             IUpdateService<Plumbing> updateService = _update.GetService(source);
             Result savedData = await UpdatedAndSaved(refresh, updateService);
 
@@ -75,7 +75,10 @@ internal class ReportAndUpdateManager(
             // Associate
             Result associated = await _plumb.SaveLinksAsync();
 
+            // Combine
             Result updateResult = Result.Combine(" | ", savedCall, savedSandwich, associated);
+            
+            // Reports and additional updates can't proceed without success here
             if (updateResult.IsFailure)
                 return updateResult;
         }
@@ -87,9 +90,8 @@ internal class ReportAndUpdateManager(
         {
             if (manage.Update)
             {
-                IUpdateService<Plumbing> update = _update.GetService(source);
-
                 // Save Data
+                IUpdateService<Plumbing> update = _update.GetService(source);
                 Result saved = await UpdatedAndSaved(refresh, update);
 
                 if (saved.IsFailure)
@@ -109,12 +111,12 @@ internal class ReportAndUpdateManager(
                     : reportData;
                 result.Add(reported);
             }
-
         }
 
         // Return result
         return Result.Combine(" | ", [.. result]);
     }
+
     private static async Task<Result> UpdatedAndSaved<T>(bool refresh, IUpdateService<T> updateService)
     {
         Result<List<T>> updateData = refresh
