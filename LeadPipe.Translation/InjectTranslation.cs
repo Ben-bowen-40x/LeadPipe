@@ -36,12 +36,10 @@ public static class InjectTranslation
 
         // IEntityToVo
         services.AddScoped<IEntityToVo<CallEntity, Call>, CallEntityToCall>();
-        services.AddScoped<IEntityToVo<PlumbingEntity, Plumbing>, PlumbingEntityToPlumbing>();
-        services.AddScoped<IEntityToVo<SubMySqlEntity, Sandwich>, SubMySqlEntityToSandwich>();
         services.AddScoped<IEntityToVo<SubsEntity, Sandwich>, SubsToSandwich>();
-
-        // IEntityToVo<,,>
+        services.AddScoped<IEntityToVo<PlumbingEntity, Plumbing>, PlumbingEntityToPlumbing>();
         services.AddScoped<IEntityToVo<CallMySqlEntity, Call>, CallMySqlEntityToCall>();
+        services.AddScoped<IEntityToVo<SubMySqlEntity, Sandwich>, SubMySqlEntityToSandwich>();
 
         // IVoToDto
         services.AddScoped<IVoToDto<Plumbing, LabDto>, PlumbingToLabDto>();
