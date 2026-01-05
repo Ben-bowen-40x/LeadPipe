@@ -10,8 +10,9 @@ internal class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
     public Plumbing Translate(YellerDto data)
     {
         // Find Phone Number
-        PhoneNumber number = new(PhoneNumber.Default);        
+        PhoneNumber number = new(PhoneNumber.Default);
         if (data.project?.survey_answers is SurveyAnswer[] answers)
+        {
             foreach (SurveyAnswer ans in answers)
                 if (ans.answer_text is string[] answerText)
                     foreach (string a in answerText)
@@ -20,6 +21,7 @@ internal class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
                             number = parsed;
                             break;
                         }
+        }
 
         // Date
         DateTimeOffset date =
