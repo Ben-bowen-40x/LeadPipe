@@ -10,12 +10,13 @@ namespace LeadPipe.Infrastructure.Data.Transform;
 
 public sealed class TransformPlumbingReport(
     ISubsPlumbingLinkRepository repo,
-    IVoToEntity<Plumbing, PlumbingEntity> voToEntity
+    IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
+    IEntityToReport<SubsPlumbingLink, ReportPlumbing> eToR
     ) : ITransform<Plumbing, ReportPlumbing>
 {
     private readonly ISubsPlumbingLinkRepository _repo = repo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = voToEntity;
-    private const string dateFormat = "yyyy-MM-dd HH:mm:ss";
+    private readonly IEntityToReport<SubsPlumbingLink, ReportPlumbing> _eToR = eToR;
     public async Task<Result<List<ReportPlumbing>>> TransformAsync(List<Plumbing> data)
     {
         List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
@@ -26,65 +27,7 @@ public sealed class TransformPlumbingReport(
         if (entities is null)
             return Result.Failure<List<ReportPlumbing>>(links.Error);
 
-        List<ReportPlumbing> result = [.. entities.Select(TransformLink)];
-        return result;
-    }
-    private static ReportPlumbing TransformLink(SubsPlumbingLink link)
-    {
-        long phoneNumber = link.PlumbingEntity!.PhoneNumber;
-
-        DateTime d = DateTime.SpecifyKind(link.PlumbingEntity.Date, DateTimeKind.Utc);
-        DateTimeOffset date = new(d, TimeSpan.Zero);
-        string formattedDate = date.ToString(dateFormat);
-
-        string message = link.PlumbingEntity.Contents is string c ? c : string.Empty;
-        string source = link.PlumbingEntity.Source.ToString();
-        string metadata = link.PlumbingEntity.MetaData;
-
-        long customerId = link.SubsEntity!.CustomerId;
-        long subId = link.SubsEntity.Id;
-        bool subActive = link.SubsEntity.Active;
-        bool completed = link.SubsEntity.Complete;
-
-        // Dates
-        DateTime cd = DateTime.SpecifyKind(link.SubsEntity.Date, DateTimeKind.Utc);
-        DateTimeOffset custDate = new(cd, TimeSpan.Zero);
-        string formattedCustDate = custDate.ToString(dateFormat);
-
-        DateTime cxl = DateTime.SpecifyKind(link.SubsEntity.CancelDate, DateTimeKind.Utc);
-        DateTimeOffset custCxlDate = new(cxl, TimeSpan.Zero);
-
-        DateTime sd = DateTime.SpecifyKind(link.SubsEntity.SubDate, DateTimeKind.Utc);
-        DateTimeOffset subDate = new(sd, TimeSpan.Zero);
-        string formattedSubDate = subDate.ToString(dateFormat);
-
-        DateTime sCxl = DateTime.SpecifyKind(link.SubsEntity.SubCancelDate, DateTimeKind.Utc);
-        DateTimeOffset subCxlDate = new(sCxl, TimeSpan.Zero);
-
-        bool msgBeforeCust = date < custDate && date < subDate;
-        bool isSale = msgBeforeCust && completed;
-
-        ReportPlumbing result = new()
-        {
-            MsgBeforeCust = msgBeforeCust,
-            IsSale = isSale,
-            PhoneNumber = phoneNumber,
-            Date = date,
-            FormattedDate = formattedDate,
-            Message = message,
-            Source = source,
-            MetaData = metadata,
-            CustomerId = customerId,
-            SubId = subId,
-            SubActive = subActive,
-            Completed = completed,
-            CustDate = custDate,
-            FormattedCustDate = formattedCustDate,
-            CustCxlDate = custCxlDate,
-            SubDate = subDate,
-            FormattedSubDate = formattedSubDate,
-            SubCxlDate = subCxlDate,
-        };
+        List<ReportPlumbing> result = [.. entities.Select(_eToR.Translate)];
         return result;
     }
 }
