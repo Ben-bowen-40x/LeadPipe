@@ -6,6 +6,7 @@ using LeadPipe.Translation;
 using LeadPipe.Infrastructure;
 using LeadPipe.Infrastructure.MySql;
 using LeadPipe.Infrastructure.Sqlite;
+using LeadPipe.Infrastructure.Dto;
 
 namespace LeadPipe.Cli;
 
@@ -25,6 +26,13 @@ internal static class ConfigureCommandLine
 
         settings.SchemaConnectionString =
             configuration.GetConnectionString("Schema");
+
+        // Tokens
+        configuration.GetSection("LabToken").Bind(settings.LabToken);
+
+        configuration.GetSection("YellerToken").Bind(settings.YellerToken);
+
+        configuration.GetSection("LeafToken").Bind(settings.LeafToken);
 
         // register once
         services.AddSingleton(settings);

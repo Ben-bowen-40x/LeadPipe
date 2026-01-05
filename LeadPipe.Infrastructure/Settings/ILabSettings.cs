@@ -1,4 +1,6 @@
-﻿namespace LeadPipe.Infrastructure.Settings;
+﻿using LeadPipe.Infrastructure.Dto;
+
+namespace LeadPipe.Infrastructure.Settings;
 
 public interface ILabSettings
 {
@@ -8,7 +10,7 @@ public interface ILabSettings
     string? LabUri { get; set; }
     string? LabPlumbing { get; set; }
     string? LabAuth { get; set; }
-    string? LabToken { get; set; }
+    Token? LabToken { get; set; }
     int LabConcurrentMax { get; set; }
     string? LabAccept { get; set; }
 }

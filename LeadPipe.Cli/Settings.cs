@@ -1,10 +1,11 @@
 ﻿using LeadPipe.Domain;
+using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.MySql.Settings;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Cli;
 
-internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettings, IYellerSettings
+internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettings
 {
     // IDwhSettings
     public string? SqlConnectionString1 { get; set; }
@@ -18,13 +19,12 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? LabPlumbing { get; set; }
     public string? LabAuth { get; set; }
     public int LabConcurrentMax { get; set; }
-    public string? LabToken { get; set; }
+    public Token? LabToken { get; set; }
     public string? LabAccept { get; set; }
 
     // Infrastructure
     public string? LeafName { get; set; }
-    public string? LeafTokenType { get; set; }
-    public string? LeafRefreshToken { get; set; }
+    public Token? LeafToken { get; set; }
     public string? LeafBase { get; set; }
     public string? LeafAcctUuid { get; set; }
     public string? LeafUuid { get; set; }
@@ -40,7 +40,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     // Yeller 
     public string? YellerName { get; set; }
     public string? YellerSecret { get; set; }
-    public string? YellerToken { get; set; }
+    public Token? YellerToken { get; set; }
     public string? YellerBase { get; set; }
     public string? YellerId { get; set; }
     public string? YellerPrelimEndpoint { get; set; }

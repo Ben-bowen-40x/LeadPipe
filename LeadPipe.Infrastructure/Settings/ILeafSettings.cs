@@ -1,10 +1,11 @@
-﻿namespace LeadPipe.Infrastructure.Settings;
+﻿using LeadPipe.Infrastructure.Dto;
+
+namespace LeadPipe.Infrastructure.Settings;
 
 public interface ILeafSettings
 {
     string? LeafName { get; set; }
-    string? LeafTokenType { get; set; }
-    string? LeafRefreshToken { get; set; }
+    Token? LeafToken { get; set; }
     string? LeafBase { get; set; }
     string? LeafAcctUuid { get; set; }
     string? LeafUuid { get; set; }

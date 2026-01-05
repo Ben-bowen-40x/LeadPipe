@@ -129,13 +129,13 @@ public static class InjectInfrastructure
             throw new Exception($"{nameof(settings.LeafName)} cannot be null");
         if (string.IsNullOrWhiteSpace(settings.LeafBase))
             throw new Exception($"{nameof(settings.LeafBase)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LeafTokenType))
-            throw new Exception($"{nameof(settings.LeafTokenType)} cannot be null");
+        if (settings.LeafToken is null)
+            throw new Exception($"{nameof(settings.LeafToken)} cannot be null");
         services.AddHttpClient(settings.LeafName, c =>
         {
             c.BaseAddress = new Uri(settings.LeafBase);
             c.DefaultRequestHeaders.Add("Accept", "application/json");
-            c.DefaultRequestHeaders.Add("Authorization", settings.LeafTokenType);
+            c.DefaultRequestHeaders.Authorization = new(settings.LeafToken.Token_type, settings.LeafToken.Access_token);
         });
 
         // Add Lab Client
@@ -145,13 +145,13 @@ public static class InjectInfrastructure
             throw new Exception($"{nameof(settings.LabUri)} cannot be null");
         if (string.IsNullOrWhiteSpace(settings.LabAccept))
             throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LabToken))
+        if (settings.LabToken is null)
             throw new Exception($"{nameof(settings.LabToken)} cannot be null");
         services.AddHttpClient(settings.LabName, c =>
         {
             c.BaseAddress = new Uri(settings.LabUri);
             c.DefaultRequestHeaders.Add("Accept", settings.LabAccept);
-            c.DefaultRequestHeaders.Add("Authorization", settings.LabToken);
+            c.DefaultRequestHeaders.Authorization = new(settings.LabToken.Token_type, settings.LabToken.Access_token);
         });
 
         // Add Yeller Client
@@ -159,13 +159,13 @@ public static class InjectInfrastructure
             throw new Exception($"{nameof(settings.YellerName)} cannot be null");
         if (string.IsNullOrWhiteSpace(settings.YellerBase))
             throw new Exception($"{nameof(settings.YellerBase)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.YellerToken))
+        if (settings.YellerToken is null)
             throw new Exception($"{nameof(settings.YellerToken)} cannot be null");
         services.AddHttpClient(settings.YellerName, c =>
         {
             c.BaseAddress = new Uri(settings.YellerBase);
             c.DefaultRequestHeaders.Add("Accept", "application/json");
-            c.DefaultRequestHeaders.Add("Authorization", settings.YellerToken);
+            c.DefaultRequestHeaders.Authorization = new(settings.YellerToken.Token_type, settings.YellerToken.Access_token);
         });
 
         #endregion
