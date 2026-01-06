@@ -5,30 +5,81 @@ using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Infrastructure.Data.Transform;
 
 internal sealed class TransformYellerReport(
     ISubsPlumbingLinkRepository spRepo,
+    ISubsCallLinkRepository subsCallRepo,
+    ICallRepository callRepo,
     IVoToEntity<Plumbing, PlumbingEntity> toEntity,
-    IEntityToReport<SubsPlumbingLink, ReportYeller> eToR
+    IEntityToReport<SubsEntity, ReportYeller> eToR,
+    IYellerSettings settings
     ) : ITransform<Plumbing, ReportYeller>
 {
-    private readonly ISubsPlumbingLinkRepository _repo = spRepo;
+    private readonly ISubsPlumbingLinkRepository _subsPlumbRepo = spRepo;
+    private readonly ISubsCallLinkRepository _subsCallRepo = subsCallRepo;
+    private readonly ICallRepository _callRepo = callRepo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = toEntity;
-    private readonly IEntityToReport<SubsPlumbingLink, ReportYeller> _eToR = eToR;
-    
+    private readonly IEntityToReport<SubsEntity, ReportYeller> _eToR = eToR;
+    private readonly IYellerSettings _settings = settings;
+
     public async Task<Result<List<ReportYeller>>> TransformAsync(List<Plumbing> data)
     {
+        // Translate data to entity
         List<PlumbingEntity> e = [.. data.Select(_voToEntity.Translate)];
-        Result<List<SubsPlumbingLink>> links = await _repo.GetAllAsync(e);
-        List<SubsPlumbingLink>? entities = links.IsSuccess
+
+        // Get links to subs for reporting
+        Result<List<SubsPlumbingLink>> links = await _subsPlumbRepo.GetAllWithDetailsAsync(e);
+
+        // Check success
+        List<SubsPlumbingLink>? spLinks = links.IsSuccess
             ? links.Value
             : null;
-        if (entities is null)
+        if (spLinks is null)
             return Result.Failure<List<ReportYeller>>(links.Error);
 
-        return entities.Select(_eToR.Translate).ToList();
+        // Ensure the list is not null
+        List<SubsPlumbingLink> subPlumbLinks = spLinks!;
+
+        // Get calls for reporting
+        Result<List<CallEntity>> callsResult = await _callRepo.FindAsync(e => e.Source == _settings.YellerCallSource1 || e.Source == _settings.YellerCallSource2);
+
+        // Check success
+        List<CallEntity>? callsList = callsResult.IsSuccess
+            ? callsResult.Value
+            : null;
+        if (callsList is null)
+            return Result.Failure<List<ReportYeller>>(callsResult.Error);
+
+        // Ensure the list is not null
+        List<CallEntity> calls = callsList!;
+
+        // Get call links to subs for reporting
+        Result<List<CallSubsLink>> callLinksResult = await _subsCallRepo.GetAllWithDetailsAsync(calls);
+
+        // Check success
+        List<CallSubsLink>? cl = callLinksResult.IsSuccess
+            ? callLinksResult.Value
+            : null;
+
+        // Ensure the list is not null
+        List<CallSubsLink> callLinks = cl!;
+
+        // Generate report
+        List<ReportYeller> spLinksReport = 
+            [.. subPlumbLinks
+                .Where(s => s.SubsEntity is not null)
+                .Select(s => _eToR.Translate(s.SubsEntity!))
+            ];
+        List<ReportYeller> callLinksReport = 
+            [.. callLinks
+                .Where(s => s.SubsEntity is not null)
+                .Select(c => _eToR.Translate(c.SubsEntity!))
+            ];
+
+        return Result.Success<List<ReportYeller>>([.. spLinksReport, .. callLinksReport]);
     }
 
 }
