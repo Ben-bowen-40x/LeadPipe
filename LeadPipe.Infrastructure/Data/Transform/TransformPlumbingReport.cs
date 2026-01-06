@@ -36,9 +36,10 @@ public sealed class TransformPlumbingReport(
         HashSet<long> ids = [.. links.Select(e => e.PlumbingId)];
 
         // Turn empty PlumbingEntities into subsplumbinglinks
-        List<SubsPlumbingLink> unfoundPlumbing = [.. plumbingEntities
-            .Where(e => !ids.Contains(e.Id)) // We are creating a partition
-            .Select(e => new SubsPlumbingLink { PlumbingEntity = e, SubsId = 0})
+        List<SubsPlumbingLink> unfoundPlumbing = 
+            [.. plumbingEntities
+                .Where(e => !ids.Contains(e.Id)) // We are creating a partition
+                .Select(e => new SubsPlumbingLink { PlumbingEntity = e, SubsId = 0})
             ];
 
         List<ReportPlumbing> result = 
