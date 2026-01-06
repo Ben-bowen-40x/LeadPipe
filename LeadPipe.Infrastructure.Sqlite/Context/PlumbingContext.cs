@@ -6,6 +6,9 @@ namespace LeadPipe.Infrastructure.Sqlite.Context;
 public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) : DbContext(options)
 {
 #pragma warning disable IDE0079
+    // TODO: Add CornFormation and CornFormationSubsLinks
+    // TODO: Add CornSubsCallPlumbingLinks
+    // TODO: Add appropriate repositories
     public DbSet<SyncStateEntity> SyncState { get; set; }
     public DbSet<SubsEntity> SubsEntities { get; set; }
     public DbSet<PlumbingEntity> PlumbingEntities { get; set; }
