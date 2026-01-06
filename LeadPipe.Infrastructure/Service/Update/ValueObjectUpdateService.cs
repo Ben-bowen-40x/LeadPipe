@@ -3,7 +3,7 @@ using LeadPipe.Application.Service;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Infrastructure.Service.Update;
 
 internal abstract class ValueObjectUpdateService<TEntity, TVo>(
     IDataSourceAsync<TEntity> source,

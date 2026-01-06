@@ -5,9 +5,8 @@ using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Translate;
-using LeadPipe.Infrastructure.Service.Update;
 
-namespace LeadPipe.Infrastructure.Service;
+namespace LeadPipe.Infrastructure.Service.Update;
 
 [SourceKey(Source.Calli)]
 internal sealed class CalliUpdateFromFileService(
