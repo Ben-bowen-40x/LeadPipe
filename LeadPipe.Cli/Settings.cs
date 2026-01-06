@@ -49,6 +49,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? YellerPrelimId { get; set; }
     public string? YellerCallSource1 { get; set; }
     public string? YellerCallSource2 { get; set; }
+    public string? YellerClientReporterLoc { get; set; }
 
     // Data
     public string? CalliSourceLoc { get; set; }
