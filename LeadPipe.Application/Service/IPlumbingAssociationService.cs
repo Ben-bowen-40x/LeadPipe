@@ -1,5 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Domain.ValueObjects;
 
 namespace LeadPipe.Application.Service;
 

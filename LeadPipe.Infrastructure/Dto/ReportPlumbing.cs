@@ -1,6 +1,5 @@
 ﻿using CsvHelper.Configuration;
 using CsvHelper.Configuration.Attributes;
-using System;
 
 namespace LeadPipe.Infrastructure.Dto;
 

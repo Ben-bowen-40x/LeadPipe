@@ -6,7 +6,6 @@ using LeadPipe.Translation;
 using LeadPipe.Infrastructure;
 using LeadPipe.Infrastructure.MySql;
 using LeadPipe.Infrastructure.Sqlite;
-using LeadPipe.Infrastructure.Dto;
 
 namespace LeadPipe.Cli;
 

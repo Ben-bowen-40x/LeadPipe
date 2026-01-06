@@ -1,5 +1,4 @@
-﻿using LeadPipe.Infrastructure.Entity.MySql;
-using LeadPipe.Infrastructure.MySql.Context;
+﻿using LeadPipe.Infrastructure.MySql.Context;
 using LeadPipe.Infrastructure.MySql.Repository;
 using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
