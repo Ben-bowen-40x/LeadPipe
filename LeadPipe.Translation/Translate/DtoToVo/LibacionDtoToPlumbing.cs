@@ -22,6 +22,6 @@ public sealed class LibacionDtoToPlumbing : IDtoToVo<LibacionDto, Plumbing>
 
         string metadata = data.Commercial is string c ? c : "Unknown";
 
-        return new Plumbing(0, PhoneNumber: number, Date: date, Contents: contents, MetaData: $"Is Commercial: {metadata}", Source.Libacion);
+        return new Plumbing(0, PhoneNumber: number, Date: date, Contents: contents, MetaData: metadata, Source.Libacion);
     }
 }
