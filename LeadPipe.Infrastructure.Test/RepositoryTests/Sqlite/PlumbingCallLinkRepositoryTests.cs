@@ -7,13 +7,14 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class PlumbingCallLinkRepositoryTests
 {
+    private readonly ILogger<PlumbingCallLinkRepository> logger = LoggerFactory
+        .Create(builder => builder.AddConsole())
+        .CreateLogger<PlumbingCallLinkRepository>();
 
     [Fact]
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<PlumbingCallLinkRepository>();
 
         var repo = new PlumbingCallLinkRepository(context, logger);
 
@@ -33,8 +34,6 @@ public class PlumbingCallLinkRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<PlumbingCallLinkRepository>();
 
         var repo = new PlumbingCallLinkRepository(context, logger);
 
@@ -48,8 +47,6 @@ public class PlumbingCallLinkRepositoryTests
     public async Task AddAsync_ShouldAddPlumbingCallLink()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<PlumbingCallLinkRepository>();
 
         var repo = new PlumbingCallLinkRepository(context, logger);
 
@@ -84,8 +81,6 @@ public class PlumbingCallLinkRepositoryTests
         context.PlumbingCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<PlumbingCallLinkRepository>();
 
         var repo = new PlumbingCallLinkRepository(context, logger);
         var result = await repo.DeleteAsync(1);
@@ -98,8 +93,6 @@ public class PlumbingCallLinkRepositoryTests
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<PlumbingCallLinkRepository>();
 
         var repo = new PlumbingCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var result = await repo.GetByIdAsync(99);
@@ -116,9 +109,6 @@ public class PlumbingCallLinkRepositoryTests
         context.PlumbingCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<PlumbingCallLinkRepository>();
-
         var repo = new PlumbingCallLinkRepository(context, logger);
         var updatedPlumbingCallLink = new PlumbingCallLink { Id = 1, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
@@ -133,9 +123,6 @@ public class PlumbingCallLinkRepositoryTests
     [Fact]
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<PlumbingCallLinkRepository>();
-
         var repo = new PlumbingCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var updatedPlumbingCallLink = new PlumbingCallLink { Id = 99, PlumbingEntity = new() { Id = 0, MetaData = string.Empty }, CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
@@ -148,9 +135,6 @@ public class PlumbingCallLinkRepositoryTests
     [Fact]
     public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<PlumbingCallLinkRepository>();
-
         var repo = new PlumbingCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var result = await repo.DeleteAsync(99);
 

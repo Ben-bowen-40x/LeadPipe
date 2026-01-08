@@ -7,16 +7,13 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class CallRepositoryTests
 {
-
+    private readonly ILogger<CallRepository> logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CallRepository>();
     [Fact]
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(context, logger);
-
 
         var entities = new List<CallEntity>
         {
@@ -34,9 +31,7 @@ public class CallRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
@@ -49,9 +44,7 @@ public class CallRepositoryTests
     public async Task AddAsync_ShouldAddCallEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(context, logger);
 
         var plumbing = new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
@@ -66,9 +59,7 @@ public class CallRepositoryTests
         context.CallEntities.Add(new CallEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty });
         await context.SaveChangesAsync();
 
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(context, logger);
         var result = await repo.GetByIdAsync(1);
 
@@ -84,9 +75,7 @@ public class CallRepositoryTests
         context.CallEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(context, logger);
         var result = await repo.DeleteAsync(1);
         var reloaded = await repo.GetByIdAsync(1);
@@ -98,9 +87,7 @@ public class CallRepositoryTests
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
         var result = await repo.GetByIdAsync(99);
 
@@ -116,9 +103,7 @@ public class CallRepositoryTests
         context.CallEntities.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(context, logger);
         var updatedCall = new CallEntity { Id = 1, PhoneNumber = 99999, Note = string.Empty, Location = string.Empty, Source = string.Empty };
 
@@ -133,9 +118,7 @@ public class CallRepositoryTests
     [Fact]
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
         var updatedCall = new CallEntity { Id = 99, PhoneNumber = 11111, Note = string.Empty, Location = string.Empty, Source = string.Empty };
 
@@ -148,9 +131,7 @@ public class CallRepositoryTests
     [Fact]
     public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<CallRepository>();
-
+        
         var repo = new CallRepository(RepoTestHelpers.GetInMemoryContext(),logger);
         var result = await repo.DeleteAsync(99);
 

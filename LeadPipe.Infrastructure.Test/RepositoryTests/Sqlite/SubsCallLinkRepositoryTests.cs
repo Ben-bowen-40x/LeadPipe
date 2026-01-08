@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Infrastructure.Data.Load;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.Extensions.Logging;
@@ -7,14 +8,14 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class SubsCallLinkRepositoryTests
 {
-
+    private readonly ILogger<SubsCallLinkRepository> logger = LoggerFactory
+        .Create(builder => builder.AddConsole())
+        .CreateLogger<SubsCallLinkRepository>();
     [Fact]
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
-
+        
         var repo = new SubsCallLinkRepository(context, logger);
 
         var entities = new List<SubsCallLink>
@@ -33,9 +34,7 @@ public class SubsCallLinkRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
-
+        
         var repo = new SubsCallLinkRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
@@ -48,9 +47,7 @@ public class SubsCallLinkRepositoryTests
     public async Task AddAsync_ShouldAddSubsCallLink()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
-
+        
         var repo = new SubsCallLinkRepository(context, logger);
 
         var plumbing = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
@@ -64,9 +61,6 @@ public class SubsCallLinkRepositoryTests
         var context = RepoTestHelpers.GetInMemoryContext();
         context.SubsCallLinks.Add(new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } });
         await context.SaveChangesAsync();
-
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
 
         var repo = new SubsCallLinkRepository(context, logger);
         var result = await repo.GetByIdAsync(1);
@@ -83,9 +77,6 @@ public class SubsCallLinkRepositoryTests
         context.SubsCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
-
         var repo = new SubsCallLinkRepository(context, logger);
         var result = await repo.DeleteAsync(1);
         var reloaded = await repo.GetByIdAsync(1);
@@ -97,9 +88,6 @@ public class SubsCallLinkRepositoryTests
     [Fact]
     public async Task GetByIdAsync_ShouldFail_WhenNotFound()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
-
         var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var result = await repo.GetByIdAsync(99);
 
@@ -115,9 +103,6 @@ public class SubsCallLinkRepositoryTests
         context.SubsCallLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
-
         var repo = new SubsCallLinkRepository(context, logger);
         var updatedSubsCallLink = new SubsCallLink { Id = 1, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
@@ -132,9 +117,6 @@ public class SubsCallLinkRepositoryTests
     [Fact]
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
-
         var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext(),logger);
         var updatedSubsCallLink = new SubsCallLink { Id = 99, SubsEntity = new(), CallEntity = new() { Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
@@ -147,9 +129,6 @@ public class SubsCallLinkRepositoryTests
     [Fact]
     public async Task DeleteAsync_ShouldSucceed_WhenEntityDoesNotExist()
     {
-        var logger = LoggerFactory.Create(builder => builder.AddConsole())
-                          .CreateLogger<SubsCallLinkRepository>();
-
         var repo = new SubsCallLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
         var result = await repo.DeleteAsync(99);
 

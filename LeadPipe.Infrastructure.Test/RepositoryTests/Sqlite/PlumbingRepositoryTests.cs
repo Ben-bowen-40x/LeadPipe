@@ -9,7 +9,9 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class PlumbingRepositoryTests
 {
-    private readonly ILogger<PlumbingRepository> logger = Substitute.For<ILogger<PlumbingRepository>>();
+    private readonly ILogger<PlumbingRepository> logger = LoggerFactory
+        .Create(builder => builder.AddConsole())
+        .CreateLogger<PlumbingRepository>();
     [Fact]
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
