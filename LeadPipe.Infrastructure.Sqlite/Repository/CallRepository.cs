@@ -16,6 +16,7 @@ public sealed class CallRepository(PlumbingContext context, ILogger<CallReposito
         if (entities.Count == 0)
             return Result.Success(new List<CallEntity>());
 
+        // Deduplicate
         List<CallEntity> uniqueEntities =
         [
             .. entities
@@ -69,7 +70,8 @@ public sealed class CallRepository(PlumbingContext context, ILogger<CallReposito
                 {
                     _logger.LogWarning(
                         ex,
-                        "Batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        nameof(CallEntity),
                         batchSize);
 
                     if (batchSize == minBatchSize)
