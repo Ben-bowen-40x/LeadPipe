@@ -78,9 +78,12 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             return Result.Success(new List<PlumbingEntity>());
 
         // Deduplicate in-memory by (PhoneNumber, Source)
-        List<PlumbingEntity> uniqueEntities = [.. entities
-            .GroupBy(e => (e.PhoneNumber, e.Source))
-            .Select(g => g.Last())];
+        List<PlumbingEntity> uniqueEntities =
+            [
+                .. entities
+                    .GroupBy(e => (e.PhoneNumber, e.Source))
+                    .Select(g => g.MaxBy(e => e.Date)!)
+            ];
 
         int batchSize = 200;
         const int minBatchSize = 1;
@@ -123,18 +126,27 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Batch insert failed (size={BatchSize}). Reducing batch size.", batchSize);
+                    _logger.LogWarning(
+                        ex,
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        nameof(PlumbingEntity),
+                        batchSize);
 
                     if (batchSize == minBatchSize)
                     {
                         var row = batch[0];
                         _logger.LogError(
-                            "Row insert failed: Phone={Phone}, Date={Date}, Contents={Contents}, Source={Source}, MetaData={MetaData}",
-                            row.PhoneNumber, row.Date, row.Contents, row.Source, row.MetaData);
+                            "{Entity} row insert failed: Phone={Phone}, Date={Date}, Contents={Contents}, Source={Source}, MetaData={MetaData}",
+                            nameof(PlumbingEntity),
+                            row.PhoneNumber,
+                            row.Date,
+                            row.Contents,
+                            row.Source,
+                            row.MetaData);
 
                         index++;
-                        batchSize = 100;
                         skipped++;
+                        batchSize = 100;
                     }
                     else
                     {
@@ -147,12 +159,34 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             int updated = await _context.Database.ExecuteSqlRawAsync("""
                 UPDATE PlumbingEntities
                 SET
-                    Date = (SELECT t.Date FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source),
-                    UnixDate = (SELECT t.UnixDate FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source),
-                    Contents = (SELECT t.Contents FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source),
-                    MetaData = (SELECT t.MetaData FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source)
+                    Date = (
+                        SELECT t.Date 
+                        FROM temp_plumbings t 
+                        WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
+                            AND t.Source = PlumbingEntities.Source
+                    ),
+                    UnixDate = (
+                        SELECT t.UnixDate 
+                        FROM temp_plumbings t 
+                        WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
+                            AND t.Source = PlumbingEntities.Source
+                    ),
+                    Contents = (
+                        SELECT t.Contents 
+                        FROM temp_plumbings t 
+                        WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
+                            AND t.Source = PlumbingEntities.Source
+                    ),
+                    MetaData = (
+                    SELECT t.MetaData 
+                    FROM temp_plumbings t 
+                    WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
+                        AND t.Source = PlumbingEntities.Source)
                 WHERE EXISTS (
-                    SELECT 1 FROM temp_plumbings t WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber AND t.Source = PlumbingEntities.Source
+                    SELECT 1 
+                    FROM temp_plumbings t 
+                    WHERE t.PhoneNumber = PlumbingEntities.PhoneNumber 
+                        AND t.Source = PlumbingEntities.Source
                 );
             """);
 
@@ -169,7 +203,10 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
                     t.MetaData
                 FROM temp_plumbings t
                 WHERE NOT EXISTS (
-                    SELECT 1 FROM PlumbingEntities c WHERE c.PhoneNumber = t.PhoneNumber AND c.Source = t.Source
+                    SELECT 1 
+                    FROM PlumbingEntities c 
+                    WHERE c.PhoneNumber = t.PhoneNumber 
+                        AND c.Source = t.Source
                 );
             """);
 
@@ -177,8 +214,14 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
             await transaction.CommitAsync();
 
             _logger.LogInformation(
-                "PlumbingEntity upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
-                entities.Count, uniqueEntities.Count, stagedCount, updated, inserted, skipped);
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
+                nameof(PlumbingEntity),
+                entities.Count,
+                uniqueEntities.Count,
+                stagedCount,
+                updated,
+                inserted,
+                skipped);
 
             return Result.Success(uniqueEntities);
         }
@@ -188,7 +231,8 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "PlumbingEntity upsert failed");
+            _logger.LogError(ex, "{Entity} upsert failed",
+                nameof(PlumbingEntity));
             return Result.Failure<List<PlumbingEntity>>(ex.ToString());
         }
 
@@ -225,10 +269,7 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
         if (string.IsNullOrEmpty(value))
             return string.Empty;
 
-        // Remove embedded nulls
         value = value.Replace("\0", string.Empty);
-
-        // Escape single quotes for raw SQL
         return value.Replace("'", "''");
     }
 }
