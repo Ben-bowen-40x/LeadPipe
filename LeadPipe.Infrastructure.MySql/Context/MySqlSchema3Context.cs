@@ -12,7 +12,7 @@ public sealed class MySqlSchema3Context(
     protected override void ApplyConfigurations(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(
-            new CornMySqlEntityConfiguration(Settings.Schema3!));
+            new CornMySqlEntityConfiguration(Settings));
     }
 
     // BLOCK ALL WRITE OPERATIONS

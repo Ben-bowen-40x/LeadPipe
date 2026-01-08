@@ -1,17 +1,18 @@
 ﻿using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Infrastructure.MySql.Settings;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeadPipe.Infrastructure.MySql.Context.Configuration;
 
-internal sealed class CornMySqlEntityConfiguration(string schema)
+internal sealed class CornMySqlEntityConfiguration(IMySqlSettings settings)
     : IEntityTypeConfiguration<CornMySqlEntity>
 {
-    private readonly string _schema = schema;
-
+    private readonly IMySqlSettings _settings = settings;
+    
     public void Configure(EntityTypeBuilder<CornMySqlEntity> entity)
     {
-        entity.ToTable("corn", schema: _schema);
+        entity.ToTable(_settings.CornTableName!, schema: _settings.Schema3!);
 
         entity.HasKey(x => x.id);
 
