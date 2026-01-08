@@ -11,6 +11,7 @@ using System.Net.Http.Json;
 
 namespace LeadPipe.Infrastructure.Service;
 
+internal record YellerFetchResult(List<string> Raw, int Errors, string FinalId);
 internal class YellerClientService : IYellerService
 {
     #region Ctor and Private Fields
@@ -41,18 +42,75 @@ internal class YellerClientService : IYellerService
     }
     #endregion
 
+    const int limit = 20;
     public async Task<Result<List<Plumbing>>> GetAllAsync(string id = "")
     {
-        const int limit = 20;
-        var endpoint = id == ""
-            ? $"{_settings.YellerPrelimEndpoint}?limit={limit}"
-            : $"{_settings.YellerPrelimEndpoint}?limit={limit}&{_settings.YellerPrelimId}={id}";
-        var raw = new List<string>();
+        if (_settings.YellerBellerId is null)
+            return Result.Failure<List<Plumbing>>($"{nameof(_settings.YellerBellerId)} list is null");
+        string[] yellerIds = _settings.YellerBellerId;
 
-        int errors = 0;
+        if (yellerIds.Length == 0)
+            return Result.Failure<List<Plumbing>>($"{nameof(_settings.YellerBellerId)} list is empty");
+
+        List<string> allRaw = [];
+        int allErrors = 0;
         string process = "Id retrieval";
         string finalId = "";
+        foreach (var yellerId in yellerIds)
+        {
+            string endpoint = id == ""
+                ? $"{_settings.YellerPrelimEndpoint1}{yellerId}{_settings.YellerPrelimEndpoint1}?limit={limit}"
+                : $"{_settings.YellerPrelimEndpoint1}{yellerId}{_settings.YellerPrelimEndpoint1}?limit={limit}&{_settings.YellerPrelimId}={id}";
+            YellerFetchResult data = await GetData(yellerId, process, endpoint);
 
+            // Aggregate raw and errors
+            allRaw.AddRange(data.Raw);
+            allErrors += data.Errors;
+
+            if (!string.IsNullOrWhiteSpace(data.FinalId))
+                finalId = data.FinalId;
+        }
+
+        // Distinct raw
+        allRaw = [.. allRaw.Distinct()];
+
+        // finalId is an opaque, API-defined cursor (alphanumeric).
+        // We intentionally persist the last cursor returned by the API,
+        // not a computed max, because ordering semantics are undocumented.
+        SyncStateEntity state = new() { LastProcessedId = finalId, LastSyncUtc = DateTime.UtcNow, UnixLastSyncUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds() };
+        Result<SyncStateEntity> synced = await _sync.SaveAsync(state);
+        if (synced.IsFailure)
+        {
+            _logger.LogError(
+                "Failed to sync. The next call to this api will have data that overlaps with existing persisted data. Error {Error}",
+                synced.Error);
+        }
+
+        // Check that raw is not empty
+        if (allRaw.Count == 0)
+        {
+            _logger.LogError(
+                "Failed prelim retrieval. Errors: {Errors}. Process: {Process}",
+                allErrors, process);
+
+            return Result.Failure<List<Plumbing>>("Failed to retrieve data from API.");
+        }
+
+        // Hydrate dtos with data by fetching data in all ids
+        Result<List<YellerDto>> dtoResult = await GetDto(allRaw);
+
+        if (!dtoResult.IsSuccess)
+            return Result.Failure<List<Plumbing>>(dtoResult.Error);
+
+        List<Plumbing> final = [.. dtoResult.Value.Select(_dtoToVo.Translate)];
+        return Result.Success(final);
+    }
+
+    private async Task<YellerFetchResult> GetData(string yellerId, string process, string endpoint)
+    {
+        List<string> raw = [];
+        int errors = 0;
+        string finalId = "";
         while (true)
         {
             if (errors >= errorLimit)
@@ -91,11 +149,16 @@ internal class YellerClientService : IYellerService
 
                 raw.AddRange(value.lead_ids);
 
-                finalId = value.lead_ids[^1];
-                endpoint = $"{_settings.YellerPrelimEndpoint}?limit={limit}&{_settings.YellerPrelimId}={finalId}";
+                // According to our Point of Contact for this Api, 
+                // it may be necessary to fetch the first item because
+                // ids are ordered descending, not ascending.
+                // So, lead_ids[0] is the most chronologically recent, not the most recent
+                // The api has a bug that's currently being worked on as of 1/8/2026
+                finalId = value.lead_ids[^1]; // may need replacement by finalId = value.lead_ids[0];
+                endpoint = $"{_settings.YellerPrelimEndpoint1}{yellerId}{_settings.YellerPrelimEndpoint1}?limit={limit}&{_settings.YellerPrelimId}={finalId}";
+
                 if (!value.has_more)
                     break;
-
             }
             catch (Exception ex)
             {
@@ -107,31 +170,7 @@ internal class YellerClientService : IYellerService
             }
         }
 
-        if (raw.Count == 0)
-        {
-            _logger.LogError(
-                "Failed prelim retrieval. Errors: {Errors}. Process: {Process}",
-                errors, process);
-
-            return Result.Failure<List<Plumbing>>("Failed to retrieve data from API.");
-        }
-
-        SyncStateEntity state = new() { LastProcessedId = finalId, LastSyncUtc = DateTime.UtcNow, UnixLastSyncUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds() };
-        Result<SyncStateEntity> synced = await _sync.SaveAsync(state);
-        if (synced.IsFailure)
-        {
-            _logger.LogError(
-                "Failed to sync. The next call to this api will have data that overlaps with existing persisted data. Error {Error}",
-                synced.Error);
-        }
-
-        Result<List<YellerDto>> dtoResult = await GetDto(raw);
-
-        if (!dtoResult.IsSuccess)
-            return Result.Failure<List<Plumbing>>(dtoResult.Error);
-
-        List<Plumbing> final = [.. dtoResult.Value.Select(_dtoToVo.Translate)];
-        return Result.Success(final);
+        return new(raw, errors, finalId);
     }
 
     private async Task<Result<List<YellerDto>>> GetDto(List<string> raw, string process = "Value retrieval")
