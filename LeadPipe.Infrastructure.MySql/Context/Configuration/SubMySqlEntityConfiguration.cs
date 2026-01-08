@@ -4,15 +4,10 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeadPipe.Infrastructure.MySql.Context.Configuration;
 
-internal sealed class SubMySqlEntityConfiguration
-    : IEntityTypeConfiguration<SubMySqlEntity>
+internal sealed class SubMySqlEntityConfiguration(string schema)
+        : IEntityTypeConfiguration<SubMySqlEntity>
 {
-    private readonly string _schema;
-
-    public SubMySqlEntityConfiguration(string schema)
-    {
-        _schema = schema;
-    }
+    private readonly string _schema = schema;
 
     public void Configure(EntityTypeBuilder<SubMySqlEntity> entity)
     {
