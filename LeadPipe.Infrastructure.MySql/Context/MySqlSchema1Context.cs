@@ -4,13 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.MySql.Context;
 
-public sealed class MySqlSchemaContext(
-    DbContextOptions<MySqlSchemaContext> options,
+public sealed class MySqlSchema1Context(
+    DbContextOptions<MySqlSchema1Context> options,
     IMySqlSettings settings
     ) : MySqlBaseContext(options, settings)
 {
     protected override void ApplyConfigurations(ModelBuilder modelBuilder)
     {
+        modelBuilder.ApplyConfiguration(
+            new CustomerMySqlEntityConfiguration(Settings.Schema1!));
+
+        modelBuilder.ApplyConfiguration(
+            new SubMySqlEntityConfiguration(Settings.Schema1!));
+
         modelBuilder.ApplyConfiguration(
             new CallMySqlEntityConfiguration(Settings.Schema2!));
 
@@ -19,12 +25,6 @@ public sealed class MySqlSchemaContext(
 
         modelBuilder.ApplyConfiguration(
             new TranscriptionMySqlEntityConfiguration(Settings.Schema2!));
-
-        modelBuilder.ApplyConfiguration(
-            new CustomerMySqlEntityConfiguration(Settings.Schema1!));
-
-        modelBuilder.ApplyConfiguration(
-            new SubMySqlEntityConfiguration(Settings.Schema1!));
     }
 
     // BLOCK ALL WRITE OPERATIONS

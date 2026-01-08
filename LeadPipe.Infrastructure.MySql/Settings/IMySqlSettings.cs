@@ -2,7 +2,7 @@
 
 public interface IMySqlSettings
 {
-    public string? SchemaConnectionString { get; set; }
+    public string? Schema1ConnectionString { get; set; }
     public string? Schema2ConnectionString { get; set; }
     public string? Schema3ConnectionString { get; set; }
     public string? Schema1 { get; set; }

@@ -13,14 +13,14 @@ public static class InjectInfrastructureMySql
     public static IServiceCollection AddInfrastructureMySql(this IServiceCollection services, IMySqlSettings settings)
     {
         // Register MySqlContext for Schema1
-        if (string.IsNullOrWhiteSpace(settings.SchemaConnectionString))
+        if (string.IsNullOrWhiteSpace(settings.Schema1ConnectionString))
             throw new InvalidOperationException("MySqlConnectionString for Schema1 is missing.");
 
-        services.AddDbContext<MySqlSchemaContext>((sp, options) =>
+        services.AddDbContext<MySqlSchema1Context>((sp, options) =>
         {
             options.UseMySql(
-                settings.SchemaConnectionString,
-                ServerVersion.AutoDetect(settings.SchemaConnectionString),
+                settings.Schema1ConnectionString,
+                ServerVersion.AutoDetect(settings.Schema1ConnectionString),
                 mySqlOptions =>
                 {
                     mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);

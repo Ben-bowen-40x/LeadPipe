@@ -20,14 +20,14 @@ internal static class ConfigureCommandLine
         settings.PlumbingConnectionString =
             configuration.GetConnectionString("Plumbing");
 
+        settings.Schema1ConnectionString =
+            configuration.GetConnectionString("Schema1");
+
         settings.Schema2ConnectionString =
             configuration.GetConnectionString("Schema2");
 
         settings.Schema3ConnectionString =
             configuration.GetConnectionString("Schema3");
-
-        settings.SchemaConnectionString =
-            configuration.GetConnectionString("Schema");
 
         // Tokens
         configuration.GetSection("LabToken").Bind(settings.LabToken);

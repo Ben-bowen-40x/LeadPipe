@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.MySql.Repository;
 
-public class SubMySqlRepository(MySqlSchemaContext context) : ISubMySqlRepository
+public class SubMySqlRepository(MySqlSchema1Context context) : ISubMySqlRepository
 {
     private readonly DbSet<SubMySqlEntity> _set = context.Set<SubMySqlEntity>();
 
