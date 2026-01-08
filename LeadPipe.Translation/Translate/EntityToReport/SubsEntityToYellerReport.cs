@@ -12,7 +12,6 @@ internal sealed class SubsEntityToYellerReport : IEntityToReport<SubsEntity, Rep
         UserData user = new()
         {
             ph = [sub.Number.ToString(), sub.Number2.ToString()],
-            country = [YellerReportHelper.Country]
         };
         CustomData custom = new()
         {

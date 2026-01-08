@@ -18,7 +18,7 @@ public class UserData
     public string? db { get; set; }
     public string? ge { get; set; }
     public required string[] ph { get; set; }
-    public required string[] country { get; set; }
+    public string[]? country { get; set; }
     public string[]? st { get; set; }
     public string[]? zp { get; set; }
     public string? lead_id { get; set; }
