@@ -79,7 +79,8 @@ public sealed class CallRepository(PlumbingContext context, ILogger<CallReposito
                         var row = batch[0];
 
                         _logger.LogError(
-                            "Row insert failed: Phone={Phone}, CallDate={CallDate}, Note={Note}, Source={Source}, Location={Location}",
+                            "{Entity} Row insert failed: Phone={Phone}, CallDate={CallDate}, Note={Note}, Source={Source}, Location={Location}",
+                            nameof(CallEntity),
                             row.PhoneNumber,
                             row.CallDate,
                             row.Note,
