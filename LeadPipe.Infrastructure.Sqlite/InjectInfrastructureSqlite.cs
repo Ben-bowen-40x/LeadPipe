@@ -36,6 +36,7 @@ public static class InjectInfrastructureSqlite
         services.AddScoped<IPlumbingCallLinkRepository, PlumbingCallLinkRepository>();
         services.AddScoped<IPlumbingRepository, PlumbingRepository>();
         services.AddScoped<ISubsCallLinkRepository, SubsCallLinkRepository>();
+        services.AddScoped<ISubsCornLinkRepository, SubsCornLinkRepository>();
         services.AddScoped<ISubsPlumbingLinkRepository, SubsPlumbingLinkRepository>();
         services.AddScoped<ISubsRepository, SubsRepository>();
         services.AddScoped<ISyncStateRepository, SyncStateRepository>();
