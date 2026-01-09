@@ -12,7 +12,7 @@ public sealed class MySqlSchema1Context(
     protected override void ApplyConfigurations(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(
-            new CustomerMySqlEntityConfiguration(Settings.Schema1!));
+            new CustardMySqlEntityConfiguration(Settings.Schema1!));
 
         modelBuilder.ApplyConfiguration(
             new SandMySqlEntityConfiguration(Settings.Schema1!));

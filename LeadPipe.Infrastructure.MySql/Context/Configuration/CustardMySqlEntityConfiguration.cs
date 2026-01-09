@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeadPipe.Infrastructure.MySql.Context.Configuration;
 
-internal sealed class CustomerMySqlEntityConfiguration(string schema)
-        : IEntityTypeConfiguration<CustomerMySqlEntity>
+internal sealed class CustardMySqlEntityConfiguration(string schema)
+        : IEntityTypeConfiguration<CustardMySqlEntity>
 {
     private readonly string _schema = schema;
 
-    public void Configure(EntityTypeBuilder<CustomerMySqlEntity> entity)
+    public void Configure(EntityTypeBuilder<CustardMySqlEntity> entity)
     {
         entity.ToTable("customer", schema: _schema);
         entity.HasKey(x => x.customerID);

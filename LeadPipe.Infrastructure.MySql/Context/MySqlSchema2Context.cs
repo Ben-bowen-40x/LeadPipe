@@ -21,7 +21,7 @@ public sealed class MySqlSchema2Context(
             new TranscriptionMySqlEntityConfiguration(Settings.Schema2!));
 
         modelBuilder.ApplyConfiguration(
-            new CustomerMySqlEntityConfiguration(Settings.Schema1!));
+            new CustardMySqlEntityConfiguration(Settings.Schema1!));
 
         modelBuilder.ApplyConfiguration(
             new SandMySqlEntityConfiguration(Settings.Schema1!));
