@@ -4,7 +4,7 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class SubsEntityToYellerReport : IEntityToReport<SubsEntity, ReportYeller>
+internal sealed class SubsEntityToReportYeller : IEntityToReport<SubsEntity, ReportYeller>
 {
     public ReportYeller Translate(SubsEntity sub)
     {
