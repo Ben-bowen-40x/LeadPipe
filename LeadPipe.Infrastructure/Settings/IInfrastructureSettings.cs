@@ -6,8 +6,8 @@ public interface IInfrastructureSettings :
     ILeafSettings,
     IYellerSettings
 {
-    string? CaliperiReportLoc { get; set; }
-    string? CaliperiSourceLoc { get; set; }
+    string? CalliReportLoc { get; set; }
+    string? CalliSourceLoc { get; set; }
 
     string? LabReportLoc { get; set; }
     string? LabSourceLoc { get; set; }
