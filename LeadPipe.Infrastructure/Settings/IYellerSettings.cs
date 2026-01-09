@@ -14,8 +14,8 @@ public interface IYellerSettings
     int YellerConcurrentMax { get; set; }
     string? YellerFinalEndpoint { get; set; }
     string? YellerPrelimId { get; set; }
-    string? YellerCallSource1 { get; set; }
-    string? YellerCallSource2 { get; set; }
+    string? YellerCaliperSource1 { get; set; }
+    string? YellerCaliperSource2 { get; set; }
     string? YellerClientReporterLoc { get; set; }
     string[]? YellerBellerId { get; set; }
     string? YellerSalt { get; set; }

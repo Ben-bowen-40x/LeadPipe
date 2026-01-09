@@ -4,4 +4,4 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
 namespace LeadPipe.Infrastructure.Data.Persistence;
 
-internal class SubsPlumbingLinkPersistence(ISubsPlumbingLinkRepository repo) : Persistence<ISubsPlumbingLinkRepository, SubsPlumbingLink>(repo), IDataPersistence<SubsPlumbingLink>{ }
+internal class SubsPlumbingLinkPersistence(ISandPlumbingLinkRepository repo) : Persistence<ISandPlumbingLinkRepository, SandPlumbingLink>(repo), IDataPersistence<SandPlumbingLink>{ }

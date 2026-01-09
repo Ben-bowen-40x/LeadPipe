@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.MySql;
 
-public class CallMySqlEntity
+public class CaliperMySqlEntity
 {
 #pragma warning disable IDE1006
     public long call_id { get; set; }

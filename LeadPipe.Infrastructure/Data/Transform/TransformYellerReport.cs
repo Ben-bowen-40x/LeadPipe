@@ -10,26 +10,26 @@ using LeadPipe.Infrastructure.Settings;
 namespace LeadPipe.Infrastructure.Data.Transform;
 
 internal sealed class TransformYellerReport(
-    ISubsPlumbingLinkRepository spRepo,
-    ISubsCallLinkRepository subsCallRepo,
+    ISandPlumbingLinkRepository spRepo,
+    ISandCaliperLinkRepository sandCaliperRepo,
     ICaliperRepository caliperRepo,
     ICornRepository cornRepo,
-    ISubsCornLinkRepository cornLinksRepo,
+    ISandCornLinkRepository cornLinksRepo,
     IVoToEntity<Plumbing, PlumbingEntity> toEntity,
-    IEntityToReport<SubsEntity, ReportYeller> subsToR,
+    IEntityToReport<SandEntity, ReportYeller> subsToR,
     IEntityToReport<PlumbingEntity, ReportYeller> plumbToR,
-    IEntityToReport<CaliperEntity, ReportYeller> callToR,
+    IEntityToReport<CaliperEntity, ReportYeller> caliperToR,
     IEntityToReport<CornEntity, ReportYeller> cornToR,
     IYellerSettings settings
     ) : ITransform<Plumbing, ReportYeller>
 {
-    private readonly ISubsPlumbingLinkRepository _subsPlumbRepo = spRepo;
-    private readonly ISubsCallLinkRepository _subsCallRepo = subsCallRepo;
+    private readonly ISandPlumbingLinkRepository _sandPlumbRepo = spRepo;
+    private readonly ISandCaliperLinkRepository _sandCaliperRepo = sandCaliperRepo;
     private readonly ICaliperRepository _caliperRepo = caliperRepo;
     private readonly ICornRepository _cornRepo = cornRepo;
-    private readonly ISubsCornLinkRepository _cornLinksRepo = cornLinksRepo;
+    private readonly ISandCornLinkRepository _cornLinksRepo = cornLinksRepo;
     private readonly IVoToEntity<Plumbing, PlumbingEntity> _voToEntity = toEntity;
-    private readonly IEntityToReport<SubsEntity, ReportYeller> _subsToR = subsToR;
+    private readonly IEntityToReport<SandEntity, ReportYeller> _subsToR = subsToR;
     private readonly IEntityToReport<PlumbingEntity, ReportYeller> _plumbToR = plumbToR;
     private readonly IEntityToReport<CaliperEntity, ReportYeller> _caliperToR = caliperToR;
     private readonly IEntityToReport<CornEntity, ReportYeller> _cornToR = cornToR;
@@ -45,10 +45,10 @@ internal sealed class TransformYellerReport(
         List<PlumbingEntity> plumbs = [.. data.Select(_voToEntity.Translate)];
 
         // Get links to subs for reporting
-        Result<List<SubsPlumbingLink>> links = await _subsPlumbRepo.GetAllWithDetailsAsync(plumbs);
+        Result<List<SandPlumbingLink>> links = await _sandPlumbRepo.GetAllWithDetailsAsync(plumbs);
         if (links.IsFailure)
             return Result.Failure<List<ReportYeller>>(links.Error);
-        List<SubsPlumbingLink> subPlumbLinks = links.Value;
+        List<SandPlumbingLink> subPlumbLinks = links.Value;
 
         // Generate reports for plumbing and plumbing links
         // Hashset for easy lookup
@@ -59,7 +59,7 @@ internal sealed class TransformYellerReport(
                     .Where(p => !plumbIds.Contains(p.Id))
                     .Select(_plumbToR.Translate),
                 .. subPlumbLinks
-                    .Select(s => _subsToR.Translate(s.SubsEntity!))
+                    .Select(s => _subsToR.Translate(s.SandEntity!))
             ];
 
         // *************************************
@@ -73,7 +73,7 @@ internal sealed class TransformYellerReport(
         List<CaliperEntity> calipers = calipersResult.Value;
 
         // Get Caliper links
-        Result<List<SubsCallLink>> callLinksResult = await _subsCallRepo.GetAllWithDetailsAsync(calls);
+        Result<List<SandCaliperLink>> caliperLinksResult = await _sandCaliperRepo.GetAllWithDetailsAsync(calipers);
         if (caliperLinksResult.IsFailure)
             return Result.Failure<List<ReportYeller>>(caliperLinksResult.Error);
         List<SandCaliperLink> caliperLinks = caliperLinksResult.Value;
@@ -87,7 +87,7 @@ internal sealed class TransformYellerReport(
                    .Where(c => !caliperIds.Contains(c.Id))
                    .Select(_caliperToR.Translate),
                 .. caliperLinks
-                    .Select(c => _subsToR.Translate(c.SubsEntity!))
+                    .Select(c => _subsToR.Translate(c.SandEntity!))
             ];
 
         // *************************************
@@ -101,10 +101,10 @@ internal sealed class TransformYellerReport(
         List <CornEntity> corn = cornResult.Value;
 
         // Corn Links
-        Result<List<SubsCornLink>> cornLinksResult = await _cornLinksRepo.GetAllWithDetailsAsync(corn);
+        Result<List<SandCornLink>> cornLinksResult = await _cornLinksRepo.GetAllWithDetailsAsync(corn);
         if (cornLinksResult.IsFailure)
             return Result.Failure<List<ReportYeller>>(cornLinksResult.Error);
-        List <SubsCornLink> cornLinks = cornLinksResult.Value;
+        List <SandCornLink> cornLinks = cornLinksResult.Value;
 
         // Generate corn report
         // Hashset for easy lookup

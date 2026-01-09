@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class SubsEntity : IEntity
+public class SandEntity : IEntity
 {
     public required long Id { get; set; }
     public long CustomerId { get; set; }
@@ -24,7 +24,7 @@ public class SubsEntity : IEntity
     public int Seller3 { get; set; }
 
     // Navigation properties
-    public ICollection<SubsPlumbingLink> SubsPlumbingLinks { get; set; } = [];
-    public ICollection<SubsCallLink> SubsCallLinks { get; set; } = [];
-    public ICollection<SubsCornLink> SubsCornLinks { get; set; } = [];
+    public ICollection<SandPlumbingLink> SubsPlumbingLinks { get; set; } = [];
+    public ICollection<SandCaliperLink> SubsCaliperLinks { get; set; } = [];
+    public ICollection<SandCornLink> SubsCornLinks { get; set; } = [];
 }

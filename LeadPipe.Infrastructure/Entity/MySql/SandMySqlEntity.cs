@@ -1,5 +1,5 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.MySql;
-public class SubMySqlEntity
+public class SandMySqlEntity
 {
 #pragma warning disable IDE1006 // Naming Styles
     public int subscriptionID { get; set; }
@@ -14,6 +14,6 @@ public class SubMySqlEntity
     public int? soldBy2 { get; set; }
     public int? soldBy3 { get; set; }
 
-    public CustomerMySqlEntity? customer { get; set; }
+    public CustardMySqlEntity? customer { get; set; }
 #pragma warning restore IDE1006 // Naming Styles
 }

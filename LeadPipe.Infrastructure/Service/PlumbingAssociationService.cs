@@ -7,21 +7,21 @@ namespace LeadPipe.Infrastructure.Service;
 
 internal class PlumbingAssociationService(
     IPlumbingRepository plumbingRepo,
-    ISubsRepository subsRepo,
-    ICallRepository callRepo,
-    ISubsPlumbingLinkRepository linkRepo,
-    ISubsCallLinkRepository subsCallRepo,
-    IPlumbingCallLinkRepository plumbingCallRepo
+    ISandRepository sandRepo,
+    ICaliperRepository caliperRepo,
+    ISandPlumbingLinkRepository linkRepo,
+    ISandCaliperLinkRepository sandCaliperRepo,
+    IPlumbingCaliperLinkRepository plumbingCaliperRepo
     ) : IPlumbingAssociationService
 {
     #region Private
     private readonly IPlumbingRepository _plumbingRepo = plumbingRepo;
-    private readonly ISubsRepository _subsRepo = subsRepo;
-    private readonly ICallRepository _callRepo = callRepo;
+    private readonly ISandRepository _sandRepo = sandRepo;
+    private readonly ICaliperRepository _caliperRepo = caliperRepo;
 
-    private readonly ISubsPlumbingLinkRepository _subsPlumbingRepo = linkRepo;
-    private readonly ISubsCallLinkRepository _subsCallRepo = subsCallRepo;
-    private readonly IPlumbingCallLinkRepository _plumbingCallRepo = plumbingCallRepo;
+    private readonly ISandPlumbingLinkRepository _sandPlumbingRepo = linkRepo;
+    private readonly ISandCaliperLinkRepository _sandCaliperRepo = sandCaliperRepo;
+    private readonly IPlumbingCaliperLinkRepository _plumbingCaliperRepo = plumbingCaliperRepo;
 
     #endregion
 
@@ -29,93 +29,93 @@ internal class PlumbingAssociationService(
     {
         // Fetch base entities
         var plumbingResult = await _plumbingRepo.GetAllAsync();
-        var subsResult = await _subsRepo.GetAllAsync();
-        var callResult = await _callRepo.GetAllAsync();
+        var sandResult = await _sandRepo.GetAllAsync();
+        var caliperResult = await _caliperRepo.GetAllAsync();
 
-        var combined = Result.Combine(plumbingResult, subsResult, callResult);
+        var combined = Result.Combine(plumbingResult, sandResult, caliperResult);
         if (combined.IsFailure)
             return combined;
 
         var plumbingEntities = plumbingResult.Value;
-        var subsEntities = subsResult.Value;
-        var callEntities = callResult.Value;
+        var sandEntities = sandResult.Value;
+        var caliperEntities = caliperResult.Value;
 
         // Build lookup dictionaries (deduped safely)
         var plumbingByPhone = plumbingEntities
             .GroupBy(p => p.PhoneNumber)
             .ToDictionary(g => g.Key, g => g.Last());
 
-        var callByPhone = callEntities
+        var caliperByPhone = caliperEntities
             .GroupBy(c => c.PhoneNumber)
             .ToDictionary(g => g.Key, g => g.Last());
 
-        var subsById = subsEntities.ToDictionary(s => s.Id);
+        var sandById = sandEntities.ToDictionary(s => s.Id);
         var plumbingById = plumbingEntities.ToDictionary(p => p.Id);
-        var callById = callEntities.ToDictionary(c => c.Id);
+        var caliperById = caliperEntities.ToDictionary(c => c.Id);
 
         // Load existing links
-        var existingSubsPlumbing = await LoadExistingSubsPlumbingAsync();
-        var existingSubsCall = await LoadExistingSubsCallAsync();
-        var existingPlumbingCall = await LoadExistingPlumbingCallAsync();
+        var existingSandPlumbing = await LoadExistingSandPlumbingAsync();
+        var existingSandCaliper = await LoadExistingSandCaliperAsync();
+        var existingPlumbingCaliper = await LoadExistingPlumbingCaliperAsync();
 
         // Generate new links
-        var subsPlumbingLinks = GenerateSubsPlumbingLinks(
-            subsEntities,
+        var sandPlumbingLinks = GenerateSandPlumbingLinks(
+            sandEntities,
             plumbingByPhone,
-            subsById,
-            existingSubsPlumbing);
+            sandById,
+            existingSandPlumbing);
 
-        var subsCallLinks = GenerateSubsCallLinks(
-            subsEntities,
-            callByPhone,
-            subsById,
-            existingSubsCall);
+        var sandCaliperLinks = GenerateSandCaliperLinks(
+            sandEntities,
+            caliperByPhone,
+            sandById,
+            existingSandCaliper);
 
-        var plumbingCallLinks = GeneratePlumbingCallLinks(
+        var plumbingCaliperLinks = GeneratePlumbingCaliperLinks(
             plumbingEntities,
-            callByPhone,
+            caliperByPhone,
             plumbingById,
-            existingPlumbingCall);
+            existingPlumbingCaliper);
 
         // Persist
-        var saveSubsPlumbing = await _subsPlumbingRepo.UpsertRangeAsync(subsPlumbingLinks);
-        var saveSubsCall = await _subsCallRepo.UpsertRangeAsync(subsCallLinks);
-        var savePlumbingCall = await _plumbingCallRepo.UpsertRangeAsync(plumbingCallLinks);
+        var saveSandPlumbing = await _sandPlumbingRepo.UpsertRangeAsync(sandPlumbingLinks);
+        var saveSandCaliper = await _sandCaliperRepo.UpsertRangeAsync(sandCaliperLinks);
+        var savePlumbingCaliper = await _plumbingCaliperRepo.UpsertRangeAsync(plumbingCaliperLinks);
 
-        return Result.Combine(saveSubsPlumbing, saveSubsCall, savePlumbingCall);
+        return Result.Combine(saveSandPlumbing, saveSandCaliper, savePlumbingCaliper);
     }
-    private async Task<HashSet<(long SubsId, long PlumbingId)>> LoadExistingSubsPlumbingAsync()
+    private async Task<HashSet<(long SandId, long PlumbingId)>> LoadExistingSandPlumbingAsync()
     {
-        var result = await _subsPlumbingRepo.GetAllAsync();
+        var result = await _sandPlumbingRepo.GetAllAsync();
         return result.IsSuccess
-            ? [.. result.Value.Select(l => (l.SubsId, l.PlumbingId))]
+            ? [.. result.Value.Select(l => (l.SandId, l.PlumbingId))]
             : [];
     }
 
-    private async Task<HashSet<(long SubsId, long CallId)>> LoadExistingSubsCallAsync()
+    private async Task<HashSet<(long SandId, long CaliperId)>> LoadExistingSandCaliperAsync()
     {
-        var result = await _subsCallRepo.GetAllAsync();
+        var result = await _sandCaliperRepo.GetAllAsync();
         return result.IsSuccess
-            ? [.. result.Value.Select(l => (l.SubsId, l.CallId))]
+            ? [.. result.Value.Select(l => (l.SandId, l.CaliperId))]
             : [];
     }
 
-    private async Task<HashSet<(long PlumbingId, long CallId)>> LoadExistingPlumbingCallAsync()
+    private async Task<HashSet<(long PlumbingId, long CaliperId)>> LoadExistingPlumbingCaliperAsync()
     {
-        var result = await _plumbingCallRepo.GetAllAsync();
+        var result = await _plumbingCaliperRepo.GetAllAsync();
         return result.IsSuccess
-            ? [.. result.Value.Select(l => (l.PlumbingId, l.CallId))]
+            ? [.. result.Value.Select(l => (l.PlumbingId, l.CaliperId))]
             : [];
     }
-    private static List<SubsPlumbingLink> GenerateSubsPlumbingLinks(
-        List<SubsEntity> subs,
+    private static List<SandPlumbingLink> GenerateSandPlumbingLinks(
+        List<SandEntity> Sand,
         Dictionary<long, PlumbingEntity> plumbingByPhone,
-        Dictionary<long, SubsEntity> subsById,
-        HashSet<(long SubsId, long PlumbingId)> existing)
+        Dictionary<long, SandEntity> SandById,
+        HashSet<(long SandId, long PlumbingId)> existing)
     {
-        var links = new List<SubsPlumbingLink>();
+        var links = new List<SandPlumbingLink>();
 
-        foreach (var s in subs)
+        foreach (var s in Sand)
         {
             foreach (var number in new[] { s.PhoneNumber, s.PhoneNumber2 })
             {
@@ -126,10 +126,10 @@ internal class PlumbingAssociationService(
                 if (existing.Contains(key))
                     continue;
 
-                links.Add(new SubsPlumbingLink
+                links.Add(new SandPlumbingLink
                 {
-                    SubsId = s.Id,
-                    SubsEntity = subsById[s.Id],
+                    SandId = s.Id,
+                    SandEntity = SandById[s.Id],
                     PlumbingId = plumbing.Id,
                     PlumbingEntity = plumbing,
                     MatchingPhone = number
@@ -139,31 +139,31 @@ internal class PlumbingAssociationService(
 
         return links;
     }
-    private static List<SubsCallLink> GenerateSubsCallLinks(
-        List<SubsEntity> subs,
-        Dictionary<long, CallEntity> callByPhone,
-        Dictionary<long, SubsEntity> subsById,
-        HashSet<(long SubsId, long CallId)> existing)
+    private static List<SandCaliperLink> GenerateSandCaliperLinks(
+        List<SandEntity> sand,
+        Dictionary<long, CaliperEntity> caliperByPhone,
+        Dictionary<long, SandEntity> sandById,
+        HashSet<(long SandId, long CaliperId)> existing)
     {
-        var links = new List<SubsCallLink>();
+        var links = new List<SandCaliperLink>();
 
-        foreach (var s in subs)
+        foreach (var s in sand)
         {
             foreach (var number in new[] { s.PhoneNumber, s.PhoneNumber2 })
             {
-                if (!callByPhone.TryGetValue(number, out var call))
+                if (!caliperByPhone.TryGetValue(number, out var caliper))
                     continue;
 
-                var key = (s.Id, call.Id);
+                var key = (s.Id, caliper.Id);
                 if (existing.Contains(key))
                     continue;
 
-                links.Add(new SubsCallLink
+                links.Add(new SandCaliperLink
                 {
-                    SubsId = s.Id,
-                    SubsEntity = subsById[s.Id],
-                    CallId = call.Id,
-                    CallEntity = call,
+                    SandId = s.Id,
+                    SandEntity = sandById[s.Id],
+                    CaliperId = caliper.Id,
+                    CaliperEntity = caliper,
                     MatchingNumber = number
                 });
             }
@@ -171,29 +171,29 @@ internal class PlumbingAssociationService(
 
         return links;
     }
-    private static List<PlumbingCallLink> GeneratePlumbingCallLinks(
+    private static List<PlumbingCaliperLink> GeneratePlumbingCaliperLinks(
         List<PlumbingEntity> plumbing,
-        Dictionary<long, CallEntity> callByPhone,
+        Dictionary<long, CaliperEntity> caliperByPhone,
         Dictionary<long, PlumbingEntity> plumbingById,
-        HashSet<(long PlumbingId, long CallId)> existing)
+        HashSet<(long PlumbingId, long CaliperId)> existing)
     {
-        var links = new List<PlumbingCallLink>();
+        var links = new List<PlumbingCaliperLink>();
 
         foreach (var p in plumbing)
         {
-            if (!callByPhone.TryGetValue(p.PhoneNumber, out var call))
+            if (!caliperByPhone.TryGetValue(p.PhoneNumber, out var caliper))
                 continue;
 
-            var key = (p.Id, call.Id);
+            var key = (p.Id, caliper.Id);
             if (existing.Contains(key))
                 continue;
 
-            links.Add(new PlumbingCallLink
+            links.Add(new PlumbingCaliperLink
             {
                 PlumbingId = p.Id,
                 PlumbingEntity = plumbingById[p.Id],
-                CallId = call.Id,
-                CallEntity = call
+                CaliperId = caliper.Id,
+                CaliperEntity = caliper
             });
         }
 

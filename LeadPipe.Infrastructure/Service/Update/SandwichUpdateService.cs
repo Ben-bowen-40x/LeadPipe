@@ -7,8 +7,8 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 namespace LeadPipe.Infrastructure.Service.Update;
 
 internal sealed class SandwichUpdateService(
-    IDataSourceAsync<SubMySqlEntity> subs,
-    IEntityToVo<SubMySqlEntity, Sandwich> eToVo,
+    IDataSourceAsync<SandMySqlEntity> subs,
+    IEntityToVo<SandMySqlEntity, Sandwich> eToVo,
     IDataPersistence<Sandwich> persist
-    ) : ValueObjectUpdateService<SubMySqlEntity, Sandwich>(subs, eToVo, persist), IUpdateService<Sandwich>
+    ) : ValueObjectUpdateService<SandMySqlEntity, Sandwich>(subs, eToVo, persist), IUpdateService<Sandwich>
 { }

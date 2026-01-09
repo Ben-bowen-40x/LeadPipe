@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Entity.MySql;
 
-public class CustomerMySqlEntity
+public class CustardMySqlEntity
 {
 #pragma warning disable IDE1006 // Naming Styles
     public int customerID { get; set; }
@@ -10,6 +10,6 @@ public class CustomerMySqlEntity
     public DateTime dateAdded { get; set; }
     public DateTime dateCancelled { get; set; }
 
-    public ICollection<SubMySqlEntity> subscriptions { get; set; } = [];
+    public ICollection<SandMySqlEntity> subscriptions { get; set; } = [];
 #pragma warning restore IDE1006 // Naming Styles
 }

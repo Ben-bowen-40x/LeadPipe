@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LeadPipe.Infrastructure.MySql.Context.Configuration;
 
-internal sealed class CallMySqlEntityConfiguration(string schema)
-        : IEntityTypeConfiguration<CallMySqlEntity>
+internal sealed class CaliperMySqlEntityConfiguration(string schema)
+        : IEntityTypeConfiguration<CaliperMySqlEntity>
 {
     private readonly string _schema = schema;
 
-    public void Configure(EntityTypeBuilder<CallMySqlEntity> entity)
+    public void Configure(EntityTypeBuilder<CaliperMySqlEntity> entity)
     {
         entity.ToTable("calls", schema: _schema);
         entity.HasKey(x => x.call_id);

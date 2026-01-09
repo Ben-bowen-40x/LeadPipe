@@ -2,4 +2,4 @@
 
 namespace LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
-public interface ICallRepository : IRepository<CallEntity> { }
+public interface ISandRepository : IRepository<SandEntity> { }

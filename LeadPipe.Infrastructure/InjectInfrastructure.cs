@@ -28,13 +28,13 @@ public static class InjectInfrastructure
         #region ADD DATA
 
         // Data Persistence
-        services.AddScoped<IDataPersistence<CallEntity>, CallEntityPersistence>();
-        services.AddScoped<IDataPersistence<PlumbingCallLink>, PlumbingCallLinkPersistence>();
+        services.AddScoped<IDataPersistence<CaliperEntity>, CaliperEntityPersistence>();
+        services.AddScoped<IDataPersistence<PlumbingCaliperLink>, PlumbingCaliperLinkPersistence>();
         services.AddScoped<IDataPersistence<PlumbingEntity>, PlumbingPersistence>();
-        services.AddScoped<IDataPersistence<SubsCallLink>, SubsCallLinkPersistence>();
-        services.AddScoped<IDataPersistence<SubsEntity>, SubsEntityPersistence>();
-        services.AddScoped<IDataPersistence<SubsPlumbingLink>, SubsPlumbingLinkPersistence>();
-        services.AddScoped<IDataPersistence<Call>, CallPersistence>();
+        services.AddScoped<IDataPersistence<SandCaliperLink>, SubsCaliperLinkPersistence>();
+        services.AddScoped<IDataPersistence<SandEntity>, SubsEntityPersistence>();
+        services.AddScoped<IDataPersistence<SandPlumbingLink>, SubsPlumbingLinkPersistence>();
+        services.AddScoped<IDataPersistence<Caliper>, CaliperPersistence>();
         services.AddScoped<IDataPersistence<Sandwich>, SandwichPersistence>();
 
         // Transformers
@@ -58,8 +58,8 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<LeasedDto>, LeasedFileDataSource>();
         services.AddScoped<IDataSourceAsync<LibacionDto>, LibacionFileDataSource>();
         services.AddScoped<IDataSourceAsync<PanDto>, PanFileDataSource>();
-        services.AddScoped<IDataSourceAsync<CallMySqlEntity>, CallMySqlDataSource>();
-        services.AddScoped<IDataSourceAsync<SubMySqlEntity>, SubMySqlDataSource>();
+        services.AddScoped<IDataSourceAsync<CaliperMySqlEntity>, CaliperMySqlDataSource>();
+        services.AddScoped<IDataSourceAsync<SandMySqlEntity>, SubMySqlDataSource>();
         #endregion
 
         // *****************************************
@@ -77,7 +77,7 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IUpdateService<Plumbing>, DummyUpdateService2>(Source.Test2);
 
         // Nonkeyed update services
-        services.AddScoped<IUpdateService<Call>, CallsUpdateService>();
+        services.AddScoped<IUpdateService<Caliper>, CalipersUpdateService>();
         services.AddScoped<IUpdateService<Sandwich>, SandwichUpdateService>();
 
         // Keyed Report services
