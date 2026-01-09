@@ -117,7 +117,7 @@ internal class PlumbingAssociationService(
 
         foreach (var s in subs)
         {
-            foreach (var number in new[] { s.Number, s.Number2 })
+            foreach (var number in new[] { s.PhoneNumber, s.PhoneNumber2 })
             {
                 if (!plumbingByPhone.TryGetValue(number, out var plumbing))
                     continue;
@@ -149,7 +149,7 @@ internal class PlumbingAssociationService(
 
         foreach (var s in subs)
         {
-            foreach (var number in new[] { s.Number, s.Number2 })
+            foreach (var number in new[] { s.PhoneNumber, s.PhoneNumber2 })
             {
                 if (!callByPhone.TryGetValue(number, out var call))
                     continue;

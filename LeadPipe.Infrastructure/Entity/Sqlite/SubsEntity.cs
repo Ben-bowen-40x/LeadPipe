@@ -2,14 +2,14 @@
 
 public class SubsEntity : IEntity
 {
-    public long Id { get; set; }
+    public required long Id { get; set; }
     public long CustomerId { get; set; }
     public DateTime Date { get; set; }
     public long UnixDate { get; set; }
     public DateTime SubDate { get; set; }
     public long UnixSubDate { get; set; }
-    public long Number { get; set; }
-    public long Number2 { get; set; }
+    public long PhoneNumber { get; set; }
+    public long PhoneNumber2 { get; set; }
     public DateTime CancelDate { get; set; }
     public long UnixCancelDate { get; set; }
     public DateTime SubCancelDate { get; set; }

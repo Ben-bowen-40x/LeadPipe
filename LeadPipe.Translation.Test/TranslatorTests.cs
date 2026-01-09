@@ -107,12 +107,13 @@ public class TranslatorTests
         var translator = new SubsToSandwich(_dt);
         var entity = new SubsEntity
         {
+            Id = 0,
             Date = new DateTime(2025, 3, 9, 2, 0, 0),      // DST gap
             SubDate = new DateTime(2025, 6, 1, 12, 0, 0), // normal
             CancelDate = new DateTime(2025, 11, 2, 1, 30, 0), // ambiguous
             SubCancelDate = new DateTime(2025, 12, 31, 23, 59, 59),
-            Number = 5555550001,
-            Number2 = 5555550002,
+            PhoneNumber = 5555550001,
+            PhoneNumber2 = 5555550002,
             Active = true,
             SubActive = false,
             Complete = false,

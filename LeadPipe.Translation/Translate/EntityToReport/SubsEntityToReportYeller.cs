@@ -12,8 +12,8 @@ internal sealed class SubsEntityToReportYeller : IEntityToReport<SubsEntity, Rep
         string eventName = "purchase";
 
         // Hash pii
-        string num1 = YellerReportHelper.HashSha256(sub.Number.ToString());
-        string num2 = YellerReportHelper.HashSha256(sub.Number2.ToString());
+        string num1 = YellerReportHelper.HashSha256(sub.PhoneNumber.ToString());
+        string num2 = YellerReportHelper.HashSha256(sub.PhoneNumber2.ToString());
 
         UserData user = new()
         {

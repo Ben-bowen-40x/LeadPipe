@@ -18,7 +18,7 @@ public sealed class SubsRepository(PlumbingContext context, ILogger<SubsReposito
 
         // Deduplicate in-memory by Number
         List<SubsEntity> uniqueEntities = [.. entities
-            .GroupBy(e => e.Number)
+            .GroupBy(e => e.PhoneNumber)
             .Select(g => g.Last())];
 
         int batchSize = 50; // Reasonable start given 19 columns per row
@@ -80,7 +80,7 @@ public sealed class SubsRepository(PlumbingContext context, ILogger<SubsReposito
                         var row = batch[0];
                         _logger.LogError(
                             "Row insert failed: Number={Number}, CustomerId={CustomerId}",
-                            row.Number, row.CustomerId);
+                            row.PhoneNumber, row.CustomerId);
 
                         index++;
                         batchSize = 25;
@@ -165,8 +165,8 @@ public sealed class SubsRepository(PlumbingContext context, ILogger<SubsReposito
                    .Append($"{e.UnixDate}, ")
                    .Append($"'{e.SubDate:yyyy-MM-dd HH:mm:ss}', ")
                    .Append($"{e.UnixSubDate}, ")
-                   .Append($"{e.Number}, ")
-                   .Append($"{e.Number2}, ")
+                   .Append($"{e.PhoneNumber}, ")
+                   .Append($"{e.PhoneNumber2}, ")
                    .Append($"'{e.CancelDate:yyyy-MM-dd HH:mm:ss}', ")
                    .Append($"{e.UnixCancelDate}, ")
                    .Append($"'{e.SubCancelDate:yyyy-MM-dd HH:mm:ss}', ")
