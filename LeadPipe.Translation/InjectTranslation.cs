@@ -48,7 +48,7 @@ public static class InjectTranslation
         // IVoToEntity
         services.AddScoped<IVoToEntity<Caliper, CaliperEntity>, CaliperToCaliperEntity>();
         services.AddScoped<IVoToEntity<Plumbing, PlumbingEntity>, PlumbingToPlumbingEntity>();
-        services.AddScoped<IVoToEntity<Sandwich, SandEntity>, SandwichToSand>();
+        services.AddScoped<IVoToEntity<Sandwich, SandEntity>, SandwichToSandEntity>();
 
         // IEntityToReport
         services.AddScoped<IEntityToReport<SandPlumbingLink, ReportPlumbing>, SandPlumbingLinkToReportPlumbing>();
