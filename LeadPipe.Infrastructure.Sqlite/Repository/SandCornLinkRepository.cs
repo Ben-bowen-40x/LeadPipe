@@ -14,7 +14,7 @@ public class SandCornLinkRepository(
     : PlumbingContextRepository<SandCornLink, SandCornLinkRepository>(context, logger),
       ISandCornLinkRepository
 {
-    public async Task<Result<List<SandCornLink>>> GetAllWithDetailsAsync()
+    public override async Task<Result<List<SandCornLink>>> GetAllWithDetailsAsync()
     {
         try
         {

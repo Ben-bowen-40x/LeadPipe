@@ -11,7 +11,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlumbingLinkRepository> logger)
     : PlumbingContextRepository<SandPlumbingLink, SandPlumbingLinkRepository>(context, logger), ISandPlumbingLinkRepository
 {
-    public async Task<Result<List<SandPlumbingLink>>> GetAllWithDetailsAsync()
+    public override async Task<Result<List<SandPlumbingLink>>> GetAllWithDetailsAsync()
     {
         try
         {
@@ -207,17 +207,5 @@ public class SandPlumbingLinkRepository(PlumbingContext context, ILogger<SandPlu
             sql.Append(';');
             _context.Database.ExecuteSqlRaw(sql.ToString());
         }
-    }
-    public async Task<Result<List<SandPlumbingLink>>> GetAllAsync(IEnumerable<PlumbingEntity> filter)
-    {
-        try
-        {
-            List<long> ids = [.. filter.Select(p => p.Id)];
-            List<SandPlumbingLink> set = await _set
-                .Where(e => ids.Contains(e.PlumbingId))
-                .ToListAsync();
-            return Result.Success(set);
-        }
-        catch (Exception ex) { return Result.Failure<List<SandPlumbingLink>>(ex.Message); }
     }
 }

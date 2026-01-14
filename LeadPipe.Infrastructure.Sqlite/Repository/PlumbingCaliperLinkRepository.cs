@@ -14,7 +14,7 @@ public sealed class PlumbingCaliperLinkRepository(
     : PlumbingContextRepository<PlumbingCaliperLink, PlumbingCaliperLinkRepository>(context, logger),
       IPlumbingCaliperLinkRepository
 {
-    public async Task<Result<List<PlumbingCaliperLink>>> GetAllWithDetailsAsync()
+    public override async Task<Result<List<PlumbingCaliperLink>>> GetAllWithDetailsAsync()
     {
         try
         {

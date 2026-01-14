@@ -159,14 +159,12 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                sql.Append("(")
+                sql.Append('(')
                    .Append($"{e.CustardId}, ")
                    .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}', ")
                    .Append($"{e.UnixDate}, ")
                    .Append($"'{e.Date:yyyy-MM-dd HH:mm:ss}', ")
                    .Append($"{e.UnixDate}, ")
-                   .Append($"{e.PhoneNumber}, ")
-                   .Append($"{e.PhoneNumber2}, ")
                    .Append($"'{e.CancelDate:yyyy-MM-dd HH:mm:ss}', ")
                    .Append($"{e.UnixCancelDate}, ")
                    .Append($"'{e.CancelDate:yyyy-MM-dd HH:mm:ss}', ")
@@ -179,7 +177,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
                    .Append($"{e.Seller}, ")
                    .Append($"{e.Seller2}, ")
                    .Append($"{e.Seller3}")
-                   .Append(")");
+                   .Append(')');
 
                 if (i < batch.Count - 1)
                     sql.Append(", ");

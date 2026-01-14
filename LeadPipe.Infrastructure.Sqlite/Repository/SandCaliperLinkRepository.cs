@@ -11,7 +11,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public sealed class SubsCaliperLinkRepository(PlumbingContext context, ILogger<SubsCaliperLinkRepository> logger)
     : PlumbingContextRepository<SandCaliperLink, SubsCaliperLinkRepository>(context, logger), ISandCaliperLinkRepository
 {
-    public async Task<Result<List<SandCaliperLink>>> GetAllWithDetailsAsync()
+    public override async Task<Result<List<SandCaliperLink>>> GetAllWithDetailsAsync()
     {
         try
         {
