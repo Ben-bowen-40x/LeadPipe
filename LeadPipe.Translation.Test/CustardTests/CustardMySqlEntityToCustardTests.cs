@@ -1,11 +1,14 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.MySql;
+using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.EntityToVo;
+using NSubstitute;
 
-namespace LeadPipe.Translation.Test.Custard;
+namespace LeadPipe.Translation.Test.CustardTests;
 
 public sealed class CustardMySqlEntityToCustardTests
 {
+    private readonly IDateTimeTranslate dt = Substitute.For<IDateTimeTranslate>();
     private static CustardMySqlEntity CreateEntity(
         int status = 1,
         string? phone1 = "5551112222",
@@ -24,7 +27,7 @@ public sealed class CustardMySqlEntityToCustardTests
     public void Translate_ShouldMapAllFieldsCorrectly()
     {
         var entity = CreateEntity();
-        var translator = new CustardMySqlEntityToCustard();
+        var translator = new CustardMySqlEntityToCustard(dt);
 
         Custard vo = translator.Translate(entity);
 
@@ -42,7 +45,7 @@ public sealed class CustardMySqlEntityToCustardTests
     public void Translate_StatusZero_ShouldProduceFalse()
     {
         var entity = CreateEntity(status: 0);
-        var translator = new CustardMySqlEntityToCustard();
+        var translator = new CustardMySqlEntityToCustard(dt);
 
         Custard vo = translator.Translate(entity);
 
@@ -53,7 +56,7 @@ public sealed class CustardMySqlEntityToCustardTests
     public void Translate_InvalidPhones_ShouldFallbackToDefault()
     {
         var entity = CreateEntity(phone1: "xxx", phone2: null);
-        var translator = new CustardMySqlEntityToCustard();
+        var translator = new CustardMySqlEntityToCustard(dt);
 
         Custard vo = translator.Translate(entity);
 
@@ -69,7 +72,7 @@ public sealed class CustardMySqlEntityToCustardTests
     {
         var entity = CreateEntity();
         entity.dateAdded = new DateTime(y, m, d, 1, 30, 0);
-        var translator = new CustardMySqlEntityToCustard();
+        var translator = new CustardMySqlEntityToCustard(dt);
 
         Custard vo = translator.Translate(entity);
 
@@ -81,7 +84,7 @@ public sealed class CustardMySqlEntityToCustardTests
     public void Translate_ShouldRemainIdempotent_AtScale()
     {
         var entity = CreateEntity();
-        var translator = new CustardMySqlEntityToCustard();
+        var translator = new CustardMySqlEntityToCustard(dt);
 
         Custard current = translator.Translate(entity);
 

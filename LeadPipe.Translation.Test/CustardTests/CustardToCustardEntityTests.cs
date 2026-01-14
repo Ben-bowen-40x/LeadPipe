@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Translation.Translate.VoToEntity;
 
-namespace LeadPipe.Translation.Test.Custard;
+namespace LeadPipe.Translation.Test.CustardTests;
 
 public sealed class CustardToCustardEntityTests
 {

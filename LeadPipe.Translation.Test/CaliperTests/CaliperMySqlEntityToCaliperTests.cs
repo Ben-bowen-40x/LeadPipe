@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Translation.Translate.EntityToVo;
 
-namespace LeadPipe.Translation.Test.Caliper;
+namespace LeadPipe.Translation.Test.CaliperTests;
 
 public sealed class CaliperMySqlEntityToCaliperTests
 {

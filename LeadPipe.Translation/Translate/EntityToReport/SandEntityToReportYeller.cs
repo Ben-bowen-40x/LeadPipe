@@ -8,12 +8,15 @@ internal sealed class SandEntityToReportYeller : IEntityToReport<SandEntity, Rep
 {
     public ReportYeller Translate(SandEntity sub)
     {
+        if(sub.CustardEntity is null)
+            throw new ArgumentNullException(nameof(sub),$"{nameof(SandEntity)} cannot have a null {nameof(CustardEntity)}");
+
         long eventTime = sub.UnixDate;
         string eventName = "purchase";
 
         // Hash pii
-        string num1 = YellerReportHelper.HashSha256(sub.PhoneNumber.ToString());
-        string num2 = YellerReportHelper.HashSha256(sub.PhoneNumber2.ToString());
+        string num1 = YellerReportHelper.HashSha256(sub.CustardEntity.PhoneNumber.ToString());
+        string num2 = YellerReportHelper.HashSha256(sub.CustardEntity.PhoneNumber2.ToString());
 
         UserData user = new()
         {

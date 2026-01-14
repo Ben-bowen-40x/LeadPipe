@@ -22,7 +22,8 @@ internal class SandwichToSandEntity : IVoToEntity<Sandwich, SandEntity>
             Value = s.Value,
             Seller = s.Seller,
             Seller2 = s.Seller2,
-            Seller3 = s.Seller3
+            Seller3 = s.Seller3,
+            Offerman = s.Offerman,
         };
     }
 }

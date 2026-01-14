@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Translation.Translate.VoToEntity;
 
-namespace LeadPipe.Translation.Test.Caliper;
+namespace LeadPipe.Translation.Test.CaliperTests;
 
 public sealed class CaliperToCaliperEntityTests
 {

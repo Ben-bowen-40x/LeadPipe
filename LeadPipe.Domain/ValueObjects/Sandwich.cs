@@ -13,5 +13,6 @@ public record Sandwich
     decimal Value,
     int Seller,
     int Seller2,
-    int Seller3
+    int Seller3,
+    string Offerman
 );

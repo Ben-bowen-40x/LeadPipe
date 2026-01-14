@@ -53,6 +53,7 @@ internal class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
             PhoneNumber: number,
             Date: date,
             Contents: contents,
+            Branch: null, 
             MetaData: metadata,
             Source.Yeller
         );

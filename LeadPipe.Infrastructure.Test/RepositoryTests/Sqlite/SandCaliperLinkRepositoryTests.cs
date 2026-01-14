@@ -8,6 +8,7 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class SubsCaliperLinkRepositoryTests
 {
+    private readonly SandEntity _sandy = new() { Id = 0, CustardId = 0, Offerman = string.Empty };
     private readonly ILogger<SubsCaliperLinkRepository> logger = LoggerFactory
         .Create(builder => builder.AddConsole())
         .CreateLogger<SubsCaliperLinkRepository>();
@@ -20,8 +21,8 @@ public class SubsCaliperLinkRepositoryTests
 
         var entities = new List<SandCaliperLink>
         {
-            new() { Id = 1, SandEntity = new() { Id = 0 }, CaliperEntity = new() { Id = 0, Note=string.Empty, Location = string.Empty, Source=string.Empty } },
-            new() { Id = 2, SandEntity = new() { Id = 0 }, CaliperEntity = new() { Id = 0, Note=string.Empty, Location = string.Empty, Source=string.Empty } }
+            new() { Id = 1, SandEntity = _sandy, CaliperEntity = new() { Id = 0, Note=string.Empty, Location = string.Empty, Source=string.Empty } },
+            new() { Id = 2, SandEntity = _sandy, CaliperEntity = new() { Id = 0, Note=string.Empty, Location = string.Empty, Source=string.Empty } }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -50,7 +51,7 @@ public class SubsCaliperLinkRepositoryTests
 
         var repo = new SubsCaliperLinkRepository(context, logger);
 
-        var plumbing = new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0 }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0, CustardId = 0, Offerman = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -59,7 +60,7 @@ public class SubsCaliperLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SandCaliperLinks.Add(new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0 }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } });
+        context.SandCaliperLinks.Add(new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0, CustardId = 0, Offerman = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } });
         await context.SaveChangesAsync();
 
         var repo = new SubsCaliperLinkRepository(context, logger);
@@ -73,7 +74,7 @@ public class SubsCaliperLinkRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0 }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0, CustardId = 0, Offerman = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         context.SandCaliperLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
@@ -99,12 +100,12 @@ public class SubsCaliperLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0 }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var plumbing = new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0, CustardId = 0, Offerman = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
         context.SandCaliperLinks.Add(plumbing);
         await context.SaveChangesAsync();
 
         var repo = new SubsCaliperLinkRepository(context, logger);
-        var updatedSubsCaliperLink = new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0 }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var updatedSubsCaliperLink = new SandCaliperLink { Id = 1, SandEntity = new() { Id = 0, CustardId = 0, Offerman = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsCaliperLink);
         var reloaded = await repo.GetByIdAsync(1);
@@ -118,7 +119,7 @@ public class SubsCaliperLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new SubsCaliperLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var updatedSubsCaliperLink = new SandCaliperLink { Id = 99, SandEntity = new() { Id = 0 }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
+        var updatedSubsCaliperLink = new SandCaliperLink { Id = 99, SandEntity = new() { Id = 0, CustardId = 0, Offerman = string.Empty }, CaliperEntity = new() { Id = 0, Note = string.Empty, Location = string.Empty, Source = string.Empty } };
 
         var result = await repo.UpdateAsync(updatedSubsCaliperLink);
 

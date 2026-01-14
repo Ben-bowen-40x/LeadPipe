@@ -11,6 +11,7 @@ public class PlumbingEntity : ISourceEntity
     public string? Contents { get; set; }
     public Source Source { get; set; }
     public required string MetaData { get; set; }
+    public string? Branch { get; set; }
 
     public ICollection<CustardPlumbingLink> CustardPlumbingLinks { get; set; } = [];
     public ICollection<SandPlumbingLink> SandPlumbingLinks { get; set; } = [];

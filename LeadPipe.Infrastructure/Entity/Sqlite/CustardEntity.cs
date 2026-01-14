@@ -12,7 +12,7 @@ public class CustardEntity : IEntity
     public long UnixCancelDate { get; set; }
 
     // Navigation    
-    public ICollection<SandEntity> SandEntities { get; set; } = default!;
+    public ICollection<SandEntity> SandEntities { get; set; } = [];
     public ICollection<CustardCaliperLink> CustardCaliperLinks { get; set; } = [];
     public ICollection<CustardCornLink> CustardCornLinks { get; set; } = [];
     public ICollection<CustardPlumbingLink> CustardPlumbingLinks { get; set; } = [];

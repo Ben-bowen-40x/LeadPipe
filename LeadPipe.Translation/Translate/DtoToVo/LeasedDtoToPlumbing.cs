@@ -14,9 +14,10 @@ public class LeasedDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeasedDto, Pl
         DateTime d = DateTime.TryParse(data.Date, out DateTime r)
             ? r
             : DateTime.MaxValue;
-        ETimeZone z = (data.CompletionDate is not null
+        string zoneStr = data.CompletionDate is not null
             ? data.CompletionDate
-            : " est").Split(" ")[^1].ToLowerInvariant() switch
+            : " est";
+        ETimeZone zone = zoneStr.Split(" ")[^1].ToLowerInvariant() switch
         {
             "est" or "edt" => ETimeZone.Eastern,
             "cst" or "cdt" => ETimeZone.Central,
@@ -24,14 +25,25 @@ public class LeasedDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeasedDto, Pl
             "pst" or "pdt" => ETimeZone.Pacific,
             _ => ETimeZone.Eastern
         };
-        DateTimeOffset date = _dt.Convert(d, z);
+        DateTimeOffset date = _dt.Convert(d, zone);
         string contents = data.Contents is null
             ? string.Empty
             : data.Contents;
 
-        string metadata = data.Lead is string l ? l : "Unknown";
+        string meta1 = data.Lead is string l ? l : "Unknown";
+        string meta2 = data.Branch is string b ? b : "Unknown";
+        string metadata = $"Is a lead?: {meta1} | Branch: {meta2}";
 
-        Plumbing result = new(0, PhoneNumber: number, Date: date, Contents: contents, MetaData: $"Is a lead?: {metadata}", Source: Source.Leased);
+        Plumbing result = new
+            (
+                Id: 0,
+                PhoneNumber: number,
+                Date: date,
+                Contents: contents,
+                Branch: data.Branch,
+                MetaData: metadata,
+                Source: Source.Leased
+            );
         return result;
     }
 }

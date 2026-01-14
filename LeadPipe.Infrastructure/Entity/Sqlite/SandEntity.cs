@@ -15,6 +15,7 @@ public class SandEntity : IEntity
     public int Seller { get; set; }
     public int Seller2 { get; set; }
     public int Seller3 { get; set; }
+    public required string Offerman { get; set; }
 
     // Navigation
     public CustardEntity? CustardEntity { get; set; }

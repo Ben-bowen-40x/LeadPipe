@@ -5,6 +5,7 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.EntityToVo;
 using LeadPipe.Translation.Translate.VoToEntity;
+using NSubstitute;
 
 namespace LeadPipe.Translation.Test;
 
@@ -12,18 +13,26 @@ public class TranslatorBackAndForthFullTests
 {
     private readonly IDateTimeTranslate _dt = Substitute.For<IDateTimeTranslate>();
 
-    private TVo RoundTrip<TEntity, TVo>(
-        TEntity entity,
-        IEntityToVo<TEntity, TVo> toVo,
-        IVoToEntity<TVo, TEntity> toEntity,
+    private static TVo RoundTrip<TEntity1, TEntity2, TVo>(
+        TEntity1 entity,
+        IEntityToVo<TEntity1, TVo> e1ToVo,
+        IVoToEntity<TVo, TEntity2> voToEntity2,
+        IEntityToVo<TEntity2, TVo> e2ToVo,
         int iterations = 1_000_000
     )
     {
-        TVo vo = toVo.Translate(entity);
+        // Generate the vo once 
+        TVo vo = e1ToVo.Translate(entity);
         for (int i = 0; i < iterations; i++)
         {
-            entity = toEntity.Translate(vo);
-            vo = toVo.Translate(entity);
+            // Translate the entity 1 to Vo
+            vo = e1ToVo.Translate(entity);
+
+            // Translate the vo to entity 2
+            TEntity2? e2 = voToEntity2.Translate(vo);
+
+            // Translate the entity2 back to vo
+            vo = e2ToVo.Translate(e2);
         }
         return vo;
     }
@@ -45,10 +54,11 @@ public class TranslatorBackAndForthFullTests
             Billable = true
         };
 
-        var toVo = new CaliperEntityToCaliper();
-        var toEntity = new CaliperToCaliperEntity();
+        IEntityToVo<CaliperMySqlEntity, Caliper> entity2ToVo = new CaliperMySqlEntityToCaliper();
+        IEntityToVo<CaliperEntity, Caliper> toVo = new CaliperEntityToCaliper();
+        IVoToEntity<Caliper, CaliperMySqlEntity> voToEntity2 = new CaliperToCaliperMySqlEntity();
 
-        Caliper vo = RoundTrip(entity, toVo, toEntity, 1_000_000);
+        Caliper vo = RoundTrip(entity, toVo, voToEntity2, entity2ToVo, 1_000_000);
 
         Assert.Equal(entity.Id, vo.Id);
         Assert.Equal(entity.PhoneNumber, vo.Number.Number);
@@ -74,18 +84,19 @@ public class TranslatorBackAndForthFullTests
             sale_billable = "billable",
             source = "Src",
             location = "Loc",
-            transcriptions = new List<TranscriptionMySqlEntity> { new() { transcription = "Hello" } },
-            summaries = new List<SummaryMySqlEntity> { new() { summary = "Summary" } }
+            transcriptions = [new() { transcription = "Hello" }],
+            summaries = [new() { summary = "Summary" }]
         };
 
-        var toVo = new CaliperMySqlEntityToCaliper();
-        var toEntity = new CaliperToCaliperMySqlEntity();
+        IEntityToVo<CaliperMySqlEntity, Caliper> toVo = new CaliperMySqlEntityToCaliper();
+        IEntityToVo<CaliperEntity, Caliper> entity2ToVo = new CaliperEntityToCaliper();
+        IVoToEntity<Caliper, CaliperEntity> toEntity = new CaliperToCaliperEntity();
 
-        Caliper vo = RoundTrip(entity, toVo, toEntity, 500_000);
+        Caliper vo = RoundTrip(entity, toVo, toEntity, entity2ToVo, 500_000);
 
         Assert.Equal(entity.call_id, vo.Id);
         Assert.Equal(5551234567, vo.Number.Number);
-        Assert.Equal(TimeSpan.FromSeconds(entity.duration), vo.Duration);
+        Assert.Equal(TimeSpan.FromSeconds((double)entity.duration!), vo.Duration);
         Assert.Equal("Summary | Hello", vo.Note);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
     }
@@ -108,10 +119,11 @@ public class TranslatorBackAndForthFullTests
             source = "Source"
         };
 
-        var toVo = new CornMySqlEntityToCornFormula();
-        var toEntity = new CornFormulaToCornEntity();
+        IEntityToVo<CornMySqlEntity, CornFormula> toVo = new CornMySqlEntityToCornFormula();
+        IEntityToVo<CornEntity, CornFormula> toVo2 = new CornEntityToCornFormula();
+        IVoToEntity<CornFormula, CornEntity> toEntity = new CornFormulaToCornEntity();
 
-        CornFormula vo = RoundTrip(entity, toVo, toEntity, 500_000);
+        CornFormula vo = RoundTrip(entity, toVo, toEntity, toVo2, 500_000);
 
         Assert.Equal(entity.id, vo.Id);
         Assert.Equal(5551002000, vo.PhoneNumber.Number);
@@ -123,7 +135,7 @@ public class TranslatorBackAndForthFullTests
     #endregion
 
     #region CustardMySqlEntity ↔ Custard
-
+    private readonly IDateTimeTranslate dt = Substitute.For<IDateTimeTranslate>();
     [Fact]
     public void CustardMySqlEntity_RoundTrip_Idempotent()
     {
@@ -137,10 +149,11 @@ public class TranslatorBackAndForthFullTests
             dateCancelled = new DateTime(2025, 12, 31, 23, 59, 59)
         };
 
-        var toVo = new CustardMySqlEntityToCustard();
-        var toEntity = new CustardToCustardEntity();
+        IEntityToVo<CustardMySqlEntity, Custard> toVo = new CustardMySqlEntityToCustard(dt);
+        IEntityToVo<CustardEntity, Custard> toVo2 = new CustardEntityToCustard();
+        IVoToEntity<Custard, CustardEntity> toEntity = new CustardToCustardEntity();
 
-        Custard vo = RoundTrip(entity, toVo, toEntity, 500_000);
+        Custard vo = RoundTrip(entity, toVo, toEntity, toVo2, 500_000);
 
         Assert.Equal(entity.customerID, vo.Id);
         Assert.True(vo.Status);
@@ -164,13 +177,13 @@ public class TranslatorBackAndForthFullTests
             Date = new DateTime(2025, 6, 1, 12, 0, 0),
             Contents = "Some content",
             MetaData = "Meta",
-            Source = "Src"
+            Source = Source.Test
         };
 
-        var toVo = new PlumbingEntityToPlumbing();
-        var toEntity = new PlumbingToPlumbingEntity();
+        IEntityToVo<PlumbingEntity, Plumbing> toVo = new PlumbingEntityToPlumbing();
+        IVoToEntity<Plumbing, PlumbingEntity> toEntity = new PlumbingToPlumbingEntity();
 
-        Plumbing vo = RoundTrip(entity, toVo, toEntity, 500_000);
+        Plumbing vo = RoundTrip(entity, toVo, toEntity, toVo, 500_000);
 
         Assert.Equal(entity.Id, vo.Id);
         Assert.Equal(entity.PhoneNumber, vo.PhoneNumber.Number);
@@ -209,16 +222,17 @@ public class TranslatorBackAndForthFullTests
             Value: 199.99m,
             Seller: 2,
             Seller2: 3,
-            Seller3: 4
+            Seller3: 4,
+            Offerman: "Offerman"
         );
 
         var toEntity = new SandwichToSandEntity();
-        var toVo = new SandMySqlEntityToSandwich(_dt);
+        var toVo = new SandEntityToSandwich(_dt);
 
         Sandwich result = sandwichVo;
         for (int i = 0; i < 500_000; i++)
         {
-            var entity = toEntity.Translate(result);
+            SandEntity entity = toEntity.Translate(result);
             result = toVo.Translate(entity);
         }
 
@@ -244,8 +258,8 @@ public class TranslatorBackAndForthFullTests
             Active = true,
             PhoneNumber = 5551002000,
             PhoneNumber2 = 5551003000,
-            Date = new DateTimeOffset(2025, 6, 1, 12, 0, 0, TimeSpan.Zero),
-            CancelDate = new DateTimeOffset(2025, 12, 31, 23, 59, 59, TimeSpan.Zero)
+            Date = new DateTime(2025, 6, 1, 12, 0, 0),
+            CancelDate = new DateTime(2025, 12, 31, 23, 59, 59)
         };
 
         var entity = new SandEntity
@@ -261,13 +275,14 @@ public class TranslatorBackAndForthFullTests
             Value = 199.99m,
             Seller = 2,
             Seller2 = 3,
-            Seller3 = 4
+            Seller3 = 4,
+            Offerman = string.Empty
         };
 
-        var toVo = new SandToSandwich(_dt);
+        var toVo = new SandEntityToSandwich(_dt);
         var toEntity = new SandwichToSandEntity();
 
-        Sandwich vo = RoundTrip(entity, toVo, toEntity, 500_000);
+        Sandwich vo = RoundTrip(entity, toVo, toEntity, toVo, 500_000);
 
         Assert.Equal(entity.Id, vo.SandId);
         Assert.Equal(entity.CustardEntity.PhoneNumber, vo.Custard.Phone1.Number);

@@ -96,17 +96,20 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         });
         custard.HasKey(c => c.Id);
         custard.Property(c => c.Id).ValueGeneratedNever(); // External id
-        custard.HasOne(c => c.Sand)
-            .WithMany(s => s.CustardEntities)
-            .HasForeignKey(c => c.SubscriptionId)
+        custard.HasMany(c => c.SandEntities)
+            .WithOne(s => s.CustardEntity)
+            .HasForeignKey(s => s.CustardId)
             .OnDelete(DeleteBehavior.Cascade);
         custard.HasIndex(c => c.PhoneNumber);
         custard.HasIndex(c => c.PhoneNumber2);
-        custard.HasIndex(c => c.SubscriptionId);
 
         // SandEntity
         var sub = modelBuilder.Entity<SandEntity>()
             .ToTable("SandEntities");
+        sub.HasOne(s => s.CustardEntity)
+            .WithMany(c => c.SandEntities)
+            .HasForeignKey(s => s.CustardId)
+            .OnDelete(DeleteBehavior.Cascade);
         sub.HasKey(s => s.Id);
         sub.Property(s => s.Id).ValueGeneratedNever(); // External id
         sub.Property(s => s.Type);

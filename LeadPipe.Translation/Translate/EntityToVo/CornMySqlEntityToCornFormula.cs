@@ -4,7 +4,7 @@ using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 
-internal class CornMySqlEntityToCornFormula : IEntityToVo<CornMySqlEntity, CornFormula>
+internal sealed class CornMySqlEntityToCornFormula : IEntityToVo<CornMySqlEntity, CornFormula>
 {
     public CornFormula Translate(CornMySqlEntity entity)
     {

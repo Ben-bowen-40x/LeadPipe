@@ -166,7 +166,7 @@ public class TranslatorBackAndForthRoundTripTests
         );
 
         var toEntity = new SandwichToSandEntity();
-        var toVo = new SandToSandwich(_dt);
+        var toVo = new SandEntityToSandwich(_dt);
 
         // Convert Sandwich → SandEntity → Sandwich 500k times
         Sandwich result = sandwichVo;

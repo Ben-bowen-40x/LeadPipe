@@ -6,6 +6,7 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class SandRepositoryTests
 {
+
     private readonly ILogger<SandRepository> logger = LoggerFactory
             .Create(builder => builder.AddConsole())
             .CreateLogger<SandRepository>();
@@ -13,13 +14,13 @@ public class SandRepositoryTests
     public async Task AddRangeAsync_ShouldAddMultipleSubsEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SandRepository(context, logger);
 
         var entities = new List<SandEntity>
         {
-            new() { Id = 1, PhoneNumber = 12345, PhoneNumber2 = 67890 },
-            new() { Id = 2, PhoneNumber = 11111, PhoneNumber2 = 22222 }
+            new() { Id = 1, CustardId = 0, Offerman = string.Empty },
+            new() { Id = 2, CustardId = 0, Offerman = string.Empty }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -32,7 +33,7 @@ public class SandRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SandRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
@@ -45,7 +46,7 @@ public class SandRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenNullList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SandRepository(context, logger);
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -60,10 +61,10 @@ public class SandRepositoryTests
     public async Task AddAsync_ShouldAddSubsEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SandRepository(context, logger);
 
-        var subs = new SandEntity { Id = 1, PhoneNumber = 12345, PhoneNumber2 = 67890 };
+        var subs = new SandEntity { Id = 1, CustardId = 0, Offerman = string.Empty };
         var result = await repo.AddAsync(subs);
 
         Assert.True(result.IsSuccess);
@@ -73,14 +74,13 @@ public class SandRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SandEntities.Add(new SandEntity { Id = 1, PhoneNumber = 12345 });
+        context.SandEntities.Add(new SandEntity { Id = 1, CustardId = 0, Offerman = string.Empty });
         await context.SaveChangesAsync();
 
         var repo = new SandRepository(context, logger);
         var result = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
-        Assert.Equal(12345, result.Value.PhoneNumber);
     }
 
     [Fact]
@@ -97,27 +97,25 @@ public class SandRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var subs = new SandEntity { Id = 1, PhoneNumber = 12345 };
+        var subs = new SandEntity { Id = 1, CustardId = 0, Offerman = string.Empty };
         context.SandEntities.Add(subs);
         await context.SaveChangesAsync();
 
         var repo = new SandRepository(context, logger);
-        var updatedSubs = new SandEntity { Id = 1, PhoneNumber = 99999, PhoneNumber2 = 67890 };
+        var updatedSubs = new SandEntity { Id = 1, CustardId = 0, Offerman = string.Empty };
 
         var result = await repo.UpdateAsync(updatedSubs);
         var reloaded = await repo.GetByIdAsync(1);
 
         Assert.True(result.IsSuccess);
         Assert.True(reloaded.IsSuccess);
-        Assert.Equal(99999, reloaded.Value.PhoneNumber);
-        Assert.Equal(67890, reloaded.Value.PhoneNumber2);
     }
 
     [Fact]
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var subs = new SandEntity { Id = 1, PhoneNumber = 12345 };
+        var subs = new SandEntity { Id = 1, CustardId = 0, Offerman = string.Empty };
         context.SandEntities.Add(subs);
         await context.SaveChangesAsync();
 
@@ -133,7 +131,7 @@ public class SandRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new SandRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var updatedSubs = new SandEntity { Id = 99, PhoneNumber = 11111 };
+        var updatedSubs = new SandEntity { Id = 99, CustardId = 0, Offerman = string.Empty };
 
         var result = await repo.UpdateAsync(updatedSubs);
 

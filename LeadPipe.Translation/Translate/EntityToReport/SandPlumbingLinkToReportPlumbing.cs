@@ -15,14 +15,13 @@ internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLi
         if (link.SandEntity is not SandEntity sub)
             sub = new()
             {
-                CustomerId = 0,
+                CustardId = 0,
                 Id = 0,
                 Active = false,
                 Complete = false,
                 Date = DateTime.MinValue,
                 CancelDate = DateTime.MinValue,
-                SubDate = DateTime.MinValue,
-                SubCancelDate = DateTime.MinValue
+                Offerman = string.Empty
             };
 
         long phoneNumber = plumb.PhoneNumber;
@@ -35,7 +34,7 @@ internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLi
         string source = plumb.Source.ToString();
         string metadata = plumb.MetaData;
 
-        long customerId = sub.CustomerId;
+        long customerId = sub.CustardId;
         long subId = sub.Id;
         bool subActive = sub.Active;
         bool completed = sub.Complete;
@@ -48,11 +47,11 @@ internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLi
         DateTime cxl = DateTime.SpecifyKind(sub.CancelDate, DateTimeKind.Utc);
         DateTimeOffset custCxlDate = new(cxl, TimeSpan.Zero);
 
-        DateTime sd = DateTime.SpecifyKind(sub.SubDate, DateTimeKind.Utc);
+        DateTime sd = DateTime.SpecifyKind(sub.Date, DateTimeKind.Utc);
         DateTimeOffset subDate = new(sd, TimeSpan.Zero);
         string formattedSubDate = subDate.ToString(dateFormat);
 
-        DateTime sCxl = DateTime.SpecifyKind(sub.SubCancelDate, DateTimeKind.Utc);
+        DateTime sCxl = DateTime.SpecifyKind(sub.CancelDate, DateTimeKind.Utc);
         DateTimeOffset subCxlDate = new(sCxl, TimeSpan.Zero);
 
         bool msgBeforeCust = date < custDate && date < subDate;

@@ -24,6 +24,7 @@ internal class PanDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<PanDto, Plumbi
             PhoneNumber: number,
             Date: date,
             Contents: contents,
+            Branch: null,
             MetaData: meta,
             Source.Pan);
     }

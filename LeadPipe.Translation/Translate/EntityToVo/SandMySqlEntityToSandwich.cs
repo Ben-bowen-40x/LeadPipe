@@ -11,7 +11,11 @@ internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntity
 
     public Sandwich Translate(SandMySqlEntity entity)
     {
-        if (entity.customer is null)
+        if (entity.customer is null && entity.offerman is null)
+            throw new ArgumentException($"{nameof(entity.customer)} cannot be null. {nameof(entity.offerman)} cannot be null.");
+        else if (entity.offerman is null)
+            throw new ArgumentException($"{nameof(entity.offerman)} cannot be null.");
+        else if (entity.customer is null)
             throw new ArgumentException($"{nameof(entity.customer)} cannot be null.");
 
         // Convert navigation property
@@ -33,6 +37,9 @@ internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntity
             ? _dt.Convert(entity.dateCancelled, ETimeZone.Pacific)
             : DateTime.MinValue;
 
+        // Get offerman
+        string offerman = entity.offerman.branchName is null ? "Unknown" : entity.offerman.branchName;
+
         Sandwich result = new(
             SandId: entity.subscriptionID,
             CustardId: entity.customerID,
@@ -45,7 +52,8 @@ internal sealed class SandMySqlEntityToSandwich(IDateTimeTranslate dt) : IEntity
             Value: entity.contractValue,
             Seller: entity.soldBy ?? 0,
             Seller2: entity.soldBy2 ?? 0,
-            Seller3: entity.soldBy3 ?? 0
+            Seller3: entity.soldBy3 ?? 0,
+            Offerman: offerman
         );
         return result;
     }

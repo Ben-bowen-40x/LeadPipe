@@ -47,7 +47,16 @@ internal class LeafDtoToPlumbing : IDtoToVo<LeafDto, Plumbing>
         }
         string metadata = metastr.Count == 0 ? string.Empty : string.Join(" | ", metastr.Where(m => !string.IsNullOrWhiteSpace(m)));
 
-        Plumbing result = new(0, PhoneNumber: number, Date: date, Contents: content, MetaData: metadata, Source: Source.Leaf);
+        Plumbing result = new
+        (
+            Id: 0,
+            PhoneNumber: number,
+            Date: date,
+            Contents: content,
+            Branch: null,
+            MetaData: metadata,
+            Source: Source.Leaf
+        );
         return result;
     }
 }

@@ -2,7 +2,7 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Translation.Translate.VoToEntity;
 
-namespace LeadPipe.Translation.Test.Plumbing;
+namespace LeadPipe.Translation.Test.PlumbingTests;
 
 public sealed class PlumbingToPlumbingEntityTests
 {
@@ -13,6 +13,7 @@ public sealed class PlumbingToPlumbingEntityTests
             Date: date,
             Contents: "Rodents",
             MetaData: "Meta",
+            Branch: "Elm",
             Source: Source.Calli
         );
 
@@ -54,6 +55,7 @@ public sealed class PlumbingToPlumbingEntityTests
             Date: DateTimeOffset.UtcNow,
             Contents: null,
             MetaData: "Meta",
+            Branch: "Elm",
             Source: Source.Leaf
         );
         var translator = new PlumbingToPlumbingEntity();

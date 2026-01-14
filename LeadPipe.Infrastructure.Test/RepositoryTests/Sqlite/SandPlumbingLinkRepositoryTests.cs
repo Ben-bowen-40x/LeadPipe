@@ -7,6 +7,8 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class SandPlumbingLinkRepositoryTests
 {
+    private readonly SandEntity _sandy = new() { Id = 0, CustardId = 0, Offerman = string.Empty };
+    private readonly PlumbingEntity _plumb = new() { Id = 0, MetaData = string.Empty };
     private readonly ILogger<SandPlumbingLinkRepository> logger = LoggerFactory
         .Create(builder => builder.AddConsole())
         .CreateLogger<SandPlumbingLinkRepository>();
@@ -14,13 +16,13 @@ public class SandPlumbingLinkRepositoryTests
     public async Task AddRangeAsync_ShouldAddMultipleEntities()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SandPlumbingLinkRepository(context, logger);
 
         var entities = new List<SandPlumbingLink>
         {
-            new() { Id = 1, SandEntity = new() { Id = 0  }, PlumbingEntity = new() { Id=0,MetaData = string.Empty } },
-            new() { Id = 2, SandEntity = new() { Id = 0 }, PlumbingEntity = new() { Id=0,MetaData = string.Empty } }
+            new() { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb },
+            new() { Id = 2, SandEntity = _sandy, PlumbingEntity = _plumb }
         };
 
         var result = await repo.AddRangeAsync(entities);
@@ -33,7 +35,7 @@ public class SandPlumbingLinkRepositoryTests
     public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SandPlumbingLinkRepository(context, logger);
 
         var result = await repo.AddRangeAsync([]);
@@ -46,10 +48,10 @@ public class SandPlumbingLinkRepositoryTests
     public async Task AddAsync_ShouldAddSubsPlumbingLink()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        
+
         var repo = new SandPlumbingLinkRepository(context, logger);
 
-        var plumbing = new SandPlumbingLink { Id = 1, SandEntity = new() { Id = 0 }, PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
+        var plumbing = new SandPlumbingLink { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb };
         Result result = await repo.AddAsync(plumbing);
 
         Assert.True(result.IsSuccess);
@@ -58,7 +60,7 @@ public class SandPlumbingLinkRepositoryTests
     public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        context.SandPlumbingLinks.Add(new SandPlumbingLink { Id = 1, SandEntity = new() { Id = 0 }, PlumbingEntity = new() { Id = 0, MetaData = string.Empty } });
+        context.SandPlumbingLinks.Add(new SandPlumbingLink { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb });
         await context.SaveChangesAsync();
 
         var repo = new SandPlumbingLinkRepository(context, logger);
@@ -72,10 +74,10 @@ public class SandPlumbingLinkRepositoryTests
     public async Task DeleteAsync_ShouldRemoveEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SandPlumbingLink { Id = 1, SandEntity = new() { Id = 0 }, PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
+        var plumbing = new SandPlumbingLink { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb };
         context.SandPlumbingLinks.Add(plumbing);
         await context.SaveChangesAsync();
-        
+
         var repo = new SandPlumbingLinkRepository(context, logger);
         var result = await repo.DeleteAsync(1);
         var reloaded = await repo.GetByIdAsync(1);
@@ -98,12 +100,12 @@ public class SandPlumbingLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldUpdateEntity()
     {
         var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new SandPlumbingLink { Id = 1, SandEntity = new() { Id = 0 }, PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
+        var plumbing = new SandPlumbingLink { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb };
         context.SandPlumbingLinks.Add(plumbing);
         await context.SaveChangesAsync();
-        
+
         var repo = new SandPlumbingLinkRepository(context, logger);
-        var updatedSubsPlumbingLink = new SandPlumbingLink { Id = 1, SandEntity = new() { Id = 0 }, PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
+        var updatedSubsPlumbingLink = new SandPlumbingLink { Id = 1, SandEntity = _sandy, PlumbingEntity = _plumb };
 
         var result = await repo.UpdateAsync(updatedSubsPlumbingLink);
         var reloaded = await repo.GetByIdAsync(1);
@@ -117,7 +119,7 @@ public class SandPlumbingLinkRepositoryTests
     public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
     {
         var repo = new SandPlumbingLinkRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var updatedSubsPlumbingLink = new SandPlumbingLink { Id = 99, SandEntity = new() { Id = 0 }, PlumbingEntity = new() { Id = 0, MetaData = string.Empty } };
+        var updatedSubsPlumbingLink = new SandPlumbingLink { Id = 99, SandEntity = _sandy, PlumbingEntity = _plumb };
 
         var result = await repo.UpdateAsync(updatedSubsPlumbingLink);
 

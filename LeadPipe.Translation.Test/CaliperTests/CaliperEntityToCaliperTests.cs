@@ -1,9 +1,8 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Translation.Translate.EntityToVo;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace LeadPipe.Translation.Test.Caliper;
+namespace LeadPipe.Translation.Test.CaliperTests;
 
 public sealed class CaliperEntityToCaliperTests
 {

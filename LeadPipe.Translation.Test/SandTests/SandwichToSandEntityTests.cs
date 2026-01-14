@@ -2,14 +2,15 @@
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.EntityToVo;
+using NSubstitute;
 
-namespace LeadPipe.Translation.Test.Sand;
+namespace LeadPipe.Translation.Test.SandTests;
 
 public sealed class SandwichToSandEntityTests
 {
     private readonly IDateTimeTranslate _dt = Substitute.For<IDateTimeTranslate>();
 
-    private Sandwich CreateVo()
+    private static Sandwich CreateVo()
     {
         var cust = new Custard(
             Id: 10,
@@ -32,7 +33,8 @@ public sealed class SandwichToSandEntityTests
             Value: 199.99m,
             Seller: 2,
             Seller2: 3,
-            Seller3: 4
+            Seller3: 4,
+            Offerman: string.Empty
         );
     }
 
@@ -44,10 +46,11 @@ public sealed class SandwichToSandEntityTests
         {
             Id = vo.SandId,
             CustardId = vo.CustardId,
-            CustardEntity = null
+            CustardEntity = null,
+            Offerman = vo.Offerman
         };
 
-        var translator = new SandToSandwich(_dt);
+        var translator = new SandEntityToSandwich(_dt);
 
         Assert.Throws<ArgumentException>(() => translator.Translate(entity));
     }
@@ -77,13 +80,14 @@ public sealed class SandwichToSandEntityTests
                 PhoneNumber2 = vo.Custard.Phone2.Number,
                 Date = vo.Custard.Date.UtcDateTime,
                 CancelDate = vo.Custard.DateCancelled.UtcDateTime
-            }
+            },
+            Offerman= vo.Offerman
         };
 
         _dt.Convert(Arg.Any<DateTime>(), Arg.Any<ETimeZone>())
             .Returns(callInfo => new DateTimeOffset((DateTime)callInfo[0], TimeSpan.Zero));
 
-        var translator = new SandToSandwich(_dt);
+        var translator = new SandEntityToSandwich(_dt);
         Sandwich result = translator.Translate(entity);
 
         Assert.Equal(vo.SandId, result.SandId);
@@ -120,13 +124,14 @@ public sealed class SandwichToSandEntityTests
                 PhoneNumber2 = vo.Custard.Phone2.Number,
                 Date = vo.Custard.Date.UtcDateTime,
                 CancelDate = vo.Custard.DateCancelled.UtcDateTime
-            }
+            },
+            Offerman = vo.Offerman
         };
 
         _dt.Convert(Arg.Any<DateTime>(), Arg.Any<ETimeZone>())
             .Returns(callInfo => new DateTimeOffset((DateTime)callInfo[0], TimeSpan.Zero));
 
-        var translator = new SandToSandwich(_dt);
+        var translator = new SandEntityToSandwich(_dt);
 
         Sandwich current = translator.Translate(entity);
 

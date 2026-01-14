@@ -2,8 +2,9 @@
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.EntityToVo;
+using NSubstitute;
 
-namespace LeadPipe.Translation.Test.Sand;
+namespace LeadPipe.Translation.Test.SandTests;
 
 public sealed class SandMySqlEntityToSandwichTests
 {
@@ -57,7 +58,7 @@ public sealed class SandMySqlEntityToSandwichTests
         var entity = CreateEntity();
         _dt.Convert(entity.dateAdded, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.dateAdded, TimeSpan.Zero));
         _dt.Convert(entity.dateCancelled, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.dateCancelled, TimeSpan.Zero));
-        _dt.Convert(entity.customer.dateAdded, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.customer.dateAdded, TimeSpan.Zero));
+        _dt.Convert(entity.customer!.dateAdded, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.customer.dateAdded, TimeSpan.Zero));
         _dt.Convert(entity.customer.dateCancelled, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.customer.dateCancelled, TimeSpan.Zero));
 
         var translator = new SandMySqlEntityToSandwich(_dt);
@@ -68,14 +69,14 @@ public sealed class SandMySqlEntityToSandwichTests
         Assert.Equal(10, vo.CustardId);
         Assert.Equal("Premium", vo.Type);
         Assert.Equal(199.99m, vo.Value);
-        Assert.Equal(true, vo.Active);
-        Assert.Equal(true, vo.Complete);
+        Assert.True(vo.Active);
+        Assert.True(vo.Complete);
         Assert.Equal(2, vo.Seller);
         Assert.Equal(3, vo.Seller2);
         Assert.Equal(4, vo.Seller3);
 
         Assert.Equal(10, vo.Custard.Id);
-        Assert.Equal(true, vo.Custard.Status);
+        Assert.True(vo.Custard.Status);
         Assert.Equal(5551002000, vo.Custard.Phone1.Number);
         Assert.Equal(5551003000, vo.Custard.Phone2.Number);
 

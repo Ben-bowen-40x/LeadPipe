@@ -5,7 +5,7 @@ using LeadPipe.Translation.Primitives;
 
 namespace LeadPipe.Translation.Translate.EntityToVo;
 
-internal class SandToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo<SandEntity, Sandwich>
+internal class SandEntityToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo<SandEntity, Sandwich>
 {
     private readonly IDateTimeTranslate _dt = dtranslate;
     public Sandwich Translate(SandEntity entity)
@@ -35,7 +35,8 @@ internal class SandToSandwich(IDateTimeTranslate dtranslate) : IEntityToVo<SandE
             Value: entity.Value,
             Seller: entity.Seller,
             Seller2: entity.Seller2,
-            Seller3: entity.Seller3
+            Seller3: entity.Seller3,
+            Offerman: entity.Offerman
         );
         return result;
     }
