@@ -10,5 +10,5 @@ public class PlumbingCaliperLink : IEntity
     public long CaliperId { get; set; }
     public CaliperEntity? CaliperEntity { get; set; }
 
-    public required long MatchingPhone { get; set; }
+    public long MatchingPhone { get; set; }
 }
