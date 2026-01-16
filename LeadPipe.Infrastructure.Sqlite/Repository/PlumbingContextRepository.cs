@@ -5,7 +5,6 @@ using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;

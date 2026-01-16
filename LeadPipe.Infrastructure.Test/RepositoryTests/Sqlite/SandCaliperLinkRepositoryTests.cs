@@ -1,5 +1,4 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Data.Load;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.Extensions.Logging;

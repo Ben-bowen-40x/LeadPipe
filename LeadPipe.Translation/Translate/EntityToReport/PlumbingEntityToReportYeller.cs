@@ -1,7 +1,6 @@
 ﻿using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
-using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
