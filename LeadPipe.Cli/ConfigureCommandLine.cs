@@ -67,7 +67,7 @@ internal static class ConfigureCommandLine
             .AddTranslation(settings)
             .AddInfrastructure(settings)
             .AddInfrastructureMySql(settings)
-            .AddInfrastructureSqlite(settings)
+            .AddInfrastructureSqlite(settings, configuration)
             .AddApplication();
     }
 }

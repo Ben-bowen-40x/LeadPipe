@@ -5,6 +5,7 @@ using LeadPipe.Infrastructure.Sqlite.Context;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -12,24 +13,47 @@ namespace LeadPipe.Infrastructure.Sqlite;
 
 public static class InjectInfrastructureSqlite
 {
-    public static IServiceCollection AddInfrastructureSqlite(this IServiceCollection services, IDwhSettings settings)
+    public static IServiceCollection AddInfrastructureSqlite(this IServiceCollection services, IDwhSettings settings, IConfiguration config)
     {
         if (string.IsNullOrWhiteSpace(settings.PlumbingConnectionString))
             throw new InvalidOperationException(
                 $"{nameof(settings.PlumbingConnectionString)} is not configured.");
 
-        services.AddDbContext<PlumbingContext>((sp, options) =>
+        bool useInMemory = config.GetValue<bool>("Ef:UseInMemoryDatabase");
+        bool sensitiveLogging = config.GetValue<bool>("Ef:SensitiveLogging");
+        services.AddSingleton<SqlitePragmaInterceptor>();
+        if (useInMemory)
         {
-            var cs = settings.PlumbingConnectionString;
+            services.AddSingleton(_ =>
+            {
+                SqliteConnection conn = new("DataSource=:memory:");
+                conn.Open();
+                return conn;
+            });
+        }
 
-            var dataSource = new SqliteConnectionStringBuilder(cs).DataSource;
+        services.AddDbContext<PlumbingContext>((provider, options) =>
+        {
+            if (sensitiveLogging)
+                options.EnableSensitiveDataLogging();
 
-            Directory.CreateDirectory(Path.GetDirectoryName(dataSource)!);
+            options
+                .AddInterceptors(provider.GetRequiredService<SqlitePragmaInterceptor>())
+                .LogTo(Console.WriteLine, LogLevel.Information);
 
-            options.UseSqlite(cs)
-                .AddInterceptors(new SqlitePragmaInterceptor())
-                .LogTo(Console.WriteLine, LogLevel.Information)
-                .EnableSensitiveDataLogging();
+            if (useInMemory)
+            {
+                SqliteConnection conn = provider.GetRequiredService<SqliteConnection>();
+                options.UseSqlite(conn);
+            }
+            else
+            {
+                string cs = settings.PlumbingConnectionString;
+                string dataSource = new SqliteConnectionStringBuilder(cs).DataSource;
+
+                Directory.CreateDirectory(Path.GetDirectoryName(dataSource)!);
+                options.UseSqlite(cs);
+            }
         });
 
         services.AddScoped<IRepository<CaliperEntity>, CaliperRepository>();
