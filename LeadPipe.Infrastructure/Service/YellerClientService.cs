@@ -34,7 +34,7 @@ internal class YellerClientService : IYellerService
     {
         _factory = factory;
         _settings = settings;
-        _client = _factory.CreateClient(_settings.YellerName!);
+        _client = _factory.CreateClient(_settings.YellerGetterName!);
         _dtoToVo = dtoToVo;
         _logger = logger;
         _throttle = new SemaphoreSlim(_settings.YellerConcurrentMax);

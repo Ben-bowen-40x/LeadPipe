@@ -20,7 +20,7 @@ public sealed class YellerClientReporter : IReport<ReportYeller>
     )
     {
         _settings = settings;
-        _client = factory.CreateClient(_settings.YellerName!);
+        _client = factory.CreateClient(_settings.YellerReporterName!);
     }
 
     public async Task<Result> ReportData(List<ReportYeller> d)
@@ -28,6 +28,7 @@ public sealed class YellerClientReporter : IReport<ReportYeller>
         throw new NotImplementedException();
     }
 }
+// Keep these together for now
 public sealed class YellerJsonReporter(
     IYellerSettings settings,
     IJsonRwService json
@@ -39,6 +40,7 @@ public sealed class YellerJsonReporter(
     public async Task<Result> ReportData(List<ReportYeller> d)
     {
         FileInfo loc = new(_settings.YellerClientReporterLoc!);
-        return await _json.WriteToFileAsync(loc, d);
+        var result = await _json.WriteToFileAsync(loc, d);
+        return result;
     }
 }
