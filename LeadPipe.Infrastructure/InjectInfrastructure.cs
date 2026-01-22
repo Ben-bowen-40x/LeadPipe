@@ -14,13 +14,15 @@ using LeadPipe.Infrastructure.Service;
 using LeadPipe.Infrastructure.Service.Report;
 using LeadPipe.Infrastructure.Service.Update;
 using LeadPipe.Infrastructure.Settings;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net;
 
 namespace LeadPipe.Infrastructure;
 
 public static class InjectInfrastructure
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IInfrastructureSettings settings, IConfiguration config)
     {
         // Format: services.AddScoped<Interface, Class>();
 
@@ -123,35 +125,53 @@ public static class InjectInfrastructure
         // *****************************************
         #region ADD CLIENTS
 
+        bool useTestClients = config.GetValue<bool>("HttpClients:UseTestClients");
+
         // Add Leaf Client
         if (string.IsNullOrWhiteSpace(settings.LeafName))
             throw new Exception($"{nameof(settings.LeafName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LeafBase))
-            throw new Exception($"{nameof(settings.LeafBase)} cannot be null");
-        if (settings.LeafToken is null)
-            throw new Exception($"{nameof(settings.LeafToken)} cannot be null");
-        services.AddHttpClient(settings.LeafName, c =>
+        if (useTestClients)
         {
-            c.BaseAddress = new Uri(settings.LeafBase);
-            c.DefaultRequestHeaders.Add("Accept", "application/json");
-            c.DefaultRequestHeaders.Authorization = new(settings.LeafToken.Token_type, settings.LeafToken.Access_token);
-        });
+            services.AddHttpClient(settings.LeafName)
+            .ConfigurePrimaryHttpMessageHandler(() => new NoOpHttpMessageHandler());
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(settings.LeafBase))
+                throw new Exception($"{nameof(settings.LeafBase)} cannot be null");
+            if (settings.LeafToken is null)
+                throw new Exception($"{nameof(settings.LeafToken)} cannot be null");
+            services.AddHttpClient(settings.LeafName, c =>
+            {
+                c.BaseAddress = new Uri(settings.LeafBase);
+                c.DefaultRequestHeaders.Add("Accept", "application/json");
+                c.DefaultRequestHeaders.Authorization = new(settings.LeafToken.Token_type, settings.LeafToken.Access_token);
+            });
+        }
 
         // Add Lab Client
         if (string.IsNullOrWhiteSpace(settings.LabName))
             throw new Exception($"{nameof(settings.LabName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LabUri))
-            throw new Exception($"{nameof(settings.LabUri)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LabAccept))
-            throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
-        if (settings.LabToken is null)
-            throw new Exception($"{nameof(settings.LabToken)} cannot be null");
-        services.AddHttpClient(settings.LabName, c =>
+        if (useTestClients)
         {
-            c.BaseAddress = new Uri(settings.LabUri);
-            c.DefaultRequestHeaders.Add("Accept", settings.LabAccept);
-            c.DefaultRequestHeaders.Authorization = new(settings.LabToken.Token_type, settings.LabToken.Access_token);
-        });
+            services.AddHttpClient(settings.LabName)
+            .ConfigurePrimaryHttpMessageHandler(() => new NoOpHttpMessageHandler());
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(settings.LabUri))
+                throw new Exception($"{nameof(settings.LabUri)} cannot be null");
+            if (string.IsNullOrWhiteSpace(settings.LabAccept))
+                throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
+            if (settings.LabToken is null)
+                throw new Exception($"{nameof(settings.LabToken)} cannot be null");
+            services.AddHttpClient(settings.LabName, c =>
+            {
+                c.BaseAddress = new Uri(settings.LabUri);
+                c.DefaultRequestHeaders.Add("Accept", settings.LabAccept);
+                c.DefaultRequestHeaders.Authorization = new(settings.LabToken.Token_type, settings.LabToken.Access_token);
+            });
+        }
 
         // Add Yeller Client
         if (string.IsNullOrWhiteSpace(settings.YellerGetterName))
@@ -160,27 +180,55 @@ public static class InjectInfrastructure
             throw new Exception($"{nameof(settings.YellerBase)} cannot be null");
         if (settings.YellerToken is null)
             throw new Exception($"{nameof(settings.YellerToken)} cannot be null");
-        services.AddHttpClient(settings.YellerGetterName, c =>
+        if (useTestClients)
         {
-            c.BaseAddress = new Uri(settings.YellerBase);
-            c.DefaultRequestHeaders.Add("Accept", "application/json");
-            c.DefaultRequestHeaders.Authorization = new(settings.YellerToken.Token_type, settings.YellerToken.Access_token);
-        });
+            services.AddHttpClient(settings.YellerGetterName)
+            .ConfigurePrimaryHttpMessageHandler(() => new NoOpHttpMessageHandler());
+        }
+        else
+        {
+            services.AddHttpClient(settings.YellerGetterName, c =>
+            {
+                c.BaseAddress = new Uri(settings.YellerBase);
+                c.DefaultRequestHeaders.Add("Accept", "application/json");
+                c.DefaultRequestHeaders.Authorization = new(settings.YellerToken.Token_type, settings.YellerToken.Access_token);
+            });
+        }
 
         // Add Second Yeller Client
         if (string.IsNullOrWhiteSpace(settings.YellerReporterName))
             throw new Exception($"{nameof(settings.YellerReporterName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.YellerSecret))
-            throw new Exception($"{nameof(settings.YellerSecret)} cannot be null");
-        services.AddHttpClient(settings.YellerReporterName, c =>
+        if (useTestClients)
         {
-            c.BaseAddress = new Uri(settings.YellerBase);
-            c.DefaultRequestHeaders.Add("Accept", "application/json");
-            c.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(settings.YellerToken.Token_type, settings.YellerSecret);
-        });
+            services.AddHttpClient(settings.YellerReporterName)
+            .ConfigurePrimaryHttpMessageHandler(() => new NoOpHttpMessageHandler());
+        }
+        else
+        {
+            if (string.IsNullOrWhiteSpace(settings.YellerSecret))
+                throw new Exception($"{nameof(settings.YellerSecret)} cannot be null");
+            services.AddHttpClient(settings.YellerReporterName, c =>
+            {
+                c.BaseAddress = new Uri(settings.YellerBase);
+                c.DefaultRequestHeaders.Add("Accept", "application/json");
+                c.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(settings.YellerToken.Token_type, settings.YellerSecret);
+            });
+        }
 
         #endregion
 
         return services;
+    }
+    public class NoOpHttpMessageHandler : DelegatingHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            // Return empty success response
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{}") // Or whatever shape your API expects
+            };
+            return Task.FromResult(response);
+        }
     }
 }
