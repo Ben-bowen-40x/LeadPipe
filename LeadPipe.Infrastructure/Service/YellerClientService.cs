@@ -59,8 +59,8 @@ internal class YellerClientService : IYellerService
         foreach (var yellerId in yellerIds)
         {
             string endpoint = id == ""
-                ? $"{_settings.YellerPrelimEndpoint1}{yellerId}{_settings.YellerPrelimEndpoint1}?limit={limit}"
-                : $"{_settings.YellerPrelimEndpoint1}{yellerId}{_settings.YellerPrelimEndpoint1}?limit={limit}&{_settings.YellerPrelimId}={id}";
+                ? $"{_settings.YellerPrelimEndpoint1}{yellerId}{_settings.YellerPrelimEndpoint2}?limit={limit}"
+                : $"{_settings.YellerPrelimEndpoint1}{yellerId}{_settings.YellerPrelimEndpoint2}?limit={limit}&{_settings.YellerPrelimId}={id}";
             YellerFetchResult data = await GetData(yellerId, process, endpoint);
 
             // Aggregate raw and errors
