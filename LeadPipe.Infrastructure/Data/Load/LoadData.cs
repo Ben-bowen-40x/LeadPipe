@@ -10,7 +10,7 @@ public abstract class LoadData<TVo, TEntity>(
     IRepository<TEntity> repo,
     IEntityToVo<TEntity, TVo> eToVo,
     Domain.ValueObjects.Source source
-    ) : ILoadData<TVo> where TEntity : class, ISourceEntity
+) : ILoadData<TVo> where TEntity : class, ISourceEntity
 {
     private readonly IRepository<TEntity> _repo = repo;
     private readonly IEntityToVo<TEntity, TVo> _eToVo = eToVo;
@@ -20,9 +20,9 @@ public abstract class LoadData<TVo, TEntity>(
         try
         {
             Result<List<TEntity>> found = await _repo.FindAsync(e => e.Source == _source);
-            List<TVo> translate = [.. found.Value.Select(_eToVo.Translate)];
+
             Result<List<TVo>> result = found.IsSuccess
-                ? Result.Success(translate)
+                ? Result.Success<List<TVo>>([.. found.Value.Select(_eToVo.Translate)])
                 : Result.Failure<List<TVo>>(found.Error);
             return result;
         }
