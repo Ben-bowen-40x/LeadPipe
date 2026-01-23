@@ -15,6 +15,7 @@ public static class InjectInfrastructureSqlite
 {
     public static IServiceCollection AddInfrastructureSqlite(this IServiceCollection services, IDwhSettings settings, IConfiguration config)
     {
+        #region Register Db Context
         if (string.IsNullOrWhiteSpace(settings.PlumbingConnectionString))
             throw new InvalidOperationException(
                 $"{nameof(settings.PlumbingConnectionString)} is not configured.");
@@ -69,17 +70,28 @@ public static class InjectInfrastructureSqlite
                 options.UseSqlite(cs);
             }
         });
+        #endregion
 
+        #region Register Repositories
         services.AddScoped<IRepository<CaliperEntity>, CaliperRepository>();
+        services.AddScoped<IRepository<CornCaliperLink>, CornCaliperLinkRepository>();
+        services.AddScoped<IRepository<CornPlumbingLink>, CornPlumbingLinkRepository>();
         services.AddScoped<IRepository<CornEntity>, CornRepository>();
+        services.AddScoped<IRepository<CustardCaliperLink>, CustardCaliperLinkRepository>();
+        services.AddScoped<IRepository<CustardCornLink>, CustardCornLinkRepository>();
+        services.AddScoped<IRepository<CustardPlumbingLink>, CustardPlumbingLinkRepository>();
+        services.AddScoped<IRepository<CustardEntity>, CustardRepository>();
         services.AddScoped<IRepository<PlumbingCaliperLink>, PlumbingCaliperLinkRepository>();
         services.AddScoped<IRepository<PlumbingEntity>, PlumbingRepository>();
-        services.AddScoped<IRepository<SandCaliperLink>, SubsCaliperLinkRepository>();
+        services.AddScoped<IRepository<SandCaliperLink>, SandCaliperLinkRepository>();
         services.AddScoped<IRepository<SandCornLink>, SandCornLinkRepository>();
         services.AddScoped<IRepository<SandPlumbingLink>, SandPlumbingLinkRepository>();
         services.AddScoped<IRepository<SandEntity>, SandRepository>();
         services.AddScoped<ISyncStateRepository, SyncStateRepository>();
+
         services.AddScoped<IRepositoryFactory, RepositoryFactory>();
+
+        #endregion
 
         return services;
     }
