@@ -1,9 +1,12 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-using CommandLine;
+﻿using CommandLine;
 using LeadPipe.Cli.Verbs;
+using LeadPipe.Infrastructure.MySql.Context;
+using LeadPipe.Infrastructure.Sqlite.Context;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
+using System.Reflection;
 
 namespace LeadPipe.Cli;
 
@@ -19,7 +22,32 @@ internal class Program
                 services.ConfigureCli(context.Configuration);
             });
         IHost host = builder.Build();
-        IServiceProvider service = host.Services.CreateScope().ServiceProvider;
+
+        using IServiceScope scope = host.Services.CreateScope();
+        IServiceProvider service = scope.ServiceProvider;
+        IConfiguration config = service.GetRequiredService<IConfiguration>();
+
+        // Make sure db is created if we're using inmemory
+        bool globalInMemoryDatabase = config.GetValue<bool>("Ef:UseInMemoryDatabase");
+        bool globalInMemoryConnection = config.GetValue<bool>("Ef:UseInMemoryConnection");
+        bool sqliteInMemory = config.GetValue<bool>("Ef:Sqlite:UseInMemoryConnection", globalInMemoryConnection);
+        bool mysqlInMemory = config.GetValue<bool>("Ef:MySql:UseInMemoryDatabase", globalInMemoryDatabase);
+
+        if (sqliteInMemory)
+        {
+            var pCtx = service.GetRequiredService<PlumbingContext>();
+            pCtx.Database.EnsureCreated();
+        }
+        if (mysqlInMemory)
+        {
+            var mysql1Ctx = service.GetRequiredService<MySqlSchema1Context>();
+            var mysql2Ctx = service.GetRequiredService<MySqlSchema2Context>();
+            var mysql3Ctx = service.GetRequiredService<MySqlSchema3Context>();
+            mysql1Ctx.Database.EnsureCreated();
+            mysql2Ctx.Database.EnsureCreated();
+            mysql3Ctx.Database.EnsureCreated();
+        }
+
         Execute(args, service);
     }
 
