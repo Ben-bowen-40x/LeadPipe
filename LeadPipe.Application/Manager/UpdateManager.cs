@@ -10,17 +10,18 @@ public interface IUpdateManager
     Task<Result> Manage(bool refresh);
 }
 public sealed class UpdateManager(
-    IUpdateSourceFactory update,
-    IUpdateService<Caliper> call,
-    IUpdateService<Sandwich> sandwich,
+    IUpdateFactory update,
     IEntityAssociationService plumb
-    ) : IUpdateManager
+) : IUpdateManager
 {
-    private readonly IUpdateSourceFactory _update = update;
-    private readonly IUpdateService<Caliper> _call = call;
-    private readonly IUpdateService<Sandwich> _sandwich = sandwich;
+    private readonly IUpdateFactory _update = update;
+    private readonly IUpdateService<Caliper> _call = update.GetService<Caliper>();
+    private readonly IUpdateService<Sandwich> _sandwich = update.GetService<Sandwich>();
+    private readonly IUpdateService<Custard> _custard = update.GetService<Custard>();
     private readonly IEntityAssociationService _plumb = plumb;
-    
+
+    private IUpdateService<Plumbing>? Plumbing { get; set; }
+
     public async Task<Result> Manage(Source source, bool refresh)
     {
         // Caliper
@@ -58,6 +59,11 @@ public sealed class UpdateManager(
         if (sandwichSaved.IsFailure)
             return sandwichSaved;
 
+        // Custard
+        Result custardSaved = await UpdatedAndSaved(refresh, _custard);
+        if (custardSaved.IsFailure)
+            return custardSaved;
+
         // Update All Sources
         Source[] sources = Enum.GetValues<Source>();
         List<Result> results = new(sources.Length);
@@ -79,14 +85,14 @@ public sealed class UpdateManager(
 
         return associated;
     }
-    
+
     private async Task<Result> UpdatePlumb(Source source, bool refresh)
     {
-        IUpdateService<Plumbing> plumbing = _update.GetService(source);
-        var result = await UpdatedAndSaved(refresh, plumbing);
+        Plumbing ??= _update.GetService<Plumbing>(source);
+        var result = await UpdatedAndSaved(refresh, Plumbing);
         return result;
     }
-    
+
     private static async Task<Result> UpdatedAndSaved<T>(bool refresh, IUpdateService<T> updateService)
     {
         Result<List<T>> updateData = refresh
