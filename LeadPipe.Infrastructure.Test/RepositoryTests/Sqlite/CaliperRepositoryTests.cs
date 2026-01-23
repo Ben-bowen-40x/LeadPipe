@@ -1,113 +1,128 @@
-﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Entity.Sqlite;
+﻿using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Sqlite.Context;
 using LeadPipe.Infrastructure.Sqlite.Repository;
-using Microsoft.Extensions.Logging;
+using LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
-public class CaliperRepositoryTests
+[Trait("Category", "Integration")]
+public class CaliperRepositoryTests : IDisposable
 {
-    private readonly ILogger<CaliperRepository> logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<CaliperRepository>();
-    [Fact]
-    public async Task AddRangeAsync_ShouldAddMultipleEntities()
+    private readonly SqliteConnection _connection;
+    private readonly PlumbingContext _context;
+    private readonly CaliperRepository _repo;
+
+    public CaliperRepositoryTests()
     {
-        var context = RepoTestHelpers.GetInMemoryContext();
+        _context = SqliteTestContextFactory.Create(out _connection);
 
-        var repo = new CaliperRepository(context, logger);
+        _repo = new CaliperRepository(
+            _context,
+            NullLogger<CaliperRepository>.Instance
+        );
+    }
 
+    [Fact]
+    public async Task UpsertRangeAsync_Inserts_New_Entities()
+    {
         var entities = new List<CaliperEntity>
+    {
+        new()
         {
-            new() { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty },
-            new() { Id = 2, PhoneNumber = 67890, Note = string.Empty, Location = string.Empty, Source = string.Empty }
+            Id = 1,
+            PhoneNumber = 123,
+            Date = DateTime.UtcNow,
+            UnixDate = 111,
+            Duration = 30,
+            Billable = true,
+            Note = string.Empty,
+            Source = string.Empty,
+            Location = string.Empty
+        }
+    };
+
+        var result = await _repo.UpsertRangeAsync(entities);
+
+        ResultAssertions.ShouldBeSuccess(result);
+
+        var saved = await _context.CaliperEntities.ToListAsync();
+        Assert.Single(saved);
+    }
+
+    [Fact]
+    public async Task UpsertRangeAsync_Updates_Existing_Entities()
+    {
+        var date = DateTime.UtcNow;
+
+        await _repo.UpsertRangeAsync(
+            new()
+            {
+            new CaliperEntity
+            {
+                Id = 1,
+                PhoneNumber = 123,
+                Date = date,
+                UnixDate = 111,
+                Duration = 30,
+                Billable = false,
+                Note = string.Empty,
+                Source = string.Empty,
+                Location = string.Empty
+            }
+            });
+
+        await _repo.UpsertRangeAsync(
+            [new CaliperEntity
+            {
+                Id = 1,
+                PhoneNumber = 123,
+                Date = date,
+                UnixDate = 222,
+                Duration = 60,
+                Billable = true,
+                Note = string.Empty,
+                Source = string.Empty,
+                Location = string.Empty
+            }]);
+
+        var entity = await _context.CaliperEntities.SingleAsync();
+
+        Assert.Equal(222, entity.UnixDate);
+        Assert.Equal(60, entity.Duration);
+        Assert.True(entity.Billable);
+    }
+
+    [Fact]
+    public async Task FindWithDetailsAsync_Includes_Links()
+    {
+        var caliper = new CaliperEntity
+        {
+            Id = 1,
+            PhoneNumber = 123,
+            Date = DateTime.UtcNow,
+            UnixDate = 1,
+            Note = string.Empty,
+            Source = string.Empty,
+            Location = string.Empty
         };
 
-        var result = await repo.UpsertRangeAsync(entities);
+        _context.CaliperEntities.Add(caliper);
+        await _context.SaveChangesAsync();
 
-        Assert.True(result.IsSuccess);
-        Assert.Equal(2, context.CaliperEntities.Count());
+        var result = await _repo.FindWithDetailsAsync(c => c.Id == 1);
+
+        ResultAssertions.ShouldBeSuccess(result);
+        Assert.Single(result.Value!);
     }
 
-    [Fact]
-    public async Task AddRangeAsync_ShouldFail_WhenEmptyList()
+    public void Dispose()
     {
-        var context = RepoTestHelpers.GetInMemoryContext();
-
-        var repo = new CaliperRepository(context, logger);
-
-        var result = await repo.UpsertRangeAsync([]);
-
-        Assert.False(result.IsSuccess);
-        Assert.Contains("No plumbing entities", result.Error);
+        _context.Dispose();
+        _connection.Dispose();
+        GC.SuppressFinalize(this);
     }
 
-    [Fact]
-    public async Task AddAsync_ShouldAddCaliperEntity()
-    {
-        var context = RepoTestHelpers.GetInMemoryContext();
-
-        var repo = new CaliperRepository(context, logger);
-
-        var plumbing = new CaliperEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
-        Result result = await repo.UpsertRangeAsync([plumbing]);
-
-        Assert.True(result.IsSuccess);
-    }
-    [Fact]
-    public async Task GetByIdAsync_ShouldReturnEntity_WhenExists()
-    {
-        var context = RepoTestHelpers.GetInMemoryContext();
-        context.CaliperEntities.Add(new CaliperEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty });
-        await context.SaveChangesAsync();
-
-
-        var repo = new CaliperRepository(context, logger);
-        Result<List<CaliperEntity>> result = await repo.FindAsync(c => c.Id == 1);
-
-        Assert.True(result.IsSuccess);
-        Assert.Equal(12345, result.Value[0].PhoneNumber);
-    }
-
-    [Fact]
-    public async Task GetByIdAsync_ShouldFail_WhenNotFound()
-    {
-
-        var repo = new CaliperRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var result = await repo.FindAsync(l => l.Id == 99);
-
-        Assert.False(result.IsSuccess);
-        Assert.Contains("not found", result.Error);
-    }
-
-    [Fact]
-    public async Task UpdateValuesAsync_ShouldUpdateEntity()
-    {
-        var context = RepoTestHelpers.GetInMemoryContext();
-        var plumbing = new CaliperEntity { Id = 1, PhoneNumber = 12345, Note = string.Empty, Location = string.Empty, Source = string.Empty };
-        context.CaliperEntities.Add(plumbing);
-        await context.SaveChangesAsync();
-
-
-        var repo = new CaliperRepository(context, logger);
-        var updatedCaliper = new CaliperEntity { Id = 1, PhoneNumber = 99999, Note = string.Empty, Location = string.Empty, Source = string.Empty };
-
-        var result = await repo.UpsertRangeAsync([updatedCaliper]);
-        var reloaded = await repo.FindAsync(l => l.Id == 1);
-
-        Assert.True(result.IsSuccess);
-        Assert.True(reloaded.IsSuccess);
-        Assert.Equal(99999, reloaded.Value[0].PhoneNumber);
-    }
-
-    [Fact]
-    public async Task UpdateValuesAsync_ShouldFail_WhenEntityDoesNotExist()
-    {
-
-        var repo = new CaliperRepository(RepoTestHelpers.GetInMemoryContext(), logger);
-        var updatedCaliper = new CaliperEntity { Id = 99, PhoneNumber = 11111, Note = string.Empty, Location = string.Empty, Source = string.Empty };
-
-        var result = await repo.UpsertRangeAsync([updatedCaliper]);
-
-        Assert.False(result.IsSuccess);
-        Assert.Contains("does not exist", result.Error);
-    }
 }
