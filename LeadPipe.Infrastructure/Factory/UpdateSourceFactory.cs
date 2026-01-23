@@ -4,11 +4,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Infrastructure.Factory;
 
-class UpdateSourceFactory(IServiceProvider provider) : IUpdateSourceFactory
+class UpdateSourceFactory(IServiceProvider provider) : IUpdateFactory
 {
     private readonly IServiceProvider _provider = provider;
-    public IUpdateService<Plumbing> GetService(Source source)
+    public IUpdateService<T> GetService<T>(Source source)
     {
-        return _provider.GetRequiredKeyedService<IUpdateService<Plumbing>>(source);
+        return _provider.GetRequiredKeyedService<IUpdateService<T>>(source);
+    }
+    public IUpdateService<T> GetService<T>()
+    {
+        return _provider.GetRequiredService<IUpdateService<T>>();
     }
 }

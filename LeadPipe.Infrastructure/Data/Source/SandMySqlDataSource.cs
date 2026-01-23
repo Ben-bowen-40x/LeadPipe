@@ -5,9 +5,9 @@ using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
 
 namespace LeadPipe.Infrastructure.Data.Source;
 
-public sealed class SubMySqlDataSource(
+public sealed class SandMySqlDataSource(
     ISandMySqlRepository repo
-    ) : IDataSourceAsync<SandMySqlEntity>
+) : IDataSourceAsync<SandMySqlEntity>
 {
     private readonly ISandMySqlRepository _repo = repo;
     public async Task<Result<List<SandMySqlEntity>>> LoadAsync()
