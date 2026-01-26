@@ -25,7 +25,7 @@ public class SandMySqlRepository(MySqlSchema1Context context) : ISandMySqlReposi
             List<SandMySqlEntity> list = await query.Where(predicate).ToListAsync();
             return Result.Success(list);
         }
-        catch (Exception ex) { return Result.Failure<List<SandMySqlEntity>>(ex.Message); }
+        catch (Exception ex) { return Result.Failure<List<SandMySqlEntity>>(ex.ToString()); }
     }
 
     public async Task<Result<SandMySqlEntity>> GetByIdAsync(int id, bool includeDetails = true)
