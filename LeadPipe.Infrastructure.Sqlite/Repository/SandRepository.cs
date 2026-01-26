@@ -158,7 +158,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
         """, ct);
 
             // 5️⃣ Clean up temp table
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM {tempTable};", ct);
+            await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
