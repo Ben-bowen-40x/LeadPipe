@@ -56,10 +56,10 @@ public sealed class SandMySqlEntityToSandwichTests
     public void Translate_ShouldMapAllFields()
     {
         var entity = CreateEntity();
-        _dt.Convert(entity.dateAdded, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.dateAdded, TimeSpan.Zero));
-        _dt.Convert(entity.dateCancelled, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.dateCancelled, TimeSpan.Zero));
-        _dt.Convert(entity.customer!.dateAdded, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.customer.dateAdded, TimeSpan.Zero));
-        _dt.Convert(entity.customer.dateCancelled, ETimeZone.Pacific).Returns(new DateTimeOffset(entity.customer.dateCancelled, TimeSpan.Zero));
+        _dt.Convert((DateTime)entity.dateAdded!, ETimeZone.Pacific).Returns(new DateTimeOffset((DateTime)entity.dateAdded!, TimeSpan.Zero));
+        _dt.Convert((DateTime)entity.dateCancelled!, ETimeZone.Pacific).Returns(new DateTimeOffset((DateTime)entity.dateCancelled, TimeSpan.Zero));
+        _dt.Convert((DateTime)entity.customer!.dateAdded!, ETimeZone.Pacific).Returns(new DateTimeOffset((DateTime)entity.customer.dateAdded, TimeSpan.Zero));
+        _dt.Convert((DateTime)entity.customer.dateCancelled!, ETimeZone.Pacific).Returns(new DateTimeOffset((DateTime)entity.customer.dateCancelled, TimeSpan.Zero));
 
         var translator = new SandMySqlEntityToSandwich(_dt);
 
