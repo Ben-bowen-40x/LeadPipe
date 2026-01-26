@@ -87,13 +87,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // Custard Entity
         var custard = modelBuilder.Entity<CustardEntity>();
-        custard.ToTable(TableNames.CustardEntitiesName, t =>
-        {
-            t.HasCheckConstraint(
-                "CK_Custard_PhoneNumber2_NotZero",
-                "PhoneNumber2 <> 0"
-            );
-        });
+        custard.ToTable(TableNames.CustardEntitiesName);
         custard.HasKey(c => c.Id);
         custard.Property(c => c.Id).ValueGeneratedNever(); // External id
         custard.HasMany(c => c.SandEntities)
