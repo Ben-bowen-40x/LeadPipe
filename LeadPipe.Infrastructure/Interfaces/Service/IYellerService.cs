@@ -1,10 +1,10 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Dto;
 
 namespace LeadPipe.Infrastructure.Interfaces.Service;
 
 public interface IYellerService
 {
-    Task<Result<List<Plumbing>>> GetAllAsync(string id = "");
-    Task<Result<List<Plumbing>>> RefreshAsync();
+    Task<Result<List<YellerDto>>> GetAllAsync(bool refresh);
+    Task<Result<List<YellerDto>>> RefreshAsync();
 }
