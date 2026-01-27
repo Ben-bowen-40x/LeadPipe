@@ -41,9 +41,14 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         var sync = modelBuilder.Entity<SyncStateEntity>()
             .ToTable(TableNames.SyncStateName);
         sync.HasKey(x => x.Id);
-        sync.HasIndex(x => x.Id)
+        sync.Property(x => x.Id).ValueGeneratedOnAdd(); // External id
+        sync.HasIndex(x => x.BusinessId)
             .IsUnique();
-        sync.Property(x => x.Id).ValueGeneratedNever(); // External id
+        sync.Property(x => x.BusinessId)
+            .HasConversion(
+                v => v.Value,
+                v => BusinessId.From(v))
+            .IsRequired();
 
         // CaliperEntity
         var caliper = modelBuilder.Entity<CaliperEntity>()
