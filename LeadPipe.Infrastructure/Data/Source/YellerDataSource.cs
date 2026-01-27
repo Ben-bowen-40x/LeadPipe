@@ -14,19 +14,17 @@ public class YellerDataSource(IYellerService yeller, IVoToDto<Plumbing, YellerDt
 
     public async Task<Result<List<YellerDto>>> LoadAsync()
     {
-        Result<List<Plumbing>> get = await _yeller.GetAllAsync();
+        Result<List<YellerDto>> get = await _yeller.GetAllAsync(false);
         if (get.IsFailure)
             return Result.Failure<List<YellerDto>>(get.Error);
-        List<YellerDto> result = [.. get.Value.Select(_voToDto.Translate)];
-        return result;
+        return get;
     }
 
     public async Task<Result<List<YellerDto>>> RefreshAsync()
     {
-        Result<List<Plumbing>> get = await _yeller.RefreshAsync();
+        Result<List<YellerDto>> get = await _yeller.RefreshAsync();
         if (get.IsFailure)
             return Result.Failure<List<YellerDto>>(get.Error);
-        List<YellerDto> result = [.. get.Value.Select(_voToDto.Translate)];
-        return result;
+        return get;
     }
 }
