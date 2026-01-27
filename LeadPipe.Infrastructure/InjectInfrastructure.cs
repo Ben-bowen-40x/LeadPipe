@@ -17,7 +17,6 @@ using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace LeadPipe.Infrastructure;
@@ -69,6 +68,7 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<CustardMySqlEntity>, CustardMySqlDataSource>();
 
         #endregion
+        // *****************************************
 
         // *****************************************
         #region ADD SERVICES
@@ -128,6 +128,7 @@ public static class InjectInfrastructure
         services.AddScoped<IYellerService, YellerClientService>();
 
         #endregion
+        // *****************************************
 
         // *****************************************
         #region ADD CLIENTS
@@ -135,129 +136,56 @@ public static class InjectInfrastructure
         bool useTestClients = config.GetValue<bool>("HttpClients:UseTestClients");
 
         // Add Leaf Client
-        if (string.IsNullOrWhiteSpace(settings.LeafName))
-            throw new Exception($"{nameof(settings.LeafName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LeafBase))
-            throw new Exception($"{nameof(settings.LeafBase)} cannot be null");
-        services.AddHttpClient(settings.LeafName, c =>
-        {
-            c.BaseAddress = new Uri(settings.LeafBase);
-            c.DefaultRequestHeaders.Add("Accept", "application/json");
-
-            if (!useTestClients)
-            {
-                if (settings.LeafToken is null)
-                    throw new Exception($"{nameof(settings.LeafToken)} cannot be null");
-
-                c.DefaultRequestHeaders.Authorization = new(settings.LeafToken.Token_type, settings.LeafToken.Access_token);
-            }
-        }).ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            return useTestClients
-                ? new NoOpHttpMessageHandler(_leafDto)
-                : new HttpClientHandler()
-                {
-                    AutomaticDecompression =
-                        DecompressionMethods.GZip |
-                        DecompressionMethods.Deflate
-                };
-        });
+        RegisterHttpClient(settings.LeafName, settings.LeafBase, "application/json", settings.LeafToken, _leafDto, services, useTestClients);
 
         // Add Lab Client
-        if (string.IsNullOrWhiteSpace(settings.LabName))
-            throw new Exception($"{nameof(settings.LabName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.LabBase))
-            throw new Exception($"{nameof(settings.LabBase)} cannot be null");
         if (string.IsNullOrWhiteSpace(settings.LabAccept))
             throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
-        services.AddHttpClient(settings.LabName, c =>
-        {
-            c.BaseAddress = new Uri(settings.LabBase);
-            c.DefaultRequestHeaders.Add("Accept", settings.LabAccept);
-
-            if (!useTestClients)
-            {
-                if (settings.LabToken is null)
-                    throw new Exception($"{nameof(settings.LabToken)} cannot be null");
-
-                c.DefaultRequestHeaders.Authorization = new(settings.LabToken.Token_type, settings.LabToken.Access_token);
-            }
-        }).ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            return useTestClients
-                ? new NoOpHttpMessageHandler(_labDto)
-                : new HttpClientHandler()
-                {
-                    AutomaticDecompression =
-                        DecompressionMethods.GZip |
-                        DecompressionMethods.Deflate
-                };
-        });
+        RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, _labDto, services, useTestClients);
 
         // Add Yeller Client
-        if (string.IsNullOrWhiteSpace(settings.YellerGetterName))
-            throw new Exception($"{nameof(settings.YellerGetterName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.YellerBase))
-            throw new Exception($"{nameof(settings.YellerBase)} cannot be null");
-        services.AddHttpClient(settings.YellerGetterName, c =>
-        {
-            c.BaseAddress = new Uri(settings.YellerBase);
-            c.DefaultRequestHeaders.Add("Accept", "application/json");
-
-            if (!useTestClients)
-            {
-                if (settings.YellerToken is null)
-                    throw new Exception($"{nameof(settings.YellerToken)} cannot be null");
-
-                c.DefaultRequestHeaders.Authorization = 
-                    new AuthenticationHeaderValue(settings.YellerToken.Token_type, settings.YellerToken.Access_token);
-            }
-        }).ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            return useTestClients
-                ? new NoOpHttpMessageHandler(_yellerDto)
-                : new HttpClientHandler()
-                {
-                    AutomaticDecompression =
-                        DecompressionMethods.GZip |
-                        DecompressionMethods.Deflate
-                };
-        });
+        RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, "application/json", settings.YellerToken, _yellerDto, services, useTestClients);
 
         // Add Second Yeller Client
-        if (string.IsNullOrWhiteSpace(settings.YellerReporterName))
-            throw new Exception($"{nameof(settings.YellerReporterName)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.YellerSecret))
-            throw new Exception($"{nameof(settings.YellerSecret)} cannot be null");
-        services.AddHttpClient(settings.YellerReporterName, c =>
-        {
-            c.BaseAddress = new Uri(settings.YellerBase);
-            c.DefaultRequestHeaders.Add("Accept", "application/json");
-
-            if (!useTestClients)
-            {
-                if (settings.YellerToken is null)
-                    throw new Exception($"{nameof(settings.YellerToken)} cannot be null");
-
-                c.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue(settings.YellerToken.Token_type, settings.YellerSecret);
-            }
-        }).ConfigurePrimaryHttpMessageHandler(() =>
-        {
-            return useTestClients
-                ? new NoOpHttpMessageHandler("{}")
-                : new HttpClientHandler()
-                {
-                    AutomaticDecompression =
-                        DecompressionMethods.GZip |
-                        DecompressionMethods.Deflate
-                };
-        });
+        RegisterHttpClient(settings.YellerReporterName, settings.YellerBase, "application/json", settings.YellerToken, "{}", services, useTestClients);
 
         #endregion
+        // *****************************************
 
         return services;
     }
+
+    private static void RegisterHttpClient(string? clientName, string? baseUri, string acceptType, Token? token, string handlerStr, IServiceCollection services, bool useTestClients)
+    {
+        if (string.IsNullOrWhiteSpace(clientName))
+            throw new Exception($"{nameof(clientName)} cannot be null");
+        if (string.IsNullOrWhiteSpace(baseUri))
+            throw new Exception($"{nameof(baseUri)} cannot be null");
+        services.AddHttpClient(clientName, c =>
+        {
+            c.BaseAddress = new Uri(baseUri);
+            c.DefaultRequestHeaders.Add("Accept", acceptType);
+
+            if (!useTestClients)
+            {
+                if (token is null)
+                    throw new Exception($"{nameof(Token)} cannot be null");
+
+                c.DefaultRequestHeaders.Authorization = new(token.Token_type, token.Access_token);
+            }
+        }).ConfigurePrimaryHttpMessageHandler(() =>
+        {
+            return useTestClients
+                ? new NoOpHttpMessageHandler(handlerStr)
+                : new HttpClientHandler()
+                {
+                    AutomaticDecompression =
+                        DecompressionMethods.GZip |
+                        DecompressionMethods.Deflate
+                };
+        });
+    }
+
     public class NoOpHttpMessageHandler(string content) : DelegatingHandler
     {
         private readonly string _content = content;
@@ -273,8 +201,8 @@ public static class InjectInfrastructure
     }
 
     private static readonly JsonSerializerOptions _options = new() { WriteIndented = true };
-    private static readonly DateTime _creationDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
-    private static readonly DateTime _modificationDate = DateTime.SpecifyKind(DateTime.Now, DateTimeKind.Utc);
+    private static readonly DateTime _creationDate = DateTime.UtcNow;
+    private static readonly DateTime _modificationDate = DateTime.UtcNow;
 
     private static readonly string _leafDto = JsonSerializer.Serialize(new LeafDto()
     {
