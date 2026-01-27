@@ -15,7 +15,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? LabId { get; set; }
     public string? LabSecret { get; set; }
     public string? LabName { get; set; }
-    public string? LabUri { get; set; }
+    public string? LabBase { get; set; }
     public string? LabPlumbing { get; set; }
     public string? LabAuth { get; set; }
     public int LabConcurrentMax { get; set; }
