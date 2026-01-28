@@ -9,11 +9,11 @@ namespace LeadPipe.Infrastructure.Data.Source;
 
 public sealed class CaliperMySqlDataSource(
     ICaliperMySqlRepository repo,
-    IRepository<CaliperEntity> caliper
+    IRepositoryFactory factory
     ) : IDataSourceAsync<CaliperMySqlEntity>
 {
     private readonly ICaliperMySqlRepository _repo = repo;
-    private readonly IRepository<CaliperEntity> _caliper = caliper;
+    private readonly IRepository<CaliperEntity> _caliper = factory.GetRepository<CaliperEntity>();
     public async Task<Result<List<CaliperMySqlEntity>>> LoadAsync()
     {
         DateTime dateFilter = DateTime.UtcNow.AddYears(-1);
