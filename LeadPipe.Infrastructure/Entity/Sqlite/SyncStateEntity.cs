@@ -1,10 +1,8 @@
-﻿using CSharpFunctionalExtensions;
+﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-namespace LeadPipe.Infrastructure.Entity.Sqlite;
-
-public class SyncStateEntity
+public class SyncStateEntity : IEntity
 {
-    public int Id { get; set; }
+    public long Id { get; set; }
     public required BusinessId BusinessId { get; set; }
     public string? LastProcessedId { get; set; }
     public DateTime LastSyncUtc { get; set; }
