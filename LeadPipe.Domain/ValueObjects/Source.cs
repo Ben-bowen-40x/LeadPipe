@@ -10,5 +10,5 @@ public enum Source
     Pan,
     Yeller,
     Test,
-    Test2
+    Test2,
 }
