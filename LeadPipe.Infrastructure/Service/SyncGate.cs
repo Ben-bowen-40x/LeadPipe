@@ -1,0 +1,98 @@
+﻿namespace LeadPipe.Infrastructure.Service;
+
+using CSharpFunctionalExtensions;
+using LeadPipe.Application.Service;
+using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+
+public sealed class SyncGate(
+    ISyncStateRepository repo
+) : ISyncGate
+{
+    private readonly ISyncStateRepository _repo = repo;
+
+    private static readonly TimeSpan Interval = TimeSpan.FromHours(12);
+
+    public async Task<bool> ShouldRunAsync(Source source, string entity)
+    {
+        BusinessId id = BuildBusinessId(source, entity);
+
+        Result<SyncStateEntity> found = await _repo.GetByIdAsync(id);
+
+        // First run → allow
+        if (found.IsFailure)
+            return true;
+
+        SyncStateEntity state = found.Value;
+
+        DateTime now = DateTime.UtcNow;
+
+        bool run = now - state.LastSyncUtc >= Interval;
+
+        return run;
+    }
+
+    public async Task<bool> ShouldRunAsync(string entity)
+    {
+        BusinessId id = BuildBusinessId(null, entity);
+
+        Result<SyncStateEntity> found = await _repo.GetByIdAsync(id);
+
+        if (found.IsFailure) return true;
+
+        SyncStateEntity state = found.Value;
+
+        DateTime now = DateTime.UtcNow;
+
+        bool run = now - state.LastSyncUtc >= Interval;
+
+        return run;
+    }
+
+    public async Task MarkSuccessAsync(Source source, string entity)
+    {
+        await UpsertAsync(source, entity);
+    }
+
+    public async Task MarkSuccessAsync(string entity)
+    {
+        await UpsertAsync(null, entity);
+    }
+
+    public async Task MarkFailureAsync(Source source, string entity, string error)
+    {
+        // don't currently persist error state.
+        await UpsertAsync(source, entity);
+    }
+
+    public async Task MarkFailureAsync(string entity, string error)
+    {
+        await UpsertAsync(null, entity);
+    }
+
+    private async Task UpsertAsync(Source? source, string entity)
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        SyncStateEntity state = new()
+        {
+            BusinessId = BuildBusinessId(source, entity),
+            LastSyncUtc = now.UtcDateTime,
+            UnixLastSyncUtc = now.ToUnixTimeSeconds(),
+            LastProcessedId = null
+        };
+
+        await _repo.UpsertRangeAsync([state]);
+    }
+
+    private static BusinessId BuildBusinessId(Source? source, string entity)
+    {
+        string scope = source is null 
+            ? "global" 
+            : source.ToString()!.ToLowerInvariant();
+
+        return BusinessId.From($"{scope}:{entity}");
+    }
+}
+
