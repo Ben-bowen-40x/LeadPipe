@@ -66,20 +66,23 @@ public sealed class UpdateManager(
         => await RunIfDue(source, nameof(Plumbing), refresh, _update.GetService<Plumbing>(source));
 
     /// <summary>
-    /// With new global entities that need to be updated, this is the method that will update
+    /// Whenever you need to update new global value objects, this is where they will update
     /// </summary>
     /// <param name="refresh"></param>
     /// <returns></returns>
     private async Task<Result> RunGlobals(bool refresh)
     {
         Result caliperSaved = await RunIfDue(nameof(Caliper), refresh, _call);
-        if (caliperSaved.IsFailure) return caliperSaved;
+        if (caliperSaved.IsFailure) 
+            return caliperSaved;
 
         Result custardSaved = await RunIfDue(nameof(Custard), refresh, _custard);
-        if (custardSaved.IsFailure) return custardSaved;
+        if (custardSaved.IsFailure) 
+            return custardSaved;
 
         Result sandwichSaved = await RunIfDue(nameof(Sandwich), refresh, _sandwich);
-        if (sandwichSaved.IsFailure) return sandwichSaved;
+        if (sandwichSaved.IsFailure) 
+            return sandwichSaved;
 
         return Result.Success();
     }
