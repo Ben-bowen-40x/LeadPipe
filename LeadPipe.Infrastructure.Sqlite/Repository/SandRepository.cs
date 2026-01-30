@@ -40,11 +40,52 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
 
         // Deduplicate in-memory by Id
         List<SandEntity> uniqueEntities =
-            [
-                .. entities
-                    .GroupBy(e => e.Id)
-                    .Select(g => g.Last())
-            ];
+        [
+            .. entities
+                .GroupBy(e => e.Id)
+                .Select(g => g.Last())
+        ];
+
+        // Foreign key validation: Custard must exist
+        HashSet<long> neededCustardIds =
+        [
+            .. uniqueEntities.Select(e => e.CustardId)
+        ];
+
+        HashSet<long> existingCustardIds =
+        [
+            .. _context.CustardEntities
+                .Where(c => neededCustardIds.Contains(c.Id))
+                .Select(c => c.Id)
+        ];
+
+        // Even though rejected entities is unlikely to need such a large capacity,
+        // starting out with an excessive capacity is better than starting out with no capacity
+        List<SandEntity> validEntities = new(uniqueEntities.Count);
+        List<SandEntity> rejectedEntities = new(uniqueEntities.Count);
+
+        foreach (var e in uniqueEntities)
+        {
+            if (existingCustardIds.Contains(e.CustardId))
+                validEntities.Add(e);
+            else
+                rejectedEntities.Add(e);
+        }
+
+        int rejected = rejectedEntities.Count;
+
+        if (rejected > 0)
+        {
+            _logger.LogWarning("{Entity}: {Rejected} rows skipped due to invalid CustardId",
+                nameof(SandEntity), rejected);
+
+            _logger.LogDebug("{Entity}: Skipped rows (as Id, CustardId) = {Rows}",
+                nameof(SandEntity),
+                rejectedEntities
+                .Select(e => new { e.Id, e.CustardId })
+                .ToArray());
+        }
+        uniqueEntities = validEntities;
 
         int batchSize = 50;
         const int minBatchSize = 1;
@@ -173,7 +214,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed",nameof(SandEntity));
+            _logger.LogError(ex, "{Entity} upsert failed", nameof(SandEntity));
             return Result.Failure<List<SandEntity>>(ex.ToString());
         }
 
@@ -185,7 +226,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
             for (int i = 0; i < batch.Count; i++)
             {
                 var e = batch[i];
-                
+
                 // Keep append instead of multiline interpolated string because this is faster, and with millions of upserts, every little bit counts
                 sql.Append('(')
                    .Append($"{e.Id}, ")
