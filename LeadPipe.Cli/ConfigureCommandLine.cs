@@ -16,6 +16,17 @@ internal static class ConfigureCommandLine
         Settings settings = new();
         configuration.Bind(settings);
 
+        // Special items
+        bool useTestClientsGlobal = configuration.GetValue("HttpClients:UseTestClients", false);
+        bool useYellerGetterTestClient = configuration.GetValue("HttpClients:Yeller:Getter:UseTestClients", useTestClientsGlobal);
+        YellerBeller beller = configuration.GetSection("YellerBellerId").Get<YellerBeller>()!;
+        string[]? yellerBellerId = useYellerGetterTestClient
+            ? beller.Test
+            : beller.Prod;
+        if (yellerBellerId is null || yellerBellerId.Length == 0)
+            throw new InvalidOperationException($"{nameof(settings.YellerBellerId)} for the selected environment is missing or empty");
+        settings.YellerBellerId = yellerBellerId;
+
         // ConnectionStrings
         string? password = configuration["DbPassword"];
         settings.PlumbingConnectionString = configuration
@@ -69,5 +80,10 @@ internal static class ConfigureCommandLine
             .AddInfrastructureMySql(settings, configuration)
             .AddInfrastructureSqlite(settings, configuration)
             .AddApplication();
+    }
+    public class YellerBeller
+    {
+        public string[]? Test { get; set; }
+        public string[]? Prod { get; set; }
     }
 }
