@@ -76,11 +76,12 @@ public sealed class CustardCornLinkRepository
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
                         nameof(CustardCornLink),
-                        batchSize);
+                        batchSize,
+                        ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -156,7 +157,9 @@ public sealed class CustardCornLinkRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(CustardCornLink));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
+                nameof(CustardCornLink),
+                ex.Message);
             return Result.Failure<List<CustardCornLink>>(ex.Message);
         }
 
