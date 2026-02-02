@@ -5,14 +5,15 @@ using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Settings;
 
 public sealed class SyncGate(
-    ISyncStateRepository repo
+    ISyncStateRepository repo,
+    ISyncSettings settings
 ) : ISyncGate
 {
     private readonly ISyncStateRepository _repo = repo;
-
-    private static readonly TimeSpan Interval = TimeSpan.FromHours(12);
+    private readonly TimeSpan _interval = TimeSpan.FromHours(settings.HourInterval);
 
     public async Task<bool> ShouldRunAsync(Source source, string entity)
     {
@@ -28,7 +29,7 @@ public sealed class SyncGate(
 
         DateTime now = DateTime.UtcNow;
 
-        bool run = now - state.LastSyncUtc >= Interval;
+        bool run = now - state.LastSyncUtc >= _interval;
 
         return run;
     }
@@ -45,7 +46,7 @@ public sealed class SyncGate(
 
         DateTime now = DateTime.UtcNow;
 
-        bool run = now - state.LastSyncUtc >= Interval;
+        bool run = now - state.LastSyncUtc >= _interval;
 
         return run;
     }
