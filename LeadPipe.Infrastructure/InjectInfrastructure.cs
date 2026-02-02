@@ -17,6 +17,7 @@ using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Text;
 using System.Text.Json;
 
 namespace LeadPipe.Infrastructure;
@@ -136,22 +137,23 @@ public static class InjectInfrastructure
         #region ADD CLIENTS
 
         bool useTestClientsGlobal = config.GetValue<bool>("HttpClients:UseTestClients", false);
+        string accept = "application/json";
 
         // Add Leaf Client
-        RegisterHttpClient(settings.LeafName, settings.LeafBase, "application/json", settings.LeafToken, _leafDto, services, useTestClientsGlobal);
+        RegisterHttpClient(settings.LeafName, settings.LeafBase, accept, settings.LeafToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_leafDto));
 
         // Add Lab Client
         if (string.IsNullOrWhiteSpace(settings.LabAccept))
             throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
-        RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, _labDto, services, useTestClientsGlobal);
+        RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_labDto));
 
         // Add Yeller Client
         bool useYellerGetterTestClient = config.GetValue<bool>("HttpClients:Yeller:Getter:UseTestClients", useTestClientsGlobal);
-        RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, "application/json", settings.YellerToken, _yellerDto, services, useYellerGetterTestClient);
+        RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerGetterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
 
         // Add Second Yeller Client
         bool useYellerReporterTestClient = config.GetValue("HttpClients:Yeller:Reporter:UseTestClients", useTestClientsGlobal);
-        RegisterHttpClient(settings.YellerReporterName, settings.YellerBase, "application/json", settings.YellerToken, "{}", services, useYellerReporterTestClient);
+        RegisterHttpClient(settings.YellerReporterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerReporterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
 
         #endregion
         // *****************************************
@@ -159,7 +161,14 @@ public static class InjectInfrastructure
         return services;
     }
 
-    private static void RegisterHttpClient(string? clientName, string? baseUri, string acceptType, Token? token, string handlerStr, IServiceCollection services, bool useTestClients)
+    private static void RegisterHttpClient(
+        string? clientName,
+        string? baseUri,
+        string acceptType,
+        Token? token,
+        IServiceCollection services,
+        bool useTestClients,
+        BaseTestHttpMessageHandler handler)
     {
         if (string.IsNullOrWhiteSpace(clientName))
             throw new Exception($"{nameof(clientName)} cannot be null");
@@ -180,7 +189,7 @@ public static class InjectInfrastructure
         }).ConfigurePrimaryHttpMessageHandler(() =>
         {
             return useTestClients
-                ? new NoOpHttpMessageHandler(handlerStr)
+                ? handler
                 : new HttpClientHandler()
                 {
                     AutomaticDecompression =
@@ -190,7 +199,8 @@ public static class InjectInfrastructure
         });
     }
 
-    public class NoOpHttpMessageHandler(string content) : DelegatingHandler
+    // Marker base class for DI-compatible test HTTP handlers
+    public class BaseTestHttpMessageHandler(string content) : DelegatingHandler
     {
         private readonly string _content = content;
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -199,6 +209,38 @@ public static class InjectInfrastructure
             var response = new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(_content) // Or whatever shape your API expects
+            };
+            return Task.FromResult(response);
+        }
+    }
+    
+    public class YellerTestHttpMessageHandler(string prelim, string final, IYellerSettings settings) : BaseTestHttpMessageHandler(final)
+    {
+        private readonly IYellerSettings _settings = settings;
+        private readonly string _prelim = prelim;
+        private readonly string _final = final;
+        private int _page = 0;
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct = default)
+        {
+            bool isPrelim = request.RequestUri!.AbsolutePath.Contains(_settings.YellerPrelimEndpoint1!)
+                && request.RequestUri!.AbsolutePath.Contains(_settings.YellerPrelimEndpoint2!);
+
+            string content;
+            if (isPrelim)
+            {
+                content = _page switch
+                {
+                    0 => JsonSerializer.Serialize(new YellerHelperDto() { lead_ids = ["id3", "id2"], has_more = true }, _options),
+                    1 => JsonSerializer.Serialize(new YellerHelperDto() { lead_ids = ["id1"], has_more = true }, _options),
+                    _ => _prelim,
+                };
+                _page++;
+            }
+            else content = _final;
+
+            var response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(content, Encoding.UTF8, "application/json")
             };
             return Task.FromResult(response);
         }
@@ -239,11 +281,11 @@ public static class InjectInfrastructure
                 }]
     }, _options);
 
-    private static readonly string _labDto = JsonSerializer.Serialize(new LabDto()
+    private static readonly string _labDto = JsonSerializer.Serialize<List<LabDto>>([new LabDto()
     {
         PhoneNumber = 5555555555,
         Date = _creationDate
-    }, _options);
+    }], _options);
 
     private static readonly string _yellerDto = JsonSerializer.Serialize(new YellerDto()
     {
@@ -263,5 +305,11 @@ public static class InjectInfrastructure
                 answer_text = ["I won't give it", "fine it's 5555555555"]
             }]
         },
+    }, _options);
+
+    private static readonly string _yellerHelperDto = JsonSerializer.Serialize(new YellerHelperDto()
+    {
+        lead_ids = [],
+        has_more = false
     }, _options);
 }
