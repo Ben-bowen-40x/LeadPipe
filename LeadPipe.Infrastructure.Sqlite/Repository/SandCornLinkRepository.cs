@@ -73,11 +73,12 @@ public sealed class SandCornLinkRepository(
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
                         nameof(SandCornLink),
-                        batchSize);
+                        batchSize,
+                        ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -151,9 +152,10 @@ public sealed class SandCornLinkRepository(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed",
-                nameof(SandCornLink));
-            return Result.Failure<List<SandCornLink>>(ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
+                nameof(SandCornLink),
+                ex.Message);
+            return Result.Failure<List<SandCornLink>>(ex.ToString());
         }
 
         void InsertBatch(List<SandCornLink> batch)
