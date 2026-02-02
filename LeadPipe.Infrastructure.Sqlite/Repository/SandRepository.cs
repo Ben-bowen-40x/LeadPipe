@@ -138,7 +138,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.", nameof(SandEntity), batchSize);
+                    _logger.LogError(ex, "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}", nameof(SandEntity), batchSize, ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -214,7 +214,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(SandEntity));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", nameof(SandEntity), ex.Message);
             return Result.Failure<List<SandEntity>>(ex.ToString());
         }
 
