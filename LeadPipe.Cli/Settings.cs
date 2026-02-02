@@ -79,4 +79,8 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     
     public string? PanReportLoc { get; set; }
     public string? PanSourceLoc { get; set; }
+
+
+    // SyncState
+    public int HourInterval { get; set; }
 }
