@@ -70,15 +70,20 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
-                        nameof(SandCaliperLink), batchSize);
+                    _logger.LogError(ex, "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
+                        nameof(SandCaliperLink),
+                        batchSize,
+                        ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
                         var row = batch[0];
                         _logger.LogError(
                             "{Entity} row insert failed: SubsId={SubsId}, CaliperId={CaliperId}, MatchingPhone={MatchingPhone}",
-                            nameof(SandCaliperLink), row.SandId, row.CaliperId, row.MatchingPhone);
+                            nameof(SandCaliperLink),
+                            row.SandId,
+                            row.CaliperId,
+                            row.MatchingPhone);
 
                         index++;
                         batchSize = 100;
@@ -136,7 +141,9 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(SandCaliperLink));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}",
+                nameof(SandCaliperLink),
+                ex.Message);
             return Result.Failure<List<SandCaliperLink>>(ex.Message);
         }
 
