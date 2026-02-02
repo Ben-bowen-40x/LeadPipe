@@ -72,11 +72,12 @@ public sealed class PlumbingCaliperLinkRepository
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
                         nameof(PlumbingCaliperLink),
-                        batchSize);
+                        batchSize,
+                        ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -148,7 +149,9 @@ public sealed class PlumbingCaliperLinkRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(PlumbingCaliperLink));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", 
+                nameof(PlumbingCaliperLink),
+                ex.Message);
             return Result.Failure<List<PlumbingCaliperLink>>(ex.Message);
         }
 
