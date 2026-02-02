@@ -133,13 +133,21 @@ public class LeafClientService : ILeafService
                 else
                 {
                     errorCount++;
-                    _logger.LogWarning("API call failed at offset {Offset}. Error count: {ErrorCount}. Error Limit: {ErrorLimit}. Error: {Error}", offset, errorCount, errorLimit, result.Error);
+                    _logger.LogWarning("API call failed at offset {Offset}. Error count: {ErrorCount}. Error Limit: {ErrorLimit}. Error: {Error}", 
+                        offset, 
+                        errorCount, 
+                        errorLimit, 
+                        result.Error);
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 errorCount++;
-                _logger.LogError(e, "Exception occurred while calling API. Offset {Offset}. Error Count: {ErrorCount}. Error Limit: {ErrorLimit}", offset, errorCount, errorLimit);
+                _logger.LogError(ex, "Exception occurred while calling API. Offset {Offset}. Error Count: {ErrorCount}. Error Limit: {ErrorLimit}. Exception Message: {Message}", 
+                    offset, 
+                    errorCount, 
+                    errorLimit, 
+                    ex.Message);
             }
             finally { _throttle.Release(); }
         }
