@@ -141,13 +141,13 @@ internal class LabService : ILabService
 
         while (morePages)
         {
-            var result = await GetLabAsync(page);
+            Result<List<LabDto>> result = await GetLabAsync(page);
             if (result.IsFailure)
             {
                 errors++;
                 _logger.LogError("Failed to get page {Page}: {Error}", page, result.Error);
                 if (errors >= errorLimit)
-                    return Result.Failure<List<Plumbing>>($"GetLabsAsync failed after {errors} errors. Last error: {result.Error}");
+                    return Result.Failure<List<Plumbing>>($"{nameof(GetLabsAsync)} failed after {errors} errors. Last error: {result.Error}");
                 page++;
                 continue;
             }
