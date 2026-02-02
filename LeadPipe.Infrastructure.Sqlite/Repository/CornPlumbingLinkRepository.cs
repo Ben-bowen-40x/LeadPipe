@@ -76,11 +76,12 @@ public sealed class CornPlumbingLinkRepository
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
                         nameof(CornPlumbingLink),
-                        batchSize);
+                        batchSize,
+                        ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -156,7 +157,9 @@ public sealed class CornPlumbingLinkRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(CornPlumbingLink));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", 
+                nameof(CornPlumbingLink),
+                ex.Message);
             return Result.Failure<List<CornPlumbingLink>>(ex.Message);
         }
 
