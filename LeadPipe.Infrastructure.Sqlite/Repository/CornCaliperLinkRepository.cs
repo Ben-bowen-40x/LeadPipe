@@ -78,11 +78,12 @@ public sealed class CornCaliperLinkRepository
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
+                    _logger.LogError(
                         ex,
-                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size.",
+                        "{Entity} batch insert failed (size={BatchSize}). Reducing batch size. Exception Message: {Message}",
                         nameof(CornCaliperLink),
-                        batchSize);
+                        batchSize, 
+                        ex.Message);
 
                     if (batchSize == minBatchSize)
                     {
@@ -158,7 +159,9 @@ public sealed class CornCaliperLinkRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed", nameof(CornCaliperLink));
+            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", 
+                nameof(CornCaliperLink),
+                ex.Message);
             return Result.Failure<List<CornCaliperLink>>(ex.Message);
         }
 
