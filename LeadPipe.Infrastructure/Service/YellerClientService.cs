@@ -200,8 +200,8 @@ internal class YellerClientService : IYellerService
                 errors++;
                 _logger.LogError(
                     ex,
-                    "Exception in prelim stage. Errors: {Errors}/{Limit}. Retrieved: {Retrieved}. Process: {Process}",
-                    errors, errorLimit, raw.Count, process);
+                    "Exception in prelim stage. Errors: {Errors}/{Limit}. Retrieved: {Retrieved}. Process: {Process}. Exception Message: {Message}",
+                    errors, errorLimit, raw.Count, process, ex.Message);
             }
         }
 
@@ -263,8 +263,8 @@ internal class YellerClientService : IYellerService
                 errors++;
                 _logger.LogError(
                     ex,
-                    "Exception in DTO stage. Errors: {Errors}/{Limit}. Retrieved: {Retrieved}. Process: {Process}",
-                    errors, errorLimit, master.Count, process);
+                    "Exception in DTO stage. Errors: {Errors}/{Limit}. Retrieved: {Retrieved}. Process: {Process}. Exception Message: {Message}",
+                    errors, errorLimit, master.Count, process, ex.Message);
             }
             finally { _throttle.Release(); }
         }
