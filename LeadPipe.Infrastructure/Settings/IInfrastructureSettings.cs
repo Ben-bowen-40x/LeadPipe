@@ -4,7 +4,8 @@ public interface IInfrastructureSettings :
     IDwhSettings,
     ILabSettings,
     ILeafSettings,
-    IYellerSettings
+    IYellerSettings,
+    ISyncSettings
 {
     string? CalliReportLoc { get; set; }
     string? CalliSourceLoc { get; set; }
