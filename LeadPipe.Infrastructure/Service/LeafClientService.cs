@@ -171,7 +171,7 @@ public class LeafClientService : ILeafService
 
         if (master.Count == 0)
         {
-            string msg = "Failed to retrieve any data from the api";
+            string msg = $"{nameof(LeafClientService)} Failed to retrieve any data from the api";
             _logger.LogError("{Message}", msg);
             return Result.Failure<List<Plumbing>>(msg);
         }
