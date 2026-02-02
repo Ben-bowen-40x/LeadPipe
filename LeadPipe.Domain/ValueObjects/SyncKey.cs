@@ -5,7 +5,7 @@ public sealed record SyncKey
 
     private SyncKey(string value) => Value = value;
 
-    // Predefined keys (enum-like)
+    // Predefined keys
     public static readonly SyncKey Caliper = new(nameof(Caliper).ToLowerInvariant());
     public static readonly SyncKey CornFormula = new(nameof(CornFormula).ToLowerInvariant());
     public static readonly SyncKey Custard = new(nameof(Custard).ToLowerInvariant());
@@ -13,12 +13,15 @@ public sealed record SyncKey
     public static readonly SyncKey Sandwich = new(nameof(Sandwich).ToLowerInvariant());
     public static readonly SyncKey Associate = new("association");
 
-    public override string ToString() => Value;
 
     // All predefined keys for TryParse and iteration
     private static readonly List<SyncKey> AllKeys =
     [
-        Caliper, CornFormula, Custard, Plumbing, Sandwich
+        Caliper, 
+        CornFormula, 
+        Custard, 
+        Plumbing, 
+        Sandwich
     ];
 
     /// <summary>
@@ -37,5 +40,7 @@ public sealed record SyncKey
         key = null!; // force null-forgiving operator, safe because TryParse returns false
         return false;
     }
+    
+    public override string ToString() => Value;
 
 }
