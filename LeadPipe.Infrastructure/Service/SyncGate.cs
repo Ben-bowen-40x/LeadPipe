@@ -1,19 +1,31 @@
-﻿namespace LeadPipe.Infrastructure.Service;
-
-using CSharpFunctionalExtensions;
+﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Settings;
+using System.Collections.Immutable;
 
+namespace LeadPipe.Infrastructure.Service;
 public sealed class SyncGate(
     ISyncStateRepository repo,
     ISyncSettings settings
 ) : ISyncGate
 {
     private readonly ISyncStateRepository _repo = repo;
-    private readonly TimeSpan _interval = TimeSpan.FromHours(settings.HourInterval);
+    private readonly TimeSpan _noSourceInterval = TimeSpan.FromHours(settings.DefaultInterval);
+
+    private readonly TimeSpan _defaultSourceInterval = TimeSpan.FromHours(settings.DefaultSourceInterval);
+    private readonly ImmutableDictionary<Source, TimeSpan> _interval = ImmutableDictionary.CreateRange(
+    [
+        new KeyValuePair<Source, TimeSpan>(Source.Calli, TimeSpan.FromHours(settings.CalliInterval)),
+        new KeyValuePair<Source, TimeSpan>(Source.Lab, TimeSpan.FromHours(settings.LabInterval)),
+        new KeyValuePair<Source, TimeSpan>(Source.Leaf, TimeSpan.FromHours(settings.LeafInterval)),
+        new KeyValuePair<Source, TimeSpan>(Source.Leased, TimeSpan.FromHours(settings.LeasedInterval)),
+        new KeyValuePair<Source, TimeSpan>(Source.Libacion, TimeSpan.FromHours(settings.LibacionInterval)),
+        new KeyValuePair<Source, TimeSpan>(Source.Pan, TimeSpan.FromHours(settings.PanInterval)),
+        new KeyValuePair<Source, TimeSpan>(Source.Yeller, TimeSpan.FromHours(settings.YellerInterval)),
+    ]);
 
     public async Task<bool> ShouldRunAsync(Source source, SyncKey entity)
     {
@@ -29,7 +41,10 @@ public sealed class SyncGate(
 
         DateTime now = DateTime.UtcNow;
 
-        bool run = now - state.LastSyncUtc >= _interval;
+        TimeSpan interval = _interval.TryGetValue(source, out TimeSpan inter)
+            ? inter
+            : _defaultSourceInterval;
+        bool run = now - state.LastSyncUtc >= interval;
 
         return run;
     }
@@ -46,7 +61,7 @@ public sealed class SyncGate(
 
         DateTime now = DateTime.UtcNow;
 
-        bool run = now - state.LastSyncUtc >= _interval;
+        bool run = now - state.LastSyncUtc >= _noSourceInterval;
 
         return run;
     }
@@ -89,11 +104,11 @@ public sealed class SyncGate(
 
     private static BusinessId BuildBusinessId(Source? source, SyncKey entity)
     {
-        string scope = source is null 
-            ? "global" 
+        string scope = source is null
+            ? "global"
             : source.ToString()!.ToLowerInvariant();
 
-        return BusinessId.From($"{scope}:{entity.Value}");
+        return BusinessId.From($"{scope}:{entity}");
     }
 }
 
