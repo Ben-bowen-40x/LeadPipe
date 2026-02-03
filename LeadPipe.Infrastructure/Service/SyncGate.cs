@@ -33,7 +33,7 @@ public sealed class SyncGate(
 
         Result<SyncStateEntity> found = await _repo.GetByIdAsync(id);
 
-        // First run → allow
+        // First run: allow
         if (found.IsFailure)
             return true;
 
