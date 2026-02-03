@@ -5,8 +5,7 @@ using LeadPipe.Translation.Primitives;
 
 namespace LeadPipe.Translation.Translate.DtoToVo;
 
-internal class CalliDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<CalliDto, 
-    Plumbing>
+internal class CalliDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<CalliDto, Plumbing>
 {
     private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(CalliDto v)
