@@ -18,8 +18,10 @@ echo.
 echo Not Termite Query success: %notTermiteErr%
 echo Not Termite output: %notTermiteOutput%
 rem error messages are placed in the output file
-if not "%notTermiteErr%"=="0" type %notTermiteOutput% 
-if not "%notTermiteErr%"=="0" goto :pauseExecution
+if not "%notTermiteErr%"=="0" (
+    type %notTermiteOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem Active Termite
@@ -33,8 +35,10 @@ echo.
 echo Termite Query success: %termiteErr%
 echo Termite output: %termiteOutput%
 rem error messages are placed in the output file
-if not "%termiteErr%"=="0" type %termiteOutput% 
-if not "%termiteErr%"=="0" goto :pauseExecution
+if not "%termiteErr%"=="0" (
+    type %termiteOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem CornFormation
@@ -48,8 +52,10 @@ echo.
 echo Corn Query success: %cornErr%
 echo Corn output: %cornOutput%
 rem error messages are placed in the output file
-if not "%cornErr%"=="0" type %cornOutput% 
-if not "%cornErr%"=="0" goto :pauseExecution
+if not "%cornErr%"=="0" (
+    type %cornOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem GoonDoggle
@@ -63,8 +69,10 @@ echo.
 echo Goon Query success: %goonErr%
 echo Goon output: %goonOutput%
 rem error messages are placed in the output file
-if not "%goonErr%"=="0" type %goonOutput% 
-if not "%goonErr%"=="0" goto :pauseExecution
+if not "%goonErr%"=="0" (
+    type %goonOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem MacBang
@@ -78,8 +86,10 @@ echo.
 echo MacBang Query success: %macBangErr%
 echo MacBang output: %macBangOutput%
 rem error messages are placed in the output file
-if not "%macBangErr%"=="0" type %macBangOutput% 
-if not "%macBangErr%"=="0" goto :pauseExecution
+if not "%macBangErr%"=="0" (
+    type %macBangOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem PanFries
@@ -93,8 +103,10 @@ echo.
 echo Pan Query success: %panErr%
 echo Pan output: %panOutput%
 rem error messages are placed in the output file
-if not "%panErr%"=="0" type %panOutput% 
-if not "%panErr%"=="0" goto :pauseExecution
+if not "%panErr%"=="0" (
+    type %panOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem Lotus
@@ -108,8 +120,10 @@ echo.
 echo Lotus Query success: %lotusErr%
 echo Lotus output: %lotusOutput%
 rem error messages are placed in the output file
-if not "%lotusErr%"=="0" type %lotusOutput% 
-if not "%lotusErr%"=="0" goto :pauseExecution
+if not "%lotusErr%"=="0" (
+    type %lotusOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem KatharticSummary
@@ -123,8 +137,10 @@ echo.
 echo KatharticSummary Query success: %katharticErr%
 echo KatharticSummary output: %katharticOutput%
 rem error messages are placed in the output file
-if not "%katharticErr%"=="0" type %katharticOutput% 
-if not "%katharticErr%"=="0" goto :pauseExecution
+if not "%katharticErr%"=="0" (
+    type %katharticOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem Upsilon
@@ -138,8 +154,10 @@ echo.
 echo Upsilon Query success: %upsilonErr%
 echo Upsilon output: %upsilonOutput%
 rem error messages are placed in the output file
-if not "%upsilonErr%"=="0" type %upsilonOutput% 
-if not "%upsilonErr%"=="0" goto :pauseExecution
+if not "%upsilonErr%"=="0" (
+    type %upsilonOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem Giggle
@@ -153,8 +171,27 @@ echo.
 echo Custard Query success: %custardErr%
 echo Custard output: %custardOutput%
 rem error messages are placed in the output file
-if not "%custardErr%"=="0" type %custardOutput% 
-if not "%custardErr%"=="0" goto :pauseExecution
+if not "%custardErr%"=="0" (
+    type %custardOutput% 
+    goto :pauseExecution
+)
+echo.
+
+rem Giggle
+echo.
+echo Giggle Custard Not
+set custardNotQuery="%USERPROFILE%\Repos\Automate\Automate.Infrastructure\.info\Queries\GiggleNotCustardQuery.sql"
+set custardNotOutput="%USERPROFILE%\Repos\Automate\Automate.Infrastructure\.info\Reports\QueryReports\GigglyNotCustard.tsv"
+"C:\Program Files\MySQL\MySQl Workbench 8.0 CE\mysql.exe" -u %user% -p%pass% -h %host% -D dwh_reportsdb --batch < %custardNotQuery% > %custardNotOutput%
+set custardNotErr=%errorlevel%
+echo.
+echo Custard Not Query success: %custardNotErr%
+echo Custard Not output: %custardNotOutput%
+rem error messages are placed in the output file
+if not "%custardNotErr%"=="0" (
+    type %custardNotOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem LeafQuery
@@ -168,8 +205,10 @@ echo.
 echo Leaf Query success: %leafErr%
 echo Leaf output: %leafOutput%
 rem error messages are placed in the output file
-if not "%leafErr%"=="0" type %leafOutput% 
-if not "%leafErr%"=="0" goto :pauseExecution
+if not "%leafErr%"=="0" (
+    type %leafOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem Code1
@@ -183,8 +222,10 @@ echo.
 echo Code HepYepNoTerms Query success: %codeErr%
 echo Code HepYepNoTerms output: %codeOutput%
 rem error messages are placed in the output file
-if not "%codeErr%"=="0" type %codeOutput% 
-if not "%codeErr%"=="0" goto :pauseExecution
+if not "%codeErr%"=="0" (
+    type %codeOutput% 
+    goto :pauseExecution
+)
 echo.
 
 rem Code2
@@ -198,8 +239,10 @@ echo.
 echo Code2 UnpurSubs Query success: %code2Err%
 echo Code2 UnpurSubs output: %code2Output%
 rem error messages are placed in the output file
-if not "%code2Err%"=="0" type %code2Output% 
-if not "%code2Err%"=="0" goto :pauseExecution
+if not "%code2Err%"=="0" (
+    type %code2Output% 
+    goto :pauseExecution
+)
 echo.
 
 rem Code3
@@ -213,8 +256,10 @@ echo.
 echo Code3 Winner Query success: %code3Err%
 echo Code3 Winner output: %code3Output%
 rem error messages are placed in the output file
-if not "%code3Err%"=="0" type %code3Output% 
-if not "%code3Err%"=="0" goto :pauseExecution
+if not "%code3Err%"=="0" (
+    type %code3Output% 
+    goto :pauseExecution
+)
 echo.
 
 rem Ending
