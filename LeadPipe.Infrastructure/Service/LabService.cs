@@ -21,7 +21,7 @@ internal class LabService : ILabService
     private readonly IRepository<PlumbingEntity> _plumbingRepo;
     private readonly SemaphoreSlim _throttle;
     private readonly JsonSerializerOptions _options;
-
+    private const int _limit = 15; // 15 is the magic number for this api
     public LabService(
         IHttpClientFactory httpClientFactory,
         ILabSettings settings,
@@ -106,7 +106,7 @@ internal class LabService : ILabService
         try
         {
             var endpoint = _settings.LabPlumbing!;
-            var response = await _client.GetAsync($"{endpoint}?per_page=15&page={page}");
+            var response = await _client.GetAsync($"{endpoint}?per_page={_limit}&page={page}");
             Wait();
 
             if (!response.IsSuccessStatusCode)
