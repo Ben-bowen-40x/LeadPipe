@@ -175,6 +175,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         plumbCaliper.Property(pc => pc.Id).ValueGeneratedOnAdd();
         plumbCaliper.HasIndex(pc => pc.PlumbingId);
         plumbCaliper.HasIndex(pc => pc.CaliperId);
+        plumbCaliper.HasIndex(pc => pc.UnixMatchDate);
         plumbCaliper.HasIndex(l => new { l.PlumbingId, l.CaliperId }).IsUnique();
         plumbCaliper.HasOne(pc => pc.PlumbingEntity)
             .WithMany(p => p.PlumbingCaliperLinks)
@@ -192,6 +193,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         cornCaliper.Property(l => l.Id).ValueGeneratedOnAdd();
         cornCaliper.HasIndex(l => l.CornId);
         cornCaliper.HasIndex(l => l.CaliperId);
+        cornCaliper.HasIndex(l => l.UnixMatchDate);
         cornCaliper.HasIndex(l => new { l.CornId, l.CaliperId }).IsUnique();
         cornCaliper.HasOne(l => l.CornEntity)
             .WithMany(c => c.CornCaliperLinks)
@@ -211,6 +213,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         cornPlumb.Property(l => l.Id).ValueGeneratedOnAdd();
         cornPlumb.HasIndex(l => l.CornId);
         cornPlumb.HasIndex(l => l.PlumbingId);
+        cornPlumb.HasIndex(l => l.UnixMatchDate);
         cornPlumb.HasIndex(l => new { l.CornId, l.PlumbingId }).IsUnique();
         cornPlumb.HasOne(l => l.CornEntity)
             .WithMany(c => c.CornPlumbingLinks)
@@ -236,6 +239,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         custardCaliper.HasKey(l => l.Id);
         custardCaliper.HasIndex(l => l.CustardId);
         custardCaliper.HasIndex(l => l.CaliperId);
+        custardCaliper.HasIndex(l => l.UnixMatchDate);
         custardCaliper.Property(l => l.Id)
             .ValueGeneratedOnAdd();
         custardCaliper.HasIndex(l => new { l.CustardId, l.CaliperId }).IsUnique();
@@ -262,6 +266,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         custardCorn.HasKey(l => l.Id);
         custardCorn.HasIndex(l => l.CustardId);
         custardCorn.HasIndex(l => l.CornId);
+        custardCorn.HasIndex(l => l.UnixMatchDate);
         custardCorn.Property(l => l.Id)
             .ValueGeneratedOnAdd();
         custardCorn.HasIndex(l => new { l.CustardId, l.CornId }).IsUnique();
@@ -288,6 +293,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         custardPlumbing.HasKey(l => l.Id);
         custardPlumbing.HasIndex(l => l.CustardId);
         custardPlumbing.HasIndex(l => l.PlumbingId);
+        custardPlumbing.HasIndex(l => l.UnixMatchDate);
         custardPlumbing.Property(l => l.Id)
             .ValueGeneratedOnAdd();
         custardPlumbing.HasIndex(l => new { l.CustardId, l.PlumbingId }).IsUnique();
@@ -312,6 +318,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         sandCaliper.Property(sc => sc.Id).ValueGeneratedOnAdd();
         sandCaliper.HasIndex(sc => sc.SandId);
         sandCaliper.HasIndex(sc => sc.CaliperId);
+        sandCaliper.HasIndex(sc => sc.UnixMatchDate);
         sandCaliper.HasIndex(l => new { l.SandId, l.CaliperId }).IsUnique();
         sandCaliper.HasOne(sc => sc.SandEntity)
             .WithMany(s => s.SandCaliperLinks)
@@ -330,6 +337,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         sandCorn.Property(l => l.Id).ValueGeneratedOnAdd();
         sandCorn.HasIndex(l => l.SandId);
         sandCorn.HasIndex(l => l.CornId);
+        sandCorn.HasIndex(l => l.UnixMatchDate);
         sandCorn.HasIndex(l => new { l.SandId, l.CornId }).IsUnique();
         sandCorn.HasOne(l => l.SandEntity)
             .WithMany(s => s.SandCornLinks)
@@ -349,6 +357,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         spLink.Property(l => l.Id).ValueGeneratedOnAdd();
         spLink.HasIndex(l => l.SandId);
         spLink.HasIndex(l => l.PlumbingId);
+        spLink.HasIndex(l => l.UnixMatchDate);
         spLink.HasIndex(l => new { l.SandId, l.PlumbingId }).IsUnique();
         spLink.HasOne(l => l.SandEntity)
             .WithMany(s => s.SandPlumbingLinks)
