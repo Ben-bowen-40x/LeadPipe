@@ -2,7 +2,7 @@
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
-public class CornPlumbingLink:IEntity
+public class CornPlumbingLink : IEntity, IHasUnixMatchDate
 {
     public long Id { get; set; }
 
