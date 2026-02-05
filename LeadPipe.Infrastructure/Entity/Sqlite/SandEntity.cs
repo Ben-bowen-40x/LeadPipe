@@ -1,4 +1,6 @@
-﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
+﻿using LeadPipe.Infrastructure.Interfaces.Core;
+
+namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
 public class SandEntity : IEntity
 {
