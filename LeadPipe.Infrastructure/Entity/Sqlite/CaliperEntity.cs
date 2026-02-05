@@ -1,9 +1,11 @@
-﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
+﻿using LeadPipe.Domain.ValueObjects;
+
+namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
 public class CaliperEntity : IEntity
 {
     public required long Id { get; set; }
-    public long PhoneNumber { get; set; }
+    public required PhoneNumber PhoneNumber { get; set; }
     public DateTime Date { get; set; }
     public long UnixDate { get; set; }
     public required string Note { get; set; }

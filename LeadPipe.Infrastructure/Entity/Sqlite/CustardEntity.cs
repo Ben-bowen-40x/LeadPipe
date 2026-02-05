@@ -1,11 +1,13 @@
-﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
+﻿using LeadPipe.Domain.ValueObjects;
+
+namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
 public class CustardEntity : IEntity
 {
     public required long Id { get; set; }
     public bool Active { get; set; }
-    public long PhoneNumber { get; set; }
-    public long PhoneNumber2 { get; set; }
+    public required PhoneNumber PhoneNumber { get; set; }
+    public PhoneNumber? PhoneNumber2 { get; set; }
     public DateTime Date { get; set; }
     public long UnixDate { get; set; }
     public DateTime CancelDate { get; set; }

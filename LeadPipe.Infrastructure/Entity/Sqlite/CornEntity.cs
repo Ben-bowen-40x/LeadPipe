@@ -1,9 +1,11 @@
-﻿namespace LeadPipe.Infrastructure.Entity.Sqlite;
+﻿using LeadPipe.Domain.ValueObjects;
+
+namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
 public class CornEntity : IEntity
 {
     public required long Id { get; set; }
-    public required long PhoneNumber { get; set; }
+    public required PhoneNumber PhoneNumber { get; set; }
     public required DateTime Date { get; set; }
     public required long UnixDate { get; set; }
     public required string Payload { get; set; }
