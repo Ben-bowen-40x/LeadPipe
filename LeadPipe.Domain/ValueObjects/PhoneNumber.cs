@@ -17,11 +17,11 @@ public partial class PhoneNumber
         return $"({digits[0..3]}) {digits[3..6]}-{digits[6..10]}";
     }
 
-
+    public bool CanParticipateInDeduplication => !IsDefault;
     private bool? _isDefault;
     public bool IsDefault
     {
-        get { return _isDefault ??= Number == Default || Number == 1111111111 || Number > 9999999999; }
+        get { return _isDefault ??= Number == Default || Number == 1111111111 || Number > 9999999999 || Number == 5555555555; }
     }
 
     public const long Default = 0;
