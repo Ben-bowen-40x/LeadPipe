@@ -23,7 +23,7 @@ public sealed class TransformPlumbingReport(
         List<PlumbingEntity> plumbingEntities = [.. data.Select(_voToEntity.Translate)];
 
         // Get links to the plumbing
-        var plumbingIds = plumbingEntities.Select(e => e.Id);
+        List<long> plumbingIds = [.. plumbingEntities.Select(e => e.Id)];
         Result<List<SandPlumbingLink>> linkResult = await _repo.FindWithDetailsAsync(l => plumbingIds.Contains(l.PlumbingId));
 
         // Check Success
@@ -43,7 +43,14 @@ public sealed class TransformPlumbingReport(
         List<SandPlumbingLink> unfoundPlumbing =
             [.. plumbingEntities
                 .Where(e => !ids.Contains(e.Id)) // We are creating a partition
-                .Select(e => new SandPlumbingLink { PlumbingEntity = e, SandId = 0})
+                .Select(e => new SandPlumbingLink
+                {
+                    PlumbingId = e.Id,
+                    PlumbingEntity = e,
+                    SandId = 0,
+                    UnixMatchDate = e.UnixDate,
+                    MatchingPhone = e.PhoneNumber.Number
+                })
             ];
 
         List<ReportPlumbing> result =
