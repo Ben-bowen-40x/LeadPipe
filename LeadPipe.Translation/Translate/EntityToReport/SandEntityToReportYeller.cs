@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Dto;
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 
@@ -15,8 +16,9 @@ internal sealed class SandEntityToReportYeller : IEntityToReport<SandEntity, Rep
         string eventName = "purchase";
 
         // Hash pii
-        string num1 = YellerReportHelper.HashSha256(sub.CustardEntity.PhoneNumber.ToString());
-        string num2 = YellerReportHelper.HashSha256(sub.CustardEntity.PhoneNumber2.ToString());
+        var num2NullCheck = sub.CustardEntity.PhoneNumber2 is null ? PhoneNumber.Default.ToString() : sub.CustardEntity.PhoneNumber2.Number.ToString();
+        string num1 = YellerReportHelper.HashSha256(sub.CustardEntity.PhoneNumber.Number.ToString());
+        string num2 = YellerReportHelper.HashSha256(num2NullCheck);
 
         UserData user = new()
         {

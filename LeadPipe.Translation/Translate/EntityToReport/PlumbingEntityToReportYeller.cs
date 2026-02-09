@@ -10,7 +10,7 @@ internal sealed class PlumbingEntityToReportYeller : IEntityToReport<PlumbingEnt
     {
         long eventtime = data.UnixDate;
         string eventName = "lead";
-        string num = YellerReportHelper.HashSha256(data.PhoneNumber.ToString());
+        string num = YellerReportHelper.HashSha256(data.PhoneNumber.Number.ToString());
         string eventid = data.Id.ToString();
 
         UserData user = new() { ph = [num] };

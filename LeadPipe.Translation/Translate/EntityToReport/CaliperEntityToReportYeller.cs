@@ -10,7 +10,7 @@ internal sealed class CaliperEntityToReportYeller : IEntityToReport<CaliperEntit
     {
         long eventtime = data.UnixDate;
         string eventname = "lead";
-        string num = YellerReportHelper.HashSha256(data.PhoneNumber.ToString());
+        string num = YellerReportHelper.HashSha256(data.PhoneNumber.Number.ToString());
         string eventid = data.Id.ToString();
 
         UserData user = new() { ph = [num] };

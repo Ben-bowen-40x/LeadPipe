@@ -24,7 +24,7 @@ internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLi
                 Offerman = string.Empty
             };
 
-        long phoneNumber = plumb.PhoneNumber;
+        long phoneNumber = plumb.PhoneNumber.Number;
 
         DateTime d = DateTime.SpecifyKind(plumb.Date, DateTimeKind.Utc);
         DateTimeOffset date = new(d, TimeSpan.Zero);

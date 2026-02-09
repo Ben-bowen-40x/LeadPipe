@@ -10,7 +10,7 @@ internal sealed class CornEntityToReportYeller : IEntityToReport<CornEntity, Rep
     {
         long eventTime = data.UnixDate;
         string eventName = "lead";
-        string num = YellerReportHelper.HashSha256(data.PhoneNumber.ToString());
+        string num = YellerReportHelper.HashSha256(data.PhoneNumber.Number.ToString());
         string eventId = data.Id.ToString();
 
         UserData user = new() { ph = [num] };
