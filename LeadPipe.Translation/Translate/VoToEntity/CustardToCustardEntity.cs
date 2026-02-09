@@ -12,8 +12,8 @@ internal sealed class CustardToCustardEntity : IVoToEntity<Custard, CustardEntit
         {
             Id = s.Id,
             Active = s.Status,
-            PhoneNumber = s.Phone1.Number,
-            PhoneNumber2 = s.Phone2.Number,
+            PhoneNumber = s.Phone1,
+            PhoneNumber2 = s.Phone2,
             Date = s.Date.UtcDateTime,
             UnixDate = s.Date.ToUnixTimeSeconds(),
             CancelDate = s.DateCancelled.UtcDateTime,

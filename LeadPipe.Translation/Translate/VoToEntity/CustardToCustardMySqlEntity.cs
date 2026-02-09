@@ -15,7 +15,7 @@ internal sealed class CustardToCustardMySqlEntity : IVoToEntity<Custard, Custard
             customerID = (int)s.Id,
             status = s.Status ? 1 : 0,
             phone1 = s.Phone1.Number.ToString(),
-            phone2 = s.Phone2.Number.ToString(),
+            phone2 = s.Phone2?.ToString(),
             dateAdded = date,
             dateCancelled = dateCancelled,
         };
