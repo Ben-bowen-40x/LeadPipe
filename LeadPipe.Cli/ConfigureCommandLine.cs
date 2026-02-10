@@ -13,12 +13,13 @@ internal static class ConfigureCommandLine
 {
     public static void ConfigureCli(this IServiceCollection services, IConfiguration configuration)
     {
+        // Bind settings
         Settings settings = new();
         configuration.Bind(settings);
 
         // Special items
-        bool useTestClientsGlobal = configuration.GetValue("HttpClients:UseTestClients", false);
-        bool useYellerGetterTestClient = configuration.GetValue("HttpClients:Yeller:Getter:UseTestClients", useTestClientsGlobal);
+        bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
+        bool useYellerGetterTestClient = settings.HttpClients?.Yeller?.Getter?.UseTestClients ?? useTestClientsGlobal;
         YellerBeller beller = configuration.GetSection("YellerBellerId").Get<YellerBeller>()!;
         string[]? yellerBellerId = useYellerGetterTestClient
             ? beller.Test

@@ -13,28 +13,22 @@ namespace LeadPipe.Infrastructure.Sqlite;
 
 public static class InjectInfrastructureSqlite
 {
-    public static IServiceCollection AddInfrastructureSqlite(this IServiceCollection services, IDwhSettings settings, IConfiguration config)
+    public static IServiceCollection AddInfrastructureSqlite(this IServiceCollection services, IInfrastructureSettings settings, IConfiguration config)
     {
         #region Register Db Context
         if (string.IsNullOrWhiteSpace(settings.PlumbingConnectionString))
             throw new InvalidOperationException(
                 $"{nameof(settings.PlumbingConnectionString)} is not configured.");
 
-        bool globalUseInMemory = config.GetValue<bool>("Ef:UseInMemoryDatabase");
-        bool globalSensitiveLogging = config.GetValue<bool>("Ef:SensitiveLogging");
-        LogLevel globalLogLevel = config.GetValue("Ef:LogLevel", LogLevel.Information);
+        bool globalUseInMemory = settings.Ef is not null && settings.Ef.UseInMemoryDatabase;
+        bool globalSensitiveLogging = settings.Ef is not null && settings.Ef.SensitiveLogging;
+        LogLevel globalLogLevel = settings.Ef is not null ? settings.Ef.LogLevel : LogLevel.Information;
 
-        bool useInMemory = config.GetValue(
-        "Ef:Sqlite:UseInMemoryConnection",
-            globalUseInMemory);
+        bool useInMemory = settings.Ef?.Sqlite?.UseInMemoryConnection ?? globalUseInMemory;
 
-        bool sensitiveLogging = config.GetValue(
-            "Ef:Sqlite:SensitiveLogging",
-            globalSensitiveLogging);
+        bool sensitiveLogging = settings.Ef?.Sqlite?.SensitiveLogging ?? globalSensitiveLogging;
 
-        LogLevel efLogLevel = config.GetValue(
-            "Ef:Sqlite:LogLevel",
-            globalLogLevel);
+        LogLevel efLogLevel = settings.Ef?.Sqlite?.LogLevel ?? globalLogLevel;
 
         services.AddSingleton<SqlitePragmaInterceptor>();
         if (useInMemory)

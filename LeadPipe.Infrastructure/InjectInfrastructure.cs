@@ -136,7 +136,7 @@ public static class InjectInfrastructure
         // *****************************************
         #region ADD CLIENTS
 
-        bool useTestClientsGlobal = config.GetValue("HttpClients:UseTestClients", false);
+        bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
         string accept = "application/json";
 
         // Add Leaf Client
@@ -147,13 +147,12 @@ public static class InjectInfrastructure
             throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
         RegisterHttpClient(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_labDto));
 
-        // Add Yeller Client
-        bool useYellerGetterTestClient = config.GetValue("HttpClients:Yeller:Getter:UseTestClients", useTestClientsGlobal);
-
+        // Add Yeller Getter Client
+        bool useYellerGetterTestClient = settings.HttpClients?.Yeller?.Getter?.UseTestClients ?? useTestClientsGlobal;
         RegisterHttpClient(settings.YellerGetterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerGetterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
 
-        // Add Second Yeller Client
-        bool useYellerReporterTestClient = config.GetValue("HttpClients:Yeller:Reporter:UseTestClients", useTestClientsGlobal);
+        // Add Yeller Reporter Client
+        bool useYellerReporterTestClient = settings.HttpClients?.Yeller?.Reporter?.UseTestClients ?? useTestClientsGlobal;
         RegisterHttpClient(settings.YellerReporterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerReporterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
 
         #endregion

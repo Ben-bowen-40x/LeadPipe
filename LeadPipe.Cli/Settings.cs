@@ -23,6 +23,10 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? LabAccept { get; set; }
 
     // Infrastructure
+    public Ef? Ef { get; set; }
+    public HttpClients? HttpClients { get; set; }
+
+    // Leaf
     public string? LeafName { get; set; }
     public Token? LeafToken { get; set; }
     public string? LeafBase { get; set; }
@@ -42,7 +46,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? SandTableName { get; set; }
     public string? CustardTableName { get; set; }
     public string[]? CornSources { get; set; }
-    
+
     // Yeller 
     public string? YellerGetterName { get; set; }
     public string? YellerReporterName { get; set; }
@@ -67,16 +71,16 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     // Data
     public string? CalliSourceLoc { get; set; }
     public string? CalliReportLoc { get; set; }
-    
-    public string? LabReportLoc { get ; set ; }
-    public string? LabSourceLoc { get ; set ; }
+
+    public string? LabReportLoc { get; set; }
+    public string? LabSourceLoc { get; set; }
 
     public string? LeasedSourceLoc { get; set; }
     public string? LeasedReportLoc { get; set; }
-    
+
     public string? LibacionSourceLoc { get; set; }
     public string? LibacionReportLoc { get; set; }
-    
+
     public string? PanReportLoc { get; set; }
     public string? PanSourceLoc { get; set; }
 
