@@ -1,8 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
@@ -14,11 +12,11 @@ namespace LeadPipe.Infrastructure.Service;
 internal class LabService : ILabService
 {
     #region Ctor
+
     private readonly HttpClient _client;
     private readonly ILogger<LabService> _logger;
     private readonly IDtoToVo<LabDto, Plumbing> _dtoToVo;
     private readonly ILabSettings _settings;
-    private readonly IRepository<PlumbingEntity> _plumbingRepo;
     private readonly SemaphoreSlim _throttle;
     private readonly JsonSerializerOptions _options;
     private const int _limit = 15; // 15 is the magic number for this api
@@ -26,133 +24,126 @@ internal class LabService : ILabService
         IHttpClientFactory httpClientFactory,
         ILabSettings settings,
         ILogger<LabService> logger,
-        IDtoToVo<LabDto, Plumbing> dtoToVo,
-        IRepository<PlumbingEntity> plumbingRepo)
+        IDtoToVo<LabDto, Plumbing> dtoToVo)
     {
         _client = httpClientFactory.CreateClient(settings.LabName!);
         _logger = logger;
         _dtoToVo = dtoToVo;
         _settings = settings;
-        _plumbingRepo = plumbingRepo;
         _throttle = new(_settings.LabConcurrentMax!);
         _options = new()
         {
             PropertyNameCaseInsensitive = true
         };
     }
+
     #endregion
 
-    public async Task<Result<List<Plumbing>>> UpdateDataAsync(int errorLimit = 5)
+    public async Task<Result<List<Plumbing>>> UpdateDataAsync(int errorLimit = 5, CancellationToken ct = default)
     {
-        // Retrieve persisted plumbing entities
-        var existingResult = await _plumbingRepo.FindAsync(p => p.Source == Source.Lab);
-        if (existingResult.IsFailure)
-        {
-            _logger.LogError("Failed to retrieve existing Plumbings: {Error}", existingResult.Error);
-            return Result.Failure<List<Plumbing>>(existingResult.Error);
-        }
-
-        // Convert items for easy comparison later
-        HashSet<(long PhoneNumber, DateTime Date)> existingPhoneDates = [.. existingResult.Value.Select(p => (p.PhoneNumber, p.Date))];
-
-        if (existingResult.Value.Count == 0)
-            return await GetLabsAsync(errorLimit);
-
-        bool resume = true;
-        var allDtos = new List<LabDto>();
-        int errors = 0;
+        List<LabDto> allDtos = [];
+        int totalErrors = 0;
+        var pageErrors = 0;
         int page = 1; // page is a page number, not an index, which is why it's 1-based and not zero-based
 
-        while (resume)
+        while (true)
         {
-            Result<List<LabDto>> pageResult = await GetLabAsync(page);
+            Result<LabHelperDto> pageResult = await GetLabAsync(page, ct);
             if (pageResult.IsFailure)
             {
-                errors++;
-                _logger.LogError("Failed to get page {Page}: {Error}", page, pageResult.Error);
-                if (errors >= errorLimit)
-                    return Result.Failure<List<Plumbing>>($"UpdateLabAsync failed after {errors} errors. Last error: {pageResult.Error}");
-                page++;
+                totalErrors++;
+                pageErrors++;
+                _logger.LogError("Failed to get page {Page}: {Error}. Errors on page: {PageErrors}. Total error count: {TotalErrors}",
+                    page,
+                    pageResult.Error,
+                    pageErrors,
+                    totalErrors);
+                if (totalErrors >= errorLimit)
+                    return Result.Failure<List<Plumbing>>($"{nameof(UpdateDataAsync)} failed after {totalErrors} errors. Last error: {pageResult.Error}");
                 continue;
             }
 
-            List<LabDto>? pageDtos = pageResult.Value;
-            if (pageDtos is null || pageDtos.Count == 0)
+            pageErrors = 0;
+            LabHelperDto? pageDto = pageResult.Value;
+            if (pageDto is null)
                 break;
 
-            // Add records to list 
-            // Stop if any record already exists
-            // We can assume that further calls will also have records that exist
-            foreach (var dto in pageDtos)
-            {
-                bool contains = existingPhoneDates.Contains((dto.PhoneNumber, dto.Date));
-                if (!contains)
-                    allDtos.Add(dto);
-                else resume = false;
-            }
+            // Add records to list
+            if (pageDto.data?.items is null)
+                break;
+            allDtos.AddRange(pageDto.data.items);
+
             page++;
         }
 
         // Translate all DTOs to Plumbing
-        var allPlumbings = allDtos.Select(_dtoToVo.Translate).ToList();
+        List<Plumbing> allPlumbings = [.. allDtos.Select(_dtoToVo.Translate)];
         return Result.Success(allPlumbings);
     }
 
-    private static async void Wait(int sleepInterval = 500) => await Task.Delay(sleepInterval);
-    internal async Task<Result<List<LabDto>>> GetLabAsync(int page = 1)
+    internal async Task<Result<LabHelperDto>> GetLabAsync(int page = 1, CancellationToken ct = default)
     {
-        await _throttle.WaitAsync();
-        List<LabDto>? dtos;
+        await _throttle.WaitAsync(ct);
+        LabHelperDto? dtos;
         try
         {
             var endpoint = _settings.LabPlumbing!;
-            var response = await _client.GetAsync($"{endpoint}?per_page={_limit}&page={page}");
-            Wait();
+            var response = await _client.GetAsync($"{endpoint}?per_page={_limit}&page={page}", ct);
+            await Task.Delay(500, ct);
 
             if (!response.IsSuccessStatusCode)
             {
                 string errorMessage = $"Failed to get page {page}. Status code: {response.StatusCode}";
                 _logger.LogError("Failed to get page {Page}. Status Code: {StatusCode}", page, response.StatusCode);
-                return Result.Failure<List<LabDto>>(errorMessage);
+                return Result.Failure<LabHelperDto>(errorMessage);
             }
 
-            var content = await response.Content.ReadAsStringAsync();
-            dtos = JsonSerializer.Deserialize<List<LabDto>>(content, _options);
+            var content = await response.Content.ReadAsStringAsync(ct);
+            dtos = JsonSerializer.Deserialize<LabHelperDto>(content, _options);
 
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Exception fetching page {Page}: {Message}", page, ex.Message);
-            return Result.Failure<List<LabDto>>($"Exception fetching page {page}: {ex}");
+            return Result.Failure<LabHelperDto>($"Exception fetching page {page}: {ex}");
         }
         finally
         {
             _throttle.Release();
         }
-        return Result.Success(dtos ?? []);
+        return Result.Success(dtos ?? new());
     }
 
-    public async Task<Result<List<Plumbing>>> GetLabsAsync(int errorLimit = 5)
+    public async Task<Result<List<Plumbing>>> GetLabsAsync(int errorLimit = 5, CancellationToken ct = default)
     {
-        var allDtos = new List<LabDto>();
+        List<LabDto> allDtos = [];
         int page = 1;
-        int errors = 0;
+        int totalErrors = 0;
+        int pageErrors = 0;
         bool morePages = true;
 
         while (morePages)
         {
-            Result<List<LabDto>> result = await GetLabAsync(page);
+            Result<LabHelperDto> result = await GetLabAsync(page, ct);
             if (result.IsFailure)
             {
-                errors++;
-                _logger.LogError("Failed to get page {Page}: {Error}", page, result.Error);
-                if (errors >= errorLimit)
-                    return Result.Failure<List<Plumbing>>($"{nameof(GetLabsAsync)} failed after {errors} errors. Last error: {result.Error}");
+                totalErrors++;
+                pageErrors++;
+                _logger.LogError("Failed to get page {Page}: {Error}. Errors on page: {PageErrors}. Total error count: {TotalErrors}",
+                    page,
+                    result.Error,
+                    pageErrors,
+                    totalErrors);
+                if (totalErrors >= errorLimit || result.Error.Contains("unauthorized", StringComparison.InvariantCultureIgnoreCase))
+                    return Result.Failure<List<Plumbing>>($"{nameof(GetLabsAsync)} failed after {totalErrors} errors. Last error: {result.Error}");
                 page++;
                 continue;
             }
 
-            var pageDtos = result.Value;
+            pageErrors = 0;
+            List<LabDto> pageDtos = result.Value.data?.items is not null
+                ? [.. result.Value.data.items]
+                : [];
             if (pageDtos == null || pageDtos.Count == 0)
                 morePages = false;
             else
@@ -162,7 +153,8 @@ internal class LabService : ILabService
             }
         }
 
-        var allPlumbings = allDtos.Select(_dtoToVo.Translate).ToList();
+        List<Plumbing> allPlumbings = [.. allDtos.Select(_dtoToVo.Translate)];
         return Result.Success(allPlumbings);
     }
+
 }
