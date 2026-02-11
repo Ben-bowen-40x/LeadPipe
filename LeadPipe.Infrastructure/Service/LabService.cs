@@ -89,7 +89,7 @@ internal class LabService : ILabService
         {
             var endpoint = _settings.LabPlumbing!;
             var response = await _client.GetAsync($"{endpoint}?per_page={_limit}&page={page}", ct);
-            await Task.Delay(500, ct);
+            await Task.Delay(250, ct);
 
             if (!response.IsSuccessStatusCode)
             {
