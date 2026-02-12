@@ -160,7 +160,7 @@ public class TranslatorBackAndForthFullTests
         Assert.Equal(entity.customerID, vo.Id);
         Assert.True(vo.Status);
         Assert.Equal(5551002000, vo.Phone1.Number);
-        Assert.Equal(5551003000, vo.Phone2.Number);
+        Assert.Equal(5551003000, vo.Phone2?.Number);
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
         Assert.Equal(TimeSpan.Zero, vo.DateCancelled.Offset);
     }
