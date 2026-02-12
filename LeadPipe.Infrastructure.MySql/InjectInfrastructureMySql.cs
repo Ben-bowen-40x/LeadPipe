@@ -103,7 +103,7 @@ public static class InjectInfrastructureMySql
         if (sensitiveLogging)
             options.EnableSensitiveDataLogging();
 
-        options.LogTo(Console.WriteLine, efLogLevel);
+        options.LogTo(msg => System.Diagnostics.Debug.WriteLine(msg), efLogLevel);
 
         // NOTE: InMemory DB is shared per service provider by name.
         // This is intentional for read-only semantics.
