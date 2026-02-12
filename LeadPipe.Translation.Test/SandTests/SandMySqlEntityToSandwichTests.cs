@@ -78,7 +78,7 @@ public sealed class SandMySqlEntityToSandwichTests
         Assert.Equal(10, vo.Custard.Id);
         Assert.True(vo.Custard.Status);
         Assert.Equal(5551002000, vo.Custard.Phone1.Number);
-        Assert.Equal(5551003000, vo.Custard.Phone2.Number);
+        Assert.Equal(5551003000, vo.Custard.Phone2?.Number);
 
         // Dates remain UTC
         Assert.Equal(TimeSpan.Zero, vo.Date.Offset);
@@ -120,6 +120,6 @@ public sealed class SandMySqlEntityToSandwichTests
         Assert.Equal(99, current.SandId);
         Assert.Equal(10, current.CustardId);
         Assert.Equal(5551002000, current.Custard.Phone1.Number);
-        Assert.Equal(5551003000, current.Custard.Phone2.Number);
+        Assert.Equal(5551003000, current.Custard.Phone2?.Number);
     }
 }
