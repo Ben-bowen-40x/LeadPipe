@@ -11,7 +11,7 @@ public abstract class FileDataSource<TDto, TSource>(FileInfo file, ICsvRwService
     private readonly ICsvRwService _csv = csv;
     private readonly IJsonRwService _json = json;
     private readonly ILogger<TSource> _logger = logging;
-    public async Task<Result<List<TDto>>> LoadAsync()
+    public async Task<Result<List<TDto>>> LoadAsync(bool _ = false)
     {
         if (!_file.Exists)
         {
@@ -27,7 +27,7 @@ public abstract class FileDataSource<TDto, TSource>(FileInfo file, ICsvRwService
         };
     }
 
-    public async Task<Result<List<TDto>>> RefreshAsync()
+    public async Task<Result<List<TDto>>> RefreshAsync(bool _ = false)
     {
         return await LoadAsync();
     }
