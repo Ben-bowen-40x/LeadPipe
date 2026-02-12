@@ -14,6 +14,7 @@ namespace LeadPipe.Infrastructure.Service;
 public class LeafClientService : ILeafService
 {
     #region Ctor and Private Fields
+
     public LeafClientService(
         ILeafSettings settings,
         IDtoToVo<LeafDto, Plumbing> dtoTranslate,
@@ -68,6 +69,7 @@ public class LeafClientService : ILeafService
             return Result.Failure<T>(ex.ToString());
         }
     }
+
     #endregion
 
     #region Public
@@ -81,14 +83,17 @@ public class LeafClientService : ILeafService
 
         if (plumbingEntities.IsFailure)
         {
-            _logger.LogWarning("Repository call failed: {Error}. Performing full refresh.", plumbingEntities.Error);
+            _logger.LogWarning("{Service}: {Repository} call failed: {Error}. Performing full refresh.", 
+                nameof(LeafClientService), 
+                nameof(IRepository<PlumbingEntity>), 
+                plumbingEntities.Error);
             return await GetAllAsync(errorLimit: errorLimit);
         }
 
         List<PlumbingEntity> leafPlumbing = [.. plumbingEntities.Value.Where(v => v.Source == Source.Leaf)];
         if (leafPlumbing.Count == 0)
         {
-            _logger.LogWarning("Database returned no items for {Source}. Performing full refresh.", Source.Leaf);
+            _logger.LogWarning("{Service}: Database returned no items for {Source}. Performing full refresh.", nameof(LeafClientService), Source.Leaf);
             return await GetAllAsync(errorLimit: errorLimit);
         }
 
@@ -133,7 +138,8 @@ public class LeafClientService : ILeafService
                 else
                 {
                     errorCount++;
-                    _logger.LogWarning("API call failed at offset {Offset}. Error count: {ErrorCount}. Error Limit: {ErrorLimit}. Error: {Error}", 
+                    _logger.LogWarning("{Service}: API call failed at offset {Offset}. Error count: {ErrorCount}. Error Limit: {ErrorLimit}. Error: {Error}", 
+                        nameof(LeafClientService),
                         offset, 
                         errorCount, 
                         errorLimit, 
@@ -143,7 +149,8 @@ public class LeafClientService : ILeafService
             catch (Exception ex)
             {
                 errorCount++;
-                _logger.LogError(ex, "Exception occurred while calling API. Offset {Offset}. Error Count: {ErrorCount}. Error Limit: {ErrorLimit}. Exception Message: {Message}", 
+                _logger.LogError(ex, "{Service}: Exception occurred while calling API. Offset {Offset}. Error Count: {ErrorCount}. Error Limit: {ErrorLimit}. Exception Message: {Message}", 
+                    nameof(LeafClientService),
                     offset, 
                     errorCount, 
                     errorLimit, 
@@ -158,7 +165,10 @@ public class LeafClientService : ILeafService
             FileInfo file = new(_file.GetLocalFile(nameof(Infrastructure), ".info", "RawLeaf.json"));
             Result saved = _json.WriteToFile(file, raw);
             if (saved.IsFailure)
-                _logger.LogError("Failed to write raw dtos to file {FileName} due to {Error}", file.FullName, saved.Error);
+                _logger.LogError("{Service}: Failed to write raw dtos to file {FileName} due to {Error}", 
+                    nameof(LeafClientService),
+                    file.FullName, 
+                    saved.Error);
 
             // Refresh messages
             Result<List<Message>>[] msgs = await GetMessagesAsync(raw);
@@ -177,7 +187,9 @@ public class LeafClientService : ILeafService
         }
 
         if (failure)
-            _logger.LogError("Reached error limit {ErrorLimit}", errorLimit);
+            _logger.LogError("{Service}: Reached error limit {ErrorLimit}", 
+                nameof(LeafClientService), 
+                errorLimit);
 
         return Result.Success(master);
     }
@@ -191,7 +203,9 @@ public class LeafClientService : ILeafService
             {
                 // Log Failures
                 if (r.IsFailure)
-                    _logger.LogError("Failed to retrieve messages. {Error}", r.Error);
+                    _logger.LogError("{Service}: Failed to retrieve messages. {Error}", 
+                        nameof(LeafClientService), 
+                        r.Error);
                 return r;
             })
             .Where(r => r.IsSuccess && r.Value is not null)
@@ -221,7 +235,7 @@ public class LeafClientService : ILeafService
     }
     internal async Task<Result<List<Message>>[]> GetMessagesAsync(List<LeafDto> leafs)
     {
-        List<Task<Result<List<Message>>>> tasks = leafs
+        var tasks = leafs
             .Where(l => l.uuid is not null)
             .Select(async leaf =>
             {
