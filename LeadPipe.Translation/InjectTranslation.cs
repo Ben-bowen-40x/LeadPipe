@@ -32,6 +32,7 @@ public static class InjectTranslation
         services.AddScoped<IDtoToVo<LeasedDto, Plumbing>, LeasedDtoToPlumbing>();
         services.AddScoped<IDtoToVo<PanDto, Plumbing>, PanDtoToPlumbing>();
         services.AddScoped<IDtoToVo<LibacionDto, Plumbing>, LibacionDtoToPlumbing>();
+        services.AddScoped<IDtoToVo<LatherDto, Plumbing>, LatherDtoToPlumbing>();
 
         // IEntityToVo
         services.AddScoped<IEntityToVo<CaliperEntity, Caliper>, CaliperEntityToCaliper>();
