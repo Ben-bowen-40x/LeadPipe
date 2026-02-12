@@ -1,11 +1,20 @@
-﻿using LeadPipe.Infrastructure.Dto;
+﻿using CSharpFunctionalExtensions;
+using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
 
 namespace LeadPipe.Infrastructure.Data.Source;
 
 public sealed class CalliFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<CalliFileDataSource> logging)
     : FileDataSource<CalliDto, CalliFileDataSource>(new FileInfo(settings.CalliSourceLoc!), csv, json, logging), IDataSourceAsync<CalliDto>
-{ }
+{
+    protected override Result<List<CalliDto>> FlattenInvalid(Result<List<CalliDto>> fileContents)
+    {
+        if (fileContents.IsFailure) return fileContents;
+
+        return fileContents.Value.Where(v => v.Phone != 0).ToList();
+    }
+}
