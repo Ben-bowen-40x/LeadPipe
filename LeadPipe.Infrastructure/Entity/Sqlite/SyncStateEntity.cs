@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Interfaces.Core;
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Interfaces.Core;
 
 namespace LeadPipe.Infrastructure.Entity.Sqlite;
 
@@ -23,4 +24,13 @@ public readonly record struct BusinessId(string Value)
     }
 
     public override string ToString() => Value;
+
+    public static BusinessId BuildBusinessId(Source? source, SyncKey entity)
+    {
+        string scope = source is null
+            ? "global"
+            : source.ToString()!.ToLowerInvariant();
+
+        return From($"{scope}:{entity}");
+    }
 }
