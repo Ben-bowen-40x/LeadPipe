@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
@@ -10,6 +11,13 @@ public class SyncStateRepository(PlumbingContext context) : ISyncStateRepository
 {
     private readonly PlumbingContext _context = context;
     private readonly DbSet<SyncStateEntity> _set = context.Set<SyncStateEntity>();
+
+    public async Task<Result<SyncStateEntity>> GetByKeyAsync(Source? source, SyncKey key)
+    {
+        BusinessId id = BusinessId.BuildBusinessId(source, key);
+        Result<SyncStateEntity> result = await GetByIdAsync(id);
+        return result;
+    }
 
     public async Task<Result<SyncStateEntity>> GetByIdAsync(BusinessId id)
     {
