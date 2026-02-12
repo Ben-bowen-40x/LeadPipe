@@ -11,7 +11,7 @@ public class LabDataSource(ILabService lab, IVoToDto<Plumbing, LabDto> voToDto) 
 {
     private readonly ILabService _lab = lab;
     private readonly IVoToDto<Plumbing, LabDto> _voToDto = voToDto;
-    public async Task<Result<List<LabDto>>> LoadAsync()
+    public async Task<Result<List<LabDto>>> LoadAsync(bool _ = false)
     {
         Result<List<Plumbing>> get = await _lab.GetLabsAsync();
         if (get.IsFailure)
@@ -20,7 +20,7 @@ public class LabDataSource(ILabService lab, IVoToDto<Plumbing, LabDto> voToDto) 
         return result;
     }
 
-    public async Task<Result<List<LabDto>>> RefreshAsync()
+    public async Task<Result<List<LabDto>>> RefreshAsync(bool _ = false)
     {
         Result<List<Plumbing>> get = await _lab.UpdateDataAsync();
         if (get.IsFailure)
