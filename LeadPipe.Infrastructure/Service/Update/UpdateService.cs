@@ -17,18 +17,18 @@ public abstract class UpdateService<TDto, TVo, TEntity>(
     private readonly IVoToEntity<TVo, TEntity> _voToEntity = voToEntity;
     private readonly IDataPersistence<TEntity> _persistence = persistence;
     
-    public async Task<Result<List<TVo>>> GetDataAsync()
+    public async Task<Result<List<TVo>>> GetDataAsync(bool withDetails)
     {
-        Result<List<TDto>> raw = await _source.LoadAsync();
+        Result<List<TDto>> raw = await _source.LoadAsync(withDetails);
         if (raw.IsFailure)
             return Result.Failure<List<TVo>>(raw.Error);
         List<TVo> result = [.. raw.Value.Select(_dtoToVo.Translate)];
         return result;
     }
     
-    public async Task<Result<List<TVo>>> UpdateDataAsync()
+    public async Task<Result<List<TVo>>> UpdateDataAsync(bool withDetails)
     {
-        Result<List<TDto>> raw = await _source.RefreshAsync();
+        Result<List<TDto>> raw = await _source.RefreshAsync(withDetails);
         if (raw.IsFailure)
             return Result.Failure<List<TVo>>(raw.Error);
         List<TVo> result = [.. raw.Value.Select(_dtoToVo.Translate)];
