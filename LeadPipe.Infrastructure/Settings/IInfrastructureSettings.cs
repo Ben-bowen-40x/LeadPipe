@@ -26,6 +26,10 @@ public interface IInfrastructureSettings :
 
     string? PanReportLoc { get; set; }
     string? PanSourceLoc { get; set; }
+
+    string? LatherReportLoc { get; set; }
+    string? LatherSourceLoc { get; set; }
+    
     string[]? CornSources { get; set; }
 }
 
