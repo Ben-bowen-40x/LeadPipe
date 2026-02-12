@@ -53,6 +53,8 @@
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
+
+    // Update specific Source
     "Data update only | Get all data | Yeller": {
       "commandName": "Project",
       "commandLineArgs": "data -us Yeller",
@@ -63,6 +65,34 @@
     "Data update only | Refresh data | Yeller": {
       "commandName": "Project",
       "commandLineArgs": "data -Rus Yeller",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update only | Get all data | Lather": {
+      "commandName": "Project",
+      "commandLineArgs": "data -us Lather",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update only | Refresh data | Lather": {
+      "commandName": "Project",
+      "commandLineArgs": "data -Rus Lather",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update only | Get all data | Leased": {
+      "commandName": "Project",
+      "commandLineArgs": "data -us Leased",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update only | Refresh data | Leased": {
+      "commandName": "Project",
+      "commandLineArgs": "data -Rus Leased",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
