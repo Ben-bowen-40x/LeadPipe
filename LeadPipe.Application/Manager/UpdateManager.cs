@@ -18,6 +18,7 @@ public sealed class UpdateManager(
     private readonly IUpdateFactory _update = update;
     private readonly IUpdateService<Caliper> _call = update.GetService<Caliper>();
     private readonly IUpdateService<Sandwich> _sandwich = update.GetService<Sandwich>();
+    private readonly IUpdateService<CornFormula> _corn = update.GetService<CornFormula>();
     private readonly IUpdateService<Custard> _custard = update.GetService<Custard>();
     private readonly IEntityAssociationService _associate = associate;
     private readonly ISyncGate _syncGate = syncGate;
@@ -81,6 +82,8 @@ public sealed class UpdateManager(
         Result sandwichSaved = await RunIfDue(SyncKey.Sandwich, refresh, true, _sandwich);
         if (sandwichSaved.IsFailure)
             return sandwichSaved;
+
+        Result cornSaved = await RunIfDue(SyncKey.CornFormula, refresh, false, _corn);
 
         return Result.Success();
     }
