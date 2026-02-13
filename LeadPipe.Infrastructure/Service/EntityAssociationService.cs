@@ -32,6 +32,7 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         Result<List<CustardEntity>> custards = await _custardRepo.GetAllWithDetailsAsync();
         Result<List<SandEntity>> sands = await _sandRepo.GetAllWithDetailsAsync();
         Result<List<PlumbingEntity>> plumbings = await _plumbingRepo.GetAllWithDetailsAsync();
+
         Result<List<CornEntity>> corns = await _cornRepo.GetAllWithDetailsAsync();
         Result<List<CaliperEntity>> calipers = await _caliperRepo.GetAllWithDetailsAsync();
 
@@ -274,7 +275,8 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         foreach (SandEntity e in sands)
         {
             if (e.CustardEntity is null)
-                throw new Exception($"{nameof(SandEntity)} cannot have null navigation values to {nameof(e.CustardEntity)}");
+                continue;
+
             var link =
             CreateLink(
                 e,
