@@ -53,7 +53,8 @@ public static class InjectInfrastructureSqlite
             if (useInMemory)
             {
                 SqliteConnection conn = provider.GetRequiredService<SqliteConnection>();
-                options.UseSqlite(conn);
+                options.UseSqlite(conn, options =>
+                    options.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
             }
             else
             {
@@ -61,7 +62,8 @@ public static class InjectInfrastructureSqlite
                 string dataSource = new SqliteConnectionStringBuilder(cs).DataSource;
 
                 Directory.CreateDirectory(Path.GetDirectoryName(dataSource)!);
-                options.UseSqlite(cs);
+                options.UseSqlite(cs, sqlOptions =>
+                    sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
             }
         });
         #endregion
