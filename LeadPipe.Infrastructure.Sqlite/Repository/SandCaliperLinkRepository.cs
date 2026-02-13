@@ -115,8 +115,8 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
 
             // ---- Phase 2: INSERT missing rows ----
             int inserted = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.SandCaliperLinksName} nameof({nameof(SandCaliperLink.SandId)}, {nameof(SandCaliperLink.CaliperId)}, {nameof(SandCaliperLink.MatchingPhone)})
-                SELECT tnameof.{nameof(SandCaliperLink.SandId)}, t.{nameof(SandCaliperLink.CaliperId)}, t.{nameof(SandCaliperLink.MatchingPhone)}
+                INSERT INTO {TableNames.SandCaliperLinksName} ({nameof(SandCaliperLink.SandId)}, {nameof(SandCaliperLink.CaliperId)}, {nameof(SandCaliperLink.MatchingPhone)})
+                SELECT t.{nameof(SandCaliperLink.SandId)}, t.{nameof(SandCaliperLink.CaliperId)}, t.{nameof(SandCaliperLink.MatchingPhone)}
                 FROM {tempTable} t
                 WHERE NOT EXISTS (
                     SELECT 1
@@ -165,4 +165,5 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
             _context.Database.ExecuteSqlRaw(sql.ToString());
         }
     }
+
 }
