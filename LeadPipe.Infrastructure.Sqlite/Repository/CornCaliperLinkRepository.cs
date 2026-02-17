@@ -23,4 +23,5 @@ public sealed class CornCaliperLinkRepository
     public override async Task<Result<List<CornCaliperLink>>> UpsertRangeAsync(
         List<CornCaliperLink> entities,
         CancellationToken ct = default) => await UpsertLinkRangeAsync(entities, ct);
+
 }

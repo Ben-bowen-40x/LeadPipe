@@ -151,7 +151,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
 
             // Update existing rows from temp table
             string updateSql = $"""
-                UPDATE {TableNames.SandEntitiesName} t
+                UPDATE {TableNames.SandEntitiesName}
                 SET
                     {nameof(SandEntity.CustardId)} = temp.{nameof(SandEntity.CustardId)},
                     {nameof(SandEntity.Date)} = temp.{nameof(SandEntity.Date)},
@@ -167,7 +167,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
                     {nameof(SandEntity.Seller3)} = temp.{nameof(SandEntity.Seller3)},
                     {nameof(SandEntity.Offerman)} = temp.{nameof(SandEntity.Offerman)}
                 FROM {tempTable} temp
-                WHERE t.{nameof(SandEntity.Id)} = temp.{nameof(SandEntity.Id)};
+                WHERE {nameof(SandEntity.Id)} = temp.{nameof(SandEntity.Id)};
             """;
             int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
 

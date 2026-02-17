@@ -112,15 +112,15 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
 
             // Update existing rows
             string updateSql = $"""
-                UPDATE {TableNames.PlumbingEntitiesName} t
+                UPDATE {TableNames.PlumbingEntitiesName}
                 SET
                     {nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)},
                     {nameof(PlumbingEntity.Contents)} = temp.{nameof(PlumbingEntity.Contents)},
                     {nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)}
                 FROM {tempTable} temp
-                WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
-                  AND t.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
-                  AND t.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)};
+                WHERE {nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
+                  AND {nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
+                  AND {nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)};
             """;
             int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
 

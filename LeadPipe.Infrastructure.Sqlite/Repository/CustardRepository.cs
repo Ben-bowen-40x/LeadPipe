@@ -117,7 +117,7 @@ public sealed class CustardRepository
 
             // Update existing rows
             string updateSql = $"""
-                UPDATE {TableNames.CustardEntitiesName} t
+                UPDATE {TableNames.CustardEntitiesName} 
                 SET 
                     {nameof(CustardEntity.Active)} = temp.{nameof(CustardEntity.Active)},
                     {nameof(CustardEntity.PhoneNumber)} = temp.{nameof(CustardEntity.PhoneNumber)},
@@ -127,7 +127,7 @@ public sealed class CustardRepository
                     {nameof(CustardEntity.CancelDate)} = temp.{nameof(CustardEntity.CancelDate)},
                     {nameof(CustardEntity.UnixCancelDate)} = temp.{nameof(CustardEntity.UnixCancelDate)}
                 FROM {tempTable} temp
-                WHERE t.{nameof(CustardEntity.Id)} = temp.{nameof(CustardEntity.Id)};
+                WHERE {nameof(CustardEntity.Id)} = temp.{nameof(CustardEntity.Id)};
             """;
             int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
 

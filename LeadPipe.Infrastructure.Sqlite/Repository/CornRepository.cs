@@ -118,9 +118,23 @@ public sealed class CornRepository(
             // Insert new rows that do not exist yet
             string insertSql = $"""
                 INSERT INTO {TableNames.CornEntitiesName} 
-                    ({nameof(CornEntity.Id)}, {nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)}, {nameof(CornEntity.UnixDate)}, {nameof(CornEntity.Payload)}, {nameof     (CornEntity.MetaData)},  {nameof(CornEntity.Source)})
+                (
+                    {nameof(CornEntity.Id)}, 
+                    {nameof(CornEntity.PhoneNumber)}, 
+                    {nameof(CornEntity.Date)}, 
+                    {nameof(CornEntity.UnixDate)}, 
+                    {nameof(CornEntity.Payload)}, 
+                    {nameof(CornEntity.MetaData)},  
+                    {nameof(CornEntity.Source)}
+                )
                 SELECT 
-                    temp.{nameof(CornEntity.Id)}, temp.{nameof(CornEntity.PhoneNumber)}, temp.{nameof(CornEntity.Date)}, temp.{nameof(CornEntity.UnixDate)}, temp.{nameof(CornEntity.   Payload)},     temp.   {nameof(CornEntity.MetaData)}, temp.{nameof(CornEntity.Source)}
+                    temp.{nameof(CornEntity.Id)}, 
+                    temp.{nameof(CornEntity.PhoneNumber)}, 
+                    temp.{nameof(CornEntity.Date)}, 
+                    temp.{nameof(CornEntity.UnixDate)}, 
+                    temp.{nameof(CornEntity.Payload)},     
+                    temp.{nameof(CornEntity.MetaData)}, 
+                    temp.{nameof(CornEntity.Source)}
                 FROM {tempTable} temp
                 WHERE NOT EXISTS (
                     SELECT 1 

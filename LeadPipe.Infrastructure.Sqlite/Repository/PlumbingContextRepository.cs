@@ -215,21 +215,21 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
             }
 
             string updateSql = $"""
-                UPDATE {tableName} t
+                UPDATE {tableName}
                 SET {phoneCol} = (
                         SELECT MIN(temp.phone)
                         FROM {tempTable} temp
-                        WHERE temp.id1 = t.{id1Col} AND temp.id2 = t.{id2Col}
+                        WHERE temp.id1 = t.{id1Col} AND temp.id2 = {id2Col}
                     ),
                     {dateCol} = (
                         SELECT MIN(temp.matchDate)
                         FROM {tempTable} temp
-                        WHERE temp.id1 = t.{id1Col} AND temp.id2 = t.{id2Col}
+                        WHERE temp.id1 = {id1Col} AND temp.id2 = {id2Col}
                     )
                 WHERE EXISTS (
                     SELECT 1 
                     FROM {tempTable} temp
-                    WHERE temp.id1 = t.{id1Col} AND temp.id2 = t.{id2Col} AND temp.phone <> 0
+                    WHERE temp.id1 = {id1Col} AND temp.id2 = {id2Col} AND temp.phone <> 0
                 );
             """;
             await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
