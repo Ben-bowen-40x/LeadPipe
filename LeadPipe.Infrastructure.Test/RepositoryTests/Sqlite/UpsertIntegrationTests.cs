@@ -44,7 +44,7 @@ public class UpsertIntegrationTests
         };
 
         // Act
-        var result = await repo.LinkUpsertAsync(testData, CancellationToken.None);
+        var result = await repo.UpsertLinkRangeAsync(testData, CancellationToken.None);
 
         // Assert
         var saved = context.PlumbingCaliperLinks.Single(x => x.PlumbingId == 1);
