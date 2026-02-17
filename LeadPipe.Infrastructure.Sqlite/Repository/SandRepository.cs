@@ -149,7 +149,30 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
                 }
             }
 
-            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+            // Update existing rows from temp table
+            string updateSql = $"""
+                UPDATE {TableNames.SandEntitiesName} t
+                SET
+                    {nameof(SandEntity.CustardId)} = temp.{nameof(SandEntity.CustardId)},
+                    {nameof(SandEntity.Date)} = temp.{nameof(SandEntity.Date)},
+                    {nameof(SandEntity.UnixDate)} = temp.{nameof(SandEntity.UnixDate)},
+                    {nameof(SandEntity.CancelDate)} = temp.{nameof(SandEntity.CancelDate)},
+                    {nameof(SandEntity.UnixCancelDate)} = temp.{nameof(SandEntity.UnixCancelDate)},
+                    {nameof(SandEntity.Active)} = temp.{nameof(SandEntity.Active)},
+                    {nameof(SandEntity.Complete)} = temp.{nameof(SandEntity.Complete)},
+                    {nameof(SandEntity.Value)} = temp.{nameof(SandEntity.Value)},
+                    {nameof(SandEntity.Type)} = temp.{nameof(SandEntity.Type)},
+                    {nameof(SandEntity.Seller)} = temp.{nameof(SandEntity.Seller)},
+                    {nameof(SandEntity.Seller2)} = temp.{nameof(SandEntity.Seller2)},
+                    {nameof(SandEntity.Seller3)} = temp.{nameof(SandEntity.Seller3)},
+                    {nameof(SandEntity.Offerman)} = temp.{nameof(SandEntity.Offerman)}
+                FROM {tempTable} temp
+                WHERE t.{nameof(SandEntity.Id)} = temp.{nameof(SandEntity.Id)};
+            """;
+            int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
+
+            // Insert new rows
+            string insertSql = $"""
                 INSERT INTO {TableNames.SandEntitiesName} (
                     {nameof(SandEntity.Id)}, 
                     {nameof(SandEntity.CustardId)}, 
@@ -167,48 +190,42 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
                     {nameof(SandEntity.Offerman)}
                 )
                 SELECT 
-                    {nameof(SandEntity.Id)}, 
-                    {nameof(SandEntity.CustardId)}, 
-                    {nameof(SandEntity.Date)}, 
-                    {nameof(SandEntity.UnixDate)}, 
-                    {nameof(SandEntity.CancelDate)}, 
-                    {nameof(SandEntity.UnixCancelDate)}, 
-                    {nameof(SandEntity.Active)}, 
-                    {nameof(SandEntity.Complete)}, 
-                    {nameof(SandEntity.Value)}, 
-                    {nameof(SandEntity.Type)}, 
-                    {nameof(SandEntity.Seller)}, 
-                    {nameof(SandEntity.Seller2)}, 
-                    {nameof(SandEntity.Seller3)}, 
-                    {nameof(SandEntity.Offerman)}
-                FROM {tempTable}
-                ON CONFLICT(Id) DO UPDATE SET
-                    {nameof(SandEntity.CustardId)} = excluded.{nameof(SandEntity.CustardId)},
-                    {nameof(SandEntity.Date)} = excluded.{nameof(SandEntity.Date)},
-                    {nameof(SandEntity.UnixDate)} = excluded.{nameof(SandEntity.UnixDate)},
-                    {nameof(SandEntity.CancelDate)} = excluded.{nameof(SandEntity.CancelDate)},
-                    {nameof(SandEntity.UnixCancelDate)} = excluded.{nameof(SandEntity.UnixCancelDate)},
-                    {nameof(SandEntity.Active)} = excluded.{nameof(SandEntity.Active)},
-                    {nameof(SandEntity.Complete)} = excluded.{nameof(SandEntity.Complete)},
-                    {nameof(SandEntity.Value)} = excluded.{nameof(SandEntity.Value)},
-                    {nameof(SandEntity.Type)} = excluded.{nameof(SandEntity.Type)},
-                    {nameof(SandEntity.Seller)} = excluded.{nameof(SandEntity.Seller)},
-                    {nameof(SandEntity.Seller2)} = excluded.{nameof(SandEntity.Seller2)},
-                    {nameof(SandEntity.Seller3)} = excluded.{nameof(SandEntity.Seller3)},
-                    {nameof(SandEntity.Offerman)} = excluded.{nameof(SandEntity.Offerman)};
-            """, ct);
+                    temp.{nameof(SandEntity.Id)}, 
+                    temp.{nameof(SandEntity.CustardId)}, 
+                    temp.{nameof(SandEntity.Date)}, 
+                    temp.{nameof(SandEntity.UnixDate)}, 
+                    temp.{nameof(SandEntity.CancelDate)}, 
+                    temp.{nameof(SandEntity.UnixCancelDate)}, 
+                    temp.{nameof(SandEntity.Active)}, 
+                    temp.{nameof(SandEntity.Complete)}, 
+                    temp.{nameof(SandEntity.Value)}, 
+                    temp.{nameof(SandEntity.Type)}, 
+                    temp.{nameof(SandEntity.Seller)}, 
+                    temp.{nameof(SandEntity.Seller2)}, 
+                    temp.{nameof(SandEntity.Seller3)}, 
+                    temp.{nameof(SandEntity.Offerman)}
+                FROM {tempTable} temp
+                WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM {TableNames.SandEntitiesName} t
+                    WHERE t.{nameof(SandEntity.Id)} = temp.{nameof(SandEntity.Id)}
+                );
+            """;
+            int totalInserted = await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
 
-            // 5️⃣ Clean up temp table
+
+            // Clean up temp table
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 nameof(SandEntity), 
                 entities.Count, 
                 uniqueEntities.Count, 
                 stagedCount, 
-                totalAffected, 
+                totalUpdated,
+                totalInserted,
                 skipped);
 
             return Result.Success(uniqueEntities);
@@ -216,7 +233,7 @@ public sealed class SandRepository(PlumbingContext context, ILogger<SandReposito
         catch (OperationCanceledException) { throw; }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "{Entity} upsert failed. Exception Message: {Message}", nameof(SandEntity), ex.Message);
+            _logger.LogError(ex, "{Entity} upsert failed.", nameof(SandEntity));
             return Result.Failure<List<SandEntity>>(ex.ToString());
         }
 

@@ -41,8 +41,8 @@ public sealed class CustardRepository
         List<CustardEntity> uniqueEntities =
         [
             .. entities
-            .GroupBy(e => e.Id)
-            .Select(g => g.Last())
+                .GroupBy(e => e.Id)
+                .Select(g => g.Last())
         ];
 
         int batchSize = 50;
@@ -115,7 +115,24 @@ public sealed class CustardRepository
                 }
             }
 
-            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
+            // Update existing rows
+            string updateSql = $"""
+                UPDATE {TableNames.CustardEntitiesName} t
+                SET 
+                    {nameof(CustardEntity.Active)} = temp.{nameof(CustardEntity.Active)},
+                    {nameof(CustardEntity.PhoneNumber)} = temp.{nameof(CustardEntity.PhoneNumber)},
+                    {nameof(CustardEntity.PhoneNumber2)} = temp.{nameof(CustardEntity.PhoneNumber2)},
+                    {nameof(CustardEntity.Date)} = temp.{nameof(CustardEntity.Date)},
+                    {nameof(CustardEntity.UnixDate)} = temp.{nameof(CustardEntity.UnixDate)},
+                    {nameof(CustardEntity.CancelDate)} = temp.{nameof(CustardEntity.CancelDate)},
+                    {nameof(CustardEntity.UnixCancelDate)} = temp.{nameof(CustardEntity.UnixCancelDate)}
+                FROM {tempTable} temp
+                WHERE t.{nameof(CustardEntity.Id)} = temp.{nameof(CustardEntity.Id)};
+            """;
+            int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
+
+            // Insert new rows that do not exist yet
+            string insertSql = $"""
                 INSERT INTO {TableNames.CustardEntitiesName} (
                     {nameof(CustardEntity.Id)},
                     {nameof(CustardEntity.Active)}, 
@@ -127,35 +144,35 @@ public sealed class CustardRepository
                     {nameof(CustardEntity.UnixCancelDate)}
                 )
                 SELECT 
-                    {nameof(CustardEntity.Id)},
-                    {nameof(CustardEntity.Active)}, 
-                    {nameof(CustardEntity.PhoneNumber)}, 
-                    {nameof(CustardEntity.PhoneNumber2)}, 
-                    {nameof(CustardEntity.Date)}, 
-                    {nameof(CustardEntity.UnixDate)}, 
-                    {nameof(CustardEntity.CancelDate)}, 
-                    {nameof(CustardEntity.UnixCancelDate)}
-                FROM {tempTable}
-                ON CONFLICT({nameof(CustardEntity.Id)}) DO UPDATE SET
-                    {nameof(CustardEntity.Active)} = excluded.{nameof(CustardEntity.Active)},
-                    {nameof(CustardEntity.PhoneNumber)} = excluded.{nameof(CustardEntity.PhoneNumber)},
-                    {nameof(CustardEntity.PhoneNumber2)} = excluded.{nameof(CustardEntity.PhoneNumber2)},
-                    {nameof(CustardEntity.Date)} = excluded.{nameof(CustardEntity.Date)},
-                    {nameof(CustardEntity.UnixDate)} = excluded.{nameof(CustardEntity.UnixDate)},
-                    {nameof(CustardEntity.CancelDate)} = excluded.{nameof(CustardEntity.CancelDate)},
-                    {nameof(CustardEntity.UnixCancelDate)} = excluded.{nameof(CustardEntity.UnixCancelDate)};
-            """, ct);
+                    temp.{nameof(CustardEntity.Id)},
+                    temp.{nameof(CustardEntity.Active)}, 
+                    temp.{nameof(CustardEntity.PhoneNumber)}, 
+                    temp.{nameof(CustardEntity.PhoneNumber2)}, 
+                    temp.{nameof(CustardEntity.Date)}, 
+                    temp.{nameof(CustardEntity.UnixDate)}, 
+                    temp.{nameof(CustardEntity.CancelDate)}, 
+                    temp.{nameof(CustardEntity.UnixCancelDate)}
+                FROM {tempTable} temp
+                WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM {TableNames.CustardEntitiesName} t
+                    WHERE t.{nameof(CustardEntity.Id)} = temp.{nameof(CustardEntity.Id)}
+                );
+            """;
+            int totalInserted = await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
+
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Unique={Unique}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 nameof(CustardEntity),
                 entities.Count,
                 uniqueEntities.Count,
                 stagedCount,
-                totalAffected,
+                totalUpdated,
+                totalInserted,
                 skipped);
 
             return Result.Success(uniqueEntities);

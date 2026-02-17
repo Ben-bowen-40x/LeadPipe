@@ -100,32 +100,47 @@ public sealed class CornRepository(
                 }
             }
 
-            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.CornEntitiesName} 
-                    ({nameof(CornEntity.Id)}, {nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)}, {nameof(CornEntity.UnixDate)}, {nameof(CornEntity.Payload)}, {nameof(CornEntity.MetaData)}, {nameof(CornEntity.Source)})
-                SELECT 
-                    {nameof(CornEntity.Id)}, {nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)}, {nameof(CornEntity.UnixDate)}, {nameof(CornEntity.Payload)}, {nameof(CornEntity.MetaData)}, {nameof(CornEntity.Source)}
-                FROM {tempTable}
-                ON CONFLICT({nameof(CornEntity.Id)}) DO UPDATE SET
-                    {nameof(CornEntity.PhoneNumber)} = excluded.{nameof(CornEntity.PhoneNumber)},
-                    {nameof(CornEntity.Date)} = excluded.{nameof(CornEntity.Date)},
-                    {nameof(CornEntity.UnixDate)} = excluded.{nameof(CornEntity.UnixDate)},
-                    {nameof(CornEntity.Payload)} = excluded.{nameof(CornEntity.Payload)},
-                    {nameof(CornEntity.MetaData)} = excluded.{nameof(CornEntity.MetaData)},
-                    {nameof(CornEntity.Source)} = excluded.{nameof(CornEntity.Source)};
-            """, ct);
+            // Update existing rows
+            string updateSql = $"""
+                UPDATE {TableNames.CornEntitiesName} t
+                SET 
+                    {nameof(CornEntity.PhoneNumber)} = temp.{nameof(CornEntity.PhoneNumber)},
+                    {nameof(CornEntity.Date)} = temp.{nameof(CornEntity.Date)},
+                    {nameof(CornEntity.UnixDate)} = temp.{nameof(CornEntity.UnixDate)},
+                    {nameof(CornEntity.Payload)} = temp.{nameof(CornEntity.Payload)},
+                    {nameof(CornEntity.MetaData)} = temp.{nameof(CornEntity.MetaData)},
+                    {nameof(CornEntity.Source)} = temp.{nameof(CornEntity.Source)}
+                FROM {tempTable} temp
+                WHERE t.{nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)};
+            """;
+            int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
 
-            await _context.Database.ExecuteSqlRawAsync(
-                $"DELETE FROM {tempTable};", ct);
+            // Insert new rows that do not exist yet
+            string insertSql = $"""
+                INSERT INTO {TableNames.CornEntitiesName} 
+                    ({nameof(CornEntity.Id)}, {nameof(CornEntity.PhoneNumber)}, {nameof(CornEntity.Date)}, {nameof(CornEntity.UnixDate)}, {nameof(CornEntity.Payload)}, {nameof     (CornEntity.MetaData)},  {nameof(CornEntity.Source)})
+                SELECT 
+                    temp.{nameof(CornEntity.Id)}, temp.{nameof(CornEntity.PhoneNumber)}, temp.{nameof(CornEntity.Date)}, temp.{nameof(CornEntity.UnixDate)}, temp.{nameof(CornEntity.   Payload)},     temp.   {nameof(CornEntity.MetaData)}, temp.{nameof(CornEntity.Source)}
+                FROM {tempTable} temp
+                WHERE NOT EXISTS (
+                    SELECT 1 
+                    FROM {TableNames.CornEntitiesName} t
+                    WHERE t.{nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)}
+                );
+            """;
+            int totalInserted = await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
+
+            await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", ct);
 
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 nameof(CornEntity),
                 entities.Count,
                 stagedCount,
-                totalAffected,
+                totalUpdated,
+                totalInserted,
                 skipped);
 
             return Result.Success(entities);

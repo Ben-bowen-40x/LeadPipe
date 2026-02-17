@@ -110,39 +110,59 @@ public class PlumbingRepository(PlumbingContext context, ILogger<PlumbingReposit
                 }
             }
 
-            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.PlumbingEntitiesName} 
-                (
-                    {nameof(PlumbingEntity.PhoneNumber)},
-                    {nameof(PlumbingEntity.Date)}, 
-                    {nameof(PlumbingEntity.UnixDate)}, 
-                    {nameof(PlumbingEntity.Contents)}, 
-                    {nameof(PlumbingEntity.Source)}, 
-                    {nameof(PlumbingEntity.MetaData)}
-                )
-                SELECT 
+            // Update existing rows
+            string updateSql = $"""
+                UPDATE {TableNames.PlumbingEntitiesName} t
+                SET
+                    {nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)},
+                    {nameof(PlumbingEntity.Contents)} = temp.{nameof(PlumbingEntity.Contents)},
+                    {nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)}
+                FROM {tempTable} temp
+                WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
+                  AND t.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
+                  AND t.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)};
+            """;
+            int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
+
+            // Insert new rows
+            string insertSql = $"""
+                INSERT INTO {TableNames.PlumbingEntitiesName} (
                     {nameof(PlumbingEntity.PhoneNumber)},
                     {nameof(PlumbingEntity.Date)},
                     {nameof(PlumbingEntity.UnixDate)},
                     {nameof(PlumbingEntity.Contents)},
                     {nameof(PlumbingEntity.Source)},
                     {nameof(PlumbingEntity.MetaData)}
-                FROM {tempTable}
-                ON CONFLICT({nameof(PlumbingEntity.PhoneNumber)}, {nameof(PlumbingEntity.Date)}, {nameof(PlumbingEntity.Source)}) DO UPDATE SET
-                    {nameof(PlumbingEntity.UnixDate)} = excluded.{nameof(PlumbingEntity.UnixDate)},
-                    {nameof(PlumbingEntity.Contents)} = excluded.{nameof(PlumbingEntity.Contents)},
-                    {nameof(PlumbingEntity.MetaData)} = excluded.{nameof(PlumbingEntity.MetaData)};
-            """, ct);
+                )
+                SELECT
+                    temp.{nameof(PlumbingEntity.PhoneNumber)},
+                    temp.{nameof(PlumbingEntity.Date)},
+                    temp.{nameof(PlumbingEntity.UnixDate)},
+                    temp.{nameof(PlumbingEntity.Contents)},
+                    temp.{nameof(PlumbingEntity.Source)},
+                    temp.{nameof(PlumbingEntity.MetaData)}
+                FROM {tempTable} temp
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM {TableNames.PlumbingEntitiesName} t
+                    WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
+                      AND t.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
+                      AND t.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)}
+                );
+            """;
+            int totalInserted = await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
+
 
             await _context.Database.ExecuteSqlRawAsync($"DELETE FROM {tempTable};", cancellationToken: ct);
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 nameof(PlumbingEntity),
                 entities.Count,
                 stagedCount,
-                totalAffected,
+                totalUpdated,
+                totalInserted,
                 skipped);
 
             return Result.Success(entities);

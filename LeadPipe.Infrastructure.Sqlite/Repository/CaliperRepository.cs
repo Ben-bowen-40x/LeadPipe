@@ -42,8 +42,7 @@ public sealed class CaliperRepository
 
         try
         {
-            await using var transaction =
-                await _context.Database.BeginTransactionAsync(ct);
+            await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             // Use TEXT for Date to match SQLite's date string preference, or INTEGER if storing ticks
             await _context.Database.ExecuteSqlRawAsync($"""
@@ -99,9 +98,60 @@ public sealed class CaliperRepository
             }
 
             // Target index is the Primary Key (Id)
-            int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
-                INSERT INTO {TableNames.CaliperEntitiesName} 
-                (
+            string updateSql = $"""
+                UPDATE {TableNames.CaliperEntitiesName} t
+                SET
+                    {nameof(CaliperEntity.PhoneNumber)} = (
+                        SELECT temp.{nameof(CaliperEntity.PhoneNumber)}
+                        FROM {tempTable} temp
+                        WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                    ),
+                    {nameof(CaliperEntity.Date)} = (
+                        SELECT temp.{nameof(CaliperEntity.Date)}
+                        FROM {tempTable} temp
+                        WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                    ),
+                    {nameof(CaliperEntity.UnixDate)} = (
+                        SELECT temp.{nameof(CaliperEntity.UnixDate)}
+                        FROM {tempTable} temp
+                        WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                    ),
+                    {nameof(CaliperEntity.Note)} = (
+                        SELECT temp.{nameof(CaliperEntity.Note)}
+                        FROM {tempTable} temp
+                        WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                    ),
+                    {nameof(CaliperEntity.Source)} = (
+                        SELECT temp.{nameof(CaliperEntity.Source)}
+                        FROM {tempTable} temp
+                        WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                    ),
+                    {nameof(CaliperEntity.Location)} = (
+                        SELECT temp.{nameof(CaliperEntity.Location)}
+                        FROM {tempTable} temp
+                        WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                    ),
+                    {nameof(CaliperEntity.Duration)} = (
+                        SELECT temp.{nameof(CaliperEntity.Duration)}
+                        FROM {tempTable} temp
+                        WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                    ),
+                    {nameof(CaliperEntity.Billable)} = (
+                        SELECT temp.{nameof(CaliperEntity.Billable)}
+                        FROM {tempTable} temp
+                        WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                    )
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM {tempTable} temp
+                    WHERE temp.{nameof(CaliperEntity.Id)} = t.{nameof(CaliperEntity.Id)}
+                );
+            """;
+            int updatedCount = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
+
+            // 4️⃣ Insert new rows
+            string insertSql = $"""
+                INSERT INTO {TableNames.CaliperEntitiesName} (
                     {nameof(CaliperEntity.Id)}, 
                     {nameof(CaliperEntity.PhoneNumber)}, 
                     {nameof(CaliperEntity.Date)}, 
@@ -112,7 +162,7 @@ public sealed class CaliperRepository
                     {nameof(CaliperEntity.Duration)}, 
                     {nameof(CaliperEntity.Billable)}
                 )
-                SELECT 
+                SELECT
                     {nameof(CaliperEntity.Id)}, 
                     {nameof(CaliperEntity.PhoneNumber)}, 
                     {nameof(CaliperEntity.Date)}, 
@@ -122,17 +172,14 @@ public sealed class CaliperRepository
                     {nameof(CaliperEntity.Location)}, 
                     {nameof(CaliperEntity.Duration)}, 
                     {nameof(CaliperEntity.Billable)}
-                FROM {tempTable}
-                ON CONFLICT(Id) DO UPDATE SET
-                    {nameof(CaliperEntity.PhoneNumber)} = excluded.{nameof(CaliperEntity.PhoneNumber)},
-                    {nameof(CaliperEntity.Date)} = excluded.{nameof(CaliperEntity.Date)},
-                    {nameof(CaliperEntity.UnixDate)} = excluded.{nameof(CaliperEntity.UnixDate)},
-                    {nameof(CaliperEntity.Note)} = excluded.{nameof(CaliperEntity.Note)},
-                    {nameof(CaliperEntity.Source)} = excluded.{nameof(CaliperEntity.Source)},
-                    {nameof(CaliperEntity.Location)} = excluded.{nameof(CaliperEntity.Location)},
-                    {nameof(CaliperEntity.Duration)} = excluded.{nameof(CaliperEntity.Duration)},
-                    {nameof(CaliperEntity.Billable)} = excluded.{nameof(CaliperEntity.Billable)};
-            """, ct);
+                FROM {tempTable} temp
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM {TableNames.CaliperEntitiesName} t
+                    WHERE t.{nameof(CaliperEntity.Id)} = temp.{nameof(CaliperEntity.Id)}
+                );
+            """;
+            int insertedCount = await _context.Database.ExecuteSqlRawAsync(insertSql, ct);
 
             await _context.Database.ExecuteSqlRawAsync(
                 $"DELETE FROM {tempTable};", ct);
@@ -140,11 +187,12 @@ public sealed class CaliperRepository
             await transaction.CommitAsync(ct);
 
             _logger.LogInformation(
-                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Affected={Affected}, Skipped={Skipped}",
+                "{Entity} upsert complete: Incoming={Incoming}, Staged={Staged}, Updated={Updated}, Inserted={Inserted}, Skipped={Skipped}",
                 nameof(CaliperEntity),
                 entities.Count,
                 stagedCount,
-                totalAffected,
+                updatedCount,
+                insertedCount,
                 skipped);
 
             return Result.Success(entities);
