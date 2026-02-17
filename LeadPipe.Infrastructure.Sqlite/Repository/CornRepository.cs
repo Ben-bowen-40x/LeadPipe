@@ -102,7 +102,7 @@ public sealed class CornRepository(
 
             // Update existing rows
             string updateSql = $"""
-                UPDATE {TableNames.CornEntitiesName} t
+                UPDATE {TableNames.CornEntitiesName}
                 SET 
                     {nameof(CornEntity.PhoneNumber)} = temp.{nameof(CornEntity.PhoneNumber)},
                     {nameof(CornEntity.Date)} = temp.{nameof(CornEntity.Date)},
@@ -111,7 +111,7 @@ public sealed class CornRepository(
                     {nameof(CornEntity.MetaData)} = temp.{nameof(CornEntity.MetaData)},
                     {nameof(CornEntity.Source)} = temp.{nameof(CornEntity.Source)}
                 FROM {tempTable} temp
-                WHERE t.{nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)};
+                WHERE {nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)};
             """;
             int totalUpdated = await _context.Database.ExecuteSqlRawAsync(updateSql, ct);
 
