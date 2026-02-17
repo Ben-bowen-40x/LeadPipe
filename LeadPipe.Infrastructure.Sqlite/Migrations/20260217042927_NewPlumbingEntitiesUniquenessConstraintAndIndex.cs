@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
+namespace LeadPipe.Infrastructure.Sqlite.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class NewPlumbingEntitiesUniquenessConstraintAndIndex : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,7 +54,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     Id = table.Column<long>(type: "INTEGER", nullable: false),
                     Active = table.Column<bool>(type: "INTEGER", nullable: false),
                     PhoneNumber = table.Column<long>(type: "INTEGER", nullable: false),
-                    PhoneNumber2 = table.Column<long>(type: "INTEGER", nullable: false),
+                    PhoneNumber2 = table.Column<long>(type: "INTEGER", nullable: true),
                     Date = table.Column<DateTime>(type: "TEXT", nullable: false),
                     UnixDate = table.Column<long>(type: "INTEGER", nullable: false),
                     CancelDate = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -108,11 +108,13 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     CornId = table.Column<long>(type: "INTEGER", nullable: false),
                     CaliperId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CornCaliperLinks", x => x.Id);
+                    table.CheckConstraint("CK_CornCaliper_MatchingPhone", "MatchingPhone <> 0");
                     table.ForeignKey(
                         name: "FK_CornCaliperLinks_CaliperEntities_CaliperId",
                         column: x => x.CaliperId,
@@ -135,7 +137,8 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     CustardId = table.Column<long>(type: "INTEGER", nullable: false),
                     CaliperId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -163,7 +166,8 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     CustardId = table.Column<long>(type: "INTEGER", nullable: false),
                     CornId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -221,11 +225,13 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     CornId = table.Column<long>(type: "INTEGER", nullable: false),
                     PlumbingId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CornPlumbingLinks", x => x.Id);
+                    table.CheckConstraint("CK_CornPlumbing_MatchingPhone", "MatchingPhone <> 0");
                     table.ForeignKey(
                         name: "FK_CornPlumbingLinks_CornEntities_CornId",
                         column: x => x.CornId,
@@ -248,7 +254,8 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     CustardId = table.Column<long>(type: "INTEGER", nullable: false),
                     PlumbingId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -276,11 +283,13 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     PlumbingId = table.Column<long>(type: "INTEGER", nullable: false),
                     CaliperId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PlumbingCaliperLinks", x => x.Id);
+                    table.CheckConstraint("CK_PlumbingCaliper_MatchingPhone", "MatchingPhone <> 0");
                     table.ForeignKey(
                         name: "FK_PlumbingCaliperLinks_CaliperEntities_CaliperId",
                         column: x => x.CaliperId,
@@ -303,11 +312,13 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     SandId = table.Column<long>(type: "INTEGER", nullable: false),
                     CaliperId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SandCaliperLinks", x => x.Id);
+                    table.CheckConstraint("CK_SandCaliper_MatchingPhone", "MatchingPhone");
                     table.ForeignKey(
                         name: "FK_SandCaliperLinks_CaliperEntities_CaliperId",
                         column: x => x.CaliperId,
@@ -330,11 +341,13 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     SandId = table.Column<long>(type: "INTEGER", nullable: false),
                     CornId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SandCornLinks", x => x.Id);
+                    table.CheckConstraint("CK_SandCorn_MatchingPhone", "MatchingPhone <> 0");
                     table.ForeignKey(
                         name: "FK_SandCornLinks_CornEntities_CornId",
                         column: x => x.CornId,
@@ -357,11 +370,13 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                         .Annotation("Sqlite:Autoincrement", true),
                     SandId = table.Column<long>(type: "INTEGER", nullable: false),
                     PlumbingId = table.Column<long>(type: "INTEGER", nullable: false),
-                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false)
+                    MatchingPhone = table.Column<long>(type: "INTEGER", nullable: false),
+                    UnixMatchDate = table.Column<long>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SandPlumbingLinks", x => x.Id);
+                    table.CheckConstraint("CK_SandPlumbing_MatchingPhone", "MatchingPhone <> 0");
                     table.ForeignKey(
                         name: "FK_SandPlumbingLinks_PlumbingEntities_PlumbingId",
                         column: x => x.PlumbingId,
@@ -377,15 +392,14 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_CaliperEntities_Date",
+                table: "CaliperEntities",
+                column: "Date");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CaliperEntities_PhoneNumber",
                 table: "CaliperEntities",
                 column: "PhoneNumber");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CaliperEntities_PhoneNumber_Date",
-                table: "CaliperEntities",
-                columns: new[] { "PhoneNumber", "Date" },
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_CornCaliperLinks_CaliperId",
@@ -404,6 +418,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_CornCaliperLinks_UnixMatchDate",
+                table: "CornCaliperLinks",
+                column: "UnixMatchDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CornEntities_PhoneNumber",
                 table: "CornEntities",
                 column: "PhoneNumber");
@@ -411,8 +430,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
             migrationBuilder.CreateIndex(
                 name: "IX_CornEntities_PhoneNumber_Source",
                 table: "CornEntities",
-                columns: new[] { "PhoneNumber", "Source" },
-                unique: true);
+                columns: new[] { "PhoneNumber", "Source" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_CornPlumbingLinks_CornId",
@@ -431,6 +449,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 column: "PlumbingId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CornPlumbingLinks_UnixMatchDate",
+                table: "CornPlumbingLinks",
+                column: "UnixMatchDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CustardCaliperLinks_CaliperId",
                 table: "CustardCaliperLinks",
                 column: "CaliperId");
@@ -447,6 +470,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_CustardCaliperLinks_UnixMatchDate",
+                table: "CustardCaliperLinks",
+                column: "UnixMatchDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CustardCornLinks_CornId",
                 table: "CustardCornLinks",
                 column: "CornId");
@@ -461,6 +489,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 table: "CustardCornLinks",
                 columns: new[] { "CustardId", "CornId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CustardCornLinks_UnixMatchDate",
+                table: "CustardCornLinks",
+                column: "UnixMatchDate");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CustardEntities_PhoneNumber",
@@ -489,6 +522,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 column: "PlumbingId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_CustardPlumbingLinks_UnixMatchDate",
+                table: "CustardPlumbingLinks",
+                column: "UnixMatchDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlumbingCaliperLinks_CaliperId",
                 table: "PlumbingCaliperLinks",
                 column: "CaliperId");
@@ -505,14 +543,19 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_PlumbingCaliperLinks_UnixMatchDate",
+                table: "PlumbingCaliperLinks",
+                column: "UnixMatchDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PlumbingEntities_PhoneNumber",
                 table: "PlumbingEntities",
                 column: "PhoneNumber");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PlumbingEntities_PhoneNumber_Source",
+                name: "IX_PlumbingEntities_PhoneNumber_Date_Source",
                 table: "PlumbingEntities",
-                columns: new[] { "PhoneNumber", "Source" },
+                columns: new[] { "PhoneNumber", "Date", "Source" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -532,6 +575,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_SandCaliperLinks_UnixMatchDate",
+                table: "SandCaliperLinks",
+                column: "UnixMatchDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_SandCornLinks_CornId",
                 table: "SandCornLinks",
                 column: "CornId");
@@ -546,6 +594,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 table: "SandCornLinks",
                 columns: new[] { "SandId", "CornId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SandCornLinks_UnixMatchDate",
+                table: "SandCornLinks",
+                column: "UnixMatchDate");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SandEntities_CustardId",
@@ -567,6 +620,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                 table: "SandPlumbingLinks",
                 columns: new[] { "SandId", "PlumbingId" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_SandPlumbingLinks_UnixMatchDate",
+                table: "SandPlumbingLinks",
+                column: "UnixMatchDate");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SyncState_BusinessId",

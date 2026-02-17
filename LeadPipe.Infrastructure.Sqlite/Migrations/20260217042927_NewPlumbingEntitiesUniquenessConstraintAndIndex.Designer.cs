@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
+namespace LeadPipe.Infrastructure.Sqlite.Migrations
 {
     [DbContext(typeof(PlumbingContext))]
-    [Migration("20260202170045_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260217042927_NewPlumbingEntitiesUniquenessConstraintAndIndex")]
+    partial class NewPlumbingEntitiesUniquenessConstraintAndIndex
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,10 +54,9 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PhoneNumber");
+                    b.HasIndex("Date");
 
-                    b.HasIndex("PhoneNumber", "Date")
-                        .IsUnique();
+                    b.HasIndex("PhoneNumber");
 
                     b.ToTable("CaliperEntities", (string)null);
                 });
@@ -77,16 +76,24 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("MatchingPhone")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CaliperId");
 
                     b.HasIndex("CornId");
 
+                    b.HasIndex("UnixMatchDate");
+
                     b.HasIndex("CornId", "CaliperId")
                         .IsUnique();
 
-                    b.ToTable("CornCaliperLinks", (string)null);
+                    b.ToTable("CornCaliperLinks", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CornCaliper_MatchingPhone", "MatchingPhone <> 0");
+                        });
                 });
 
             modelBuilder.Entity("LeadPipe.Infrastructure.Entity.Sqlite.CornEntity", b =>
@@ -119,8 +126,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
 
                     b.HasIndex("PhoneNumber");
 
-                    b.HasIndex("PhoneNumber", "Source")
-                        .IsUnique();
+                    b.HasIndex("PhoneNumber", "Source");
 
                     b.ToTable("CornEntities", (string)null);
                 });
@@ -140,16 +146,24 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("PlumbingId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CornId");
 
                     b.HasIndex("PlumbingId");
 
+                    b.HasIndex("UnixMatchDate");
+
                     b.HasIndex("CornId", "PlumbingId")
                         .IsUnique();
 
-                    b.ToTable("CornPlumbingLinks", (string)null);
+                    b.ToTable("CornPlumbingLinks", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_CornPlumbing_MatchingPhone", "MatchingPhone <> 0");
+                        });
                 });
 
             modelBuilder.Entity("LeadPipe.Infrastructure.Entity.Sqlite.CustardCaliperLink", b =>
@@ -167,11 +181,16 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("MatchingPhone")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CaliperId");
 
                     b.HasIndex("CustardId");
+
+                    b.HasIndex("UnixMatchDate");
 
                     b.HasIndex("CustardId", "CaliperId")
                         .IsUnique();
@@ -197,11 +216,16 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("MatchingPhone")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CornId");
 
                     b.HasIndex("CustardId");
+
+                    b.HasIndex("UnixMatchDate");
 
                     b.HasIndex("CustardId", "CornId")
                         .IsUnique();
@@ -229,7 +253,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("PhoneNumber")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("PhoneNumber2")
+                    b.Property<long?>("PhoneNumber2")
                         .HasColumnType("INTEGER");
 
                     b.Property<long>("UnixCancelDate")
@@ -262,11 +286,16 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("PlumbingId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustardId");
 
                     b.HasIndex("PlumbingId");
+
+                    b.HasIndex("UnixMatchDate");
 
                     b.HasIndex("CustardId", "PlumbingId")
                         .IsUnique();
@@ -292,16 +321,24 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("PlumbingId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CaliperId");
 
                     b.HasIndex("PlumbingId");
 
+                    b.HasIndex("UnixMatchDate");
+
                     b.HasIndex("PlumbingId", "CaliperId")
                         .IsUnique();
 
-                    b.ToTable("PlumbingCaliperLinks", (string)null);
+                    b.ToTable("PlumbingCaliperLinks", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_PlumbingCaliper_MatchingPhone", "MatchingPhone <> 0");
+                        });
                 });
 
             modelBuilder.Entity("LeadPipe.Infrastructure.Entity.Sqlite.PlumbingEntity", b =>
@@ -337,7 +374,7 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
 
                     b.HasIndex("PhoneNumber");
 
-                    b.HasIndex("PhoneNumber", "Source")
+                    b.HasIndex("PhoneNumber", "Date", "Source")
                         .IsUnique();
 
                     b.ToTable("PlumbingEntities", (string)null);
@@ -358,16 +395,24 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("SandId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CaliperId");
 
                     b.HasIndex("SandId");
 
+                    b.HasIndex("UnixMatchDate");
+
                     b.HasIndex("SandId", "CaliperId")
                         .IsUnique();
 
-                    b.ToTable("SandCaliperLinks", (string)null);
+                    b.ToTable("SandCaliperLinks", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SandCaliper_MatchingPhone", "MatchingPhone");
+                        });
                 });
 
             modelBuilder.Entity("LeadPipe.Infrastructure.Entity.Sqlite.SandCornLink", b =>
@@ -385,16 +430,24 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("SandId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CornId");
 
                     b.HasIndex("SandId");
 
+                    b.HasIndex("UnixMatchDate");
+
                     b.HasIndex("SandId", "CornId")
                         .IsUnique();
 
-                    b.ToTable("SandCornLinks", (string)null);
+                    b.ToTable("SandCornLinks", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SandCorn_MatchingPhone", "MatchingPhone <> 0");
+                        });
                 });
 
             modelBuilder.Entity("LeadPipe.Infrastructure.Entity.Sqlite.SandEntity", b =>
@@ -464,16 +517,24 @@ namespace LeadPipe.Infrastructure.Sqlite.Migrations.Plumbing
                     b.Property<long>("SandId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("UnixMatchDate")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PlumbingId");
 
                     b.HasIndex("SandId");
 
+                    b.HasIndex("UnixMatchDate");
+
                     b.HasIndex("SandId", "PlumbingId")
                         .IsUnique();
 
-                    b.ToTable("SandPlumbingLinks", (string)null);
+                    b.ToTable("SandPlumbingLinks", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_SandPlumbing_MatchingPhone", "MatchingPhone <> 0");
+                        });
                 });
 
             modelBuilder.Entity("LeadPipe.Infrastructure.Entity.Sqlite.SyncStateEntity", b =>

@@ -92,7 +92,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         caliper.HasIndex(c => c.PhoneNumber);
         caliper.Property(c => c.Date).IsRequired();
         caliper.Property(c => c.UnixDate).IsRequired();
-        caliper.HasIndex(c => c.PhoneNumber); 
+        caliper.HasIndex(c => c.PhoneNumber);
         caliper.HasIndex(c => c.Date);
         caliper.Property(c => c.PhoneNumber)
             .HasConversion(PhoneNumberAndLongConversion)
@@ -126,7 +126,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         plumb.HasKey(p => p.Id);
         plumb.Property(p => p.Id).ValueGeneratedOnAdd(); // Internal Id
         plumb.HasIndex(p => p.PhoneNumber);
-        plumb.HasIndex(p => new { p.PhoneNumber, p.Source });
+        plumb.HasIndex(p => new { p.PhoneNumber, p.Date, p.Source }).IsUnique();
         plumb.Property(p => p.Source)
             .HasConversion<string>()
             .IsRequired();
@@ -171,13 +171,18 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         #region Links
         // PlumbingCaliperLink
         var plumbCaliper = modelBuilder.Entity<PlumbingCaliperLink>()
-            .ToTable(TableNames.PlumbingCaliperLinksName);
+            .ToTable(TableNames.PlumbingCaliperLinksName, t =>
+            {
+                t.HasCheckConstraint(
+                    "CK_PlumbingCaliper_MatchingPhone",
+                    $"{nameof(PlumbingCaliperLink.MatchingPhone)} <> 0");
+            });
         plumbCaliper.HasKey(pc => pc.Id);
         plumbCaliper.Property(pc => pc.Id).ValueGeneratedOnAdd();
         plumbCaliper.HasIndex(pc => pc.PlumbingId);
         plumbCaliper.HasIndex(pc => pc.CaliperId);
         plumbCaliper.HasIndex(pc => pc.UnixMatchDate);
-        plumbCaliper.HasIndex(l => new { l.PlumbingId, l.CaliperId }).IsUnique();
+        plumbCaliper.HasIndex(l => new { l.PlumbingId, l.CaliperId }).IsUnique(); // Order matters here
         plumbCaliper.HasOne(pc => pc.PlumbingEntity)
             .WithMany(p => p.PlumbingCaliperLinks)
             .HasForeignKey(pc => pc.PlumbingId)
@@ -189,13 +194,18 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // CornCaliperLink
         var cornCaliper = modelBuilder.Entity<CornCaliperLink>()
-            .ToTable(TableNames.CornCaliperLinksName);
+            .ToTable(TableNames.CornCaliperLinksName, t =>
+            {
+                t.HasCheckConstraint(
+                "CK_CornCaliper_MatchingPhone",
+                $"{nameof(CornCaliperLink.MatchingPhone)} <> 0");
+            });
         cornCaliper.HasKey(l => l.Id);
         cornCaliper.Property(l => l.Id).ValueGeneratedOnAdd();
         cornCaliper.HasIndex(l => l.CornId);
         cornCaliper.HasIndex(l => l.CaliperId);
         cornCaliper.HasIndex(l => l.UnixMatchDate);
-        cornCaliper.HasIndex(l => new { l.CornId, l.CaliperId }).IsUnique();
+        cornCaliper.HasIndex(l => new { l.CornId, l.CaliperId }).IsUnique(); // DO NOT change the order here
         cornCaliper.HasOne(l => l.CornEntity)
             .WithMany(c => c.CornCaliperLinks)
             .HasForeignKey(l => l.CornId)
@@ -209,13 +219,18 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // CornPlumbingLink
         var cornPlumb = modelBuilder.Entity<CornPlumbingLink>()
-            .ToTable(TableNames.CornPlumbingLinksName);
+            .ToTable(TableNames.CornPlumbingLinksName, t =>
+            {
+                t.HasCheckConstraint(
+                    "CK_CornPlumbing_MatchingPhone",
+                    $"{nameof(CornPlumbingLink.MatchingPhone)} <> 0");
+            });
         cornPlumb.HasKey(l => l.Id);
         cornPlumb.Property(l => l.Id).ValueGeneratedOnAdd();
         cornPlumb.HasIndex(l => l.CornId);
         cornPlumb.HasIndex(l => l.PlumbingId);
         cornPlumb.HasIndex(l => l.UnixMatchDate);
-        cornPlumb.HasIndex(l => new { l.CornId, l.PlumbingId }).IsUnique();
+        cornPlumb.HasIndex(l => new { l.CornId, l.PlumbingId }).IsUnique(); // DO NOT change the order here
         cornPlumb.HasOne(l => l.CornEntity)
             .WithMany(c => c.CornPlumbingLinks)
             .HasForeignKey(l => l.CornId)
@@ -235,7 +250,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         {
             t.HasCheckConstraint(
                 "CK_CustardCaliper_MatchingPhone",
-                "MatchingPhone <> 0");
+                $"{nameof(CustardCaliperLink.MatchingPhone)} <> 0");
         });
         custardCaliper.HasKey(l => l.Id);
         custardCaliper.HasIndex(l => l.CustardId);
@@ -243,7 +258,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         custardCaliper.HasIndex(l => l.UnixMatchDate);
         custardCaliper.Property(l => l.Id)
             .ValueGeneratedOnAdd();
-        custardCaliper.HasIndex(l => new { l.CustardId, l.CaliperId }).IsUnique();
+        custardCaliper.HasIndex(l => new { l.CustardId, l.CaliperId }).IsUnique(); // Order matters here
         custardCaliper.Property(l => l.CustardId).IsRequired();
         custardCaliper.Property(l => l.CaliperId).IsRequired();
         custardCaliper.HasOne(l => l.Custard)
@@ -262,7 +277,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         {
             t.HasCheckConstraint(
                 "CK_CustardCorn_MatchingPhone",
-                "MatchingPhone <> 0");
+                $"{nameof(CustardCornLink.MatchingPhone)} <> 0");
         });
         custardCorn.HasKey(l => l.Id);
         custardCorn.HasIndex(l => l.CustardId);
@@ -289,7 +304,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         {
             t.HasCheckConstraint(
                 "CK_CustardPlumbing_MatchingPhone",
-                "MatchingPhone <> 0");
+                $"{nameof(CustardPlumbingLink.MatchingPhone)} <> 0");
         });
         custardPlumbing.HasKey(l => l.Id);
         custardPlumbing.HasIndex(l => l.CustardId);
@@ -297,7 +312,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         custardPlumbing.HasIndex(l => l.UnixMatchDate);
         custardPlumbing.Property(l => l.Id)
             .ValueGeneratedOnAdd();
-        custardPlumbing.HasIndex(l => new { l.CustardId, l.PlumbingId }).IsUnique();
+        custardPlumbing.HasIndex(l => new { l.CustardId, l.PlumbingId }).IsUnique(); // Order Matters
         custardPlumbing.Property(l => l.CustardId).IsRequired();
         custardPlumbing.Property(l => l.PlumbingId).IsRequired();
         custardPlumbing.HasOne(l => l.Custard)
@@ -314,13 +329,18 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         #region SAND links
         // SandCaliperLink
         var sandCaliper = modelBuilder.Entity<SandCaliperLink>()
-            .ToTable(TableNames.SandCaliperLinksName);
+            .ToTable(TableNames.SandCaliperLinksName, t =>
+            {
+                t.HasCheckConstraint(
+                    "CK_SandCaliper_MatchingPhone",
+                    $"{nameof(SandCaliperLink.MatchingPhone)}");
+            });
         sandCaliper.HasKey(sc => sc.Id);
         sandCaliper.Property(sc => sc.Id).ValueGeneratedOnAdd();
         sandCaliper.HasIndex(sc => sc.SandId);
         sandCaliper.HasIndex(sc => sc.CaliperId);
         sandCaliper.HasIndex(sc => sc.UnixMatchDate);
-        sandCaliper.HasIndex(l => new { l.SandId, l.CaliperId }).IsUnique();
+        sandCaliper.HasIndex(l => new { l.SandId, l.CaliperId }).IsUnique(); // Order matters
         sandCaliper.HasOne(sc => sc.SandEntity)
             .WithMany(s => s.SandCaliperLinks)
             .HasForeignKey(sc => sc.SandId)
@@ -333,13 +353,18 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // SandCornLink
         var sandCorn = modelBuilder.Entity<SandCornLink>()
-            .ToTable(TableNames.SandCornLinksName);
+            .ToTable(TableNames.SandCornLinksName, t =>
+            {
+                t.HasCheckConstraint(
+                    "CK_SandCorn_MatchingPhone",
+                    $"{nameof(SandCornLink.MatchingPhone)} <> 0");
+            });
         sandCorn.HasKey(l => l.Id);
         sandCorn.Property(l => l.Id).ValueGeneratedOnAdd();
         sandCorn.HasIndex(l => l.SandId);
         sandCorn.HasIndex(l => l.CornId);
         sandCorn.HasIndex(l => l.UnixMatchDate);
-        sandCorn.HasIndex(l => new { l.SandId, l.CornId }).IsUnique();
+        sandCorn.HasIndex(l => new { l.SandId, l.CornId }).IsUnique(); // Order Matters
         sandCorn.HasOne(l => l.SandEntity)
             .WithMany(s => s.SandCornLinks)
             .HasForeignKey(l => l.SandId)
@@ -353,13 +378,18 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
         // SandPlumbingLink
         var spLink = modelBuilder.Entity<SandPlumbingLink>()
-            .ToTable(TableNames.SandPlumbingLinksName);
+            .ToTable(TableNames.SandPlumbingLinksName, t =>
+            {
+                t.HasCheckConstraint(
+                    "CK_SandPlumbing_MatchingPhone",
+                    $"{nameof(SandPlumbingLink.MatchingPhone)} <> 0");
+            });
         spLink.HasKey(l => l.Id);
         spLink.Property(l => l.Id).ValueGeneratedOnAdd();
         spLink.HasIndex(l => l.SandId);
         spLink.HasIndex(l => l.PlumbingId);
         spLink.HasIndex(l => l.UnixMatchDate);
-        spLink.HasIndex(l => new { l.SandId, l.PlumbingId }).IsUnique();
+        spLink.HasIndex(l => new { l.SandId, l.PlumbingId }).IsUnique(); // Order Matter
         spLink.HasOne(l => l.SandEntity)
             .WithMany(s => s.SandPlumbingLinks)
             .HasForeignKey(l => l.SandId)
@@ -369,6 +399,9 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .HasForeignKey(l => l.PlumbingId)
             .OnDelete(DeleteBehavior.Cascade);
         spLink.Property(l => l.MatchingPhone).IsRequired();
+
         #endregion
+    
     }
+
 }
