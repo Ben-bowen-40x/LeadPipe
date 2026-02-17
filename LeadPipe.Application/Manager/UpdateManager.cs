@@ -30,12 +30,14 @@ public sealed class UpdateManager(
         Result globals = await RunGlobals(refresh);
         if (globals.IsFailure) return globals;
 
-        Result sources = await RunSource(source, refresh);
+        //Result sources = await RunSource(source, refresh);
 
         // Associate
         Result associated = await AssociateIfDue();
 
-        return Result.Combine(" | ", sources, associated);
+        return Result.Combine(" | ", 
+            //sources, 
+            associated);
     }
 
     public async Task<Result> Manage(bool refresh)
@@ -84,6 +86,8 @@ public sealed class UpdateManager(
             return sandwichSaved;
 
         Result cornSaved = await RunIfDue(SyncKey.CornFormula, refresh, false, _corn);
+        if (cornSaved.IsFailure)
+            return cornSaved;
 
         return Result.Success();
     }
@@ -102,7 +106,8 @@ public sealed class UpdateManager(
     private async Task<Result> AssociateIfDue()
     {
         var key = SyncKey.Associate;
-        if (!await _syncGate.ShouldRunAsync(key))
+        bool shouldRun = await _syncGate.ShouldRunAsync(key);
+        if (!shouldRun)
             return Result.Success();
 
         Result result = await _associate.AssociateAsync();
