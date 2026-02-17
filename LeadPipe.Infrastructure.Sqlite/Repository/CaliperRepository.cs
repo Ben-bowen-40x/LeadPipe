@@ -4,7 +4,6 @@ using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Text;
 
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
@@ -102,8 +101,27 @@ public sealed class CaliperRepository
             // Target index is the Primary Key (Id)
             int totalAffected = await _context.Database.ExecuteSqlRawAsync($"""
                 INSERT INTO {TableNames.CaliperEntitiesName} 
-                    ({nameof(CaliperEntity.Id)}, {nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)}, {nameof(CaliperEntity.UnixDate)}, {nameof(CaliperEntity.Note)}, {nameof(CaliperEntity.Source)}, {nameof(CaliperEntity.Location)}, {nameof(CaliperEntity.Duration)}, {nameof(CaliperEntity.Billable)})
-                SELECT {nameof(CaliperEntity.Id)}, {nameof(CaliperEntity.PhoneNumber)}, {nameof(CaliperEntity.Date)}, {nameof(CaliperEntity.UnixDate)}, {nameof(CaliperEntity.Note)}, {nameof(CaliperEntity.Source)}, {nameof(CaliperEntity.Location)}, {nameof(CaliperEntity.Duration)}, {nameof(CaliperEntity.Billable)}
+                (
+                    {nameof(CaliperEntity.Id)}, 
+                    {nameof(CaliperEntity.PhoneNumber)}, 
+                    {nameof(CaliperEntity.Date)}, 
+                    {nameof(CaliperEntity.UnixDate)}, 
+                    {nameof(CaliperEntity.Note)}, 
+                    {nameof(CaliperEntity.Source)}, 
+                    {nameof(CaliperEntity.Location)}, 
+                    {nameof(CaliperEntity.Duration)}, 
+                    {nameof(CaliperEntity.Billable)}
+                )
+                SELECT 
+                    {nameof(CaliperEntity.Id)}, 
+                    {nameof(CaliperEntity.PhoneNumber)}, 
+                    {nameof(CaliperEntity.Date)}, 
+                    {nameof(CaliperEntity.UnixDate)}, 
+                    {nameof(CaliperEntity.Note)}, 
+                    {nameof(CaliperEntity.Source)}, 
+                    {nameof(CaliperEntity.Location)}, 
+                    {nameof(CaliperEntity.Duration)}, 
+                    {nameof(CaliperEntity.Billable)}
                 FROM {tempTable}
                 ON CONFLICT(Id) DO UPDATE SET
                     {nameof(CaliperEntity.PhoneNumber)} = excluded.{nameof(CaliperEntity.PhoneNumber)},
