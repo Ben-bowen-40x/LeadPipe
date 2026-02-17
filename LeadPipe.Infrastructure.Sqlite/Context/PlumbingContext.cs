@@ -92,7 +92,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
         caliper.HasIndex(c => c.PhoneNumber);
         caliper.Property(c => c.Date).IsRequired();
         caliper.Property(c => c.UnixDate).IsRequired();
-        caliper.HasIndex(c => c.PhoneNumber);
         caliper.HasIndex(c => c.Date);
         caliper.Property(c => c.PhoneNumber)
             .HasConversion(PhoneNumberAndLongConversion)
@@ -103,7 +102,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .ToTable(TableNames.CornEntitiesName);
         corn.HasKey(c => c.Id);
         corn.Property(c => c.Id).ValueGeneratedNever(); // External id
-        corn.HasIndex(c => c.PhoneNumber);
         corn.HasIndex(c => new { c.PhoneNumber, c.Source });
         corn.Property(c => c.Source)
             .HasConversion<string>()
@@ -125,7 +123,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             .ToTable(TableNames.PlumbingEntitiesName);
         plumb.HasKey(p => p.Id);
         plumb.Property(p => p.Id).ValueGeneratedOnAdd(); // Internal Id
-        plumb.HasIndex(p => p.PhoneNumber);
         plumb.HasIndex(p => new { p.PhoneNumber, p.Date, p.Source }).IsUnique();
         plumb.Property(p => p.Source)
             .HasConversion<string>()
@@ -179,7 +176,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             });
         plumbCaliper.HasKey(pc => pc.Id);
         plumbCaliper.Property(pc => pc.Id).ValueGeneratedOnAdd();
-        plumbCaliper.HasIndex(pc => pc.PlumbingId);
         plumbCaliper.HasIndex(pc => pc.CaliperId);
         plumbCaliper.HasIndex(pc => pc.UnixMatchDate);
         plumbCaliper.HasIndex(l => new { l.PlumbingId, l.CaliperId }).IsUnique(); // Order matters here
@@ -202,7 +198,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             });
         cornCaliper.HasKey(l => l.Id);
         cornCaliper.Property(l => l.Id).ValueGeneratedOnAdd();
-        cornCaliper.HasIndex(l => l.CornId);
         cornCaliper.HasIndex(l => l.CaliperId);
         cornCaliper.HasIndex(l => l.UnixMatchDate);
         cornCaliper.HasIndex(l => new { l.CornId, l.CaliperId }).IsUnique(); // DO NOT change the order here
@@ -227,7 +222,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             });
         cornPlumb.HasKey(l => l.Id);
         cornPlumb.Property(l => l.Id).ValueGeneratedOnAdd();
-        cornPlumb.HasIndex(l => l.CornId);
         cornPlumb.HasIndex(l => l.PlumbingId);
         cornPlumb.HasIndex(l => l.UnixMatchDate);
         cornPlumb.HasIndex(l => new { l.CornId, l.PlumbingId }).IsUnique(); // DO NOT change the order here
@@ -253,7 +247,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
                 $"{nameof(CustardCaliperLink.MatchingPhone)} <> 0");
         });
         custardCaliper.HasKey(l => l.Id);
-        custardCaliper.HasIndex(l => l.CustardId);
         custardCaliper.HasIndex(l => l.CaliperId);
         custardCaliper.HasIndex(l => l.UnixMatchDate);
         custardCaliper.Property(l => l.Id)
@@ -280,7 +273,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
                 $"{nameof(CustardCornLink.MatchingPhone)} <> 0");
         });
         custardCorn.HasKey(l => l.Id);
-        custardCorn.HasIndex(l => l.CustardId);
         custardCorn.HasIndex(l => l.CornId);
         custardCorn.HasIndex(l => l.UnixMatchDate);
         custardCorn.Property(l => l.Id)
@@ -307,7 +299,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
                 $"{nameof(CustardPlumbingLink.MatchingPhone)} <> 0");
         });
         custardPlumbing.HasKey(l => l.Id);
-        custardPlumbing.HasIndex(l => l.CustardId);
         custardPlumbing.HasIndex(l => l.PlumbingId);
         custardPlumbing.HasIndex(l => l.UnixMatchDate);
         custardPlumbing.Property(l => l.Id)
@@ -337,7 +328,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             });
         sandCaliper.HasKey(sc => sc.Id);
         sandCaliper.Property(sc => sc.Id).ValueGeneratedOnAdd();
-        sandCaliper.HasIndex(sc => sc.SandId);
         sandCaliper.HasIndex(sc => sc.CaliperId);
         sandCaliper.HasIndex(sc => sc.UnixMatchDate);
         sandCaliper.HasIndex(l => new { l.SandId, l.CaliperId }).IsUnique(); // Order matters
@@ -361,7 +351,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             });
         sandCorn.HasKey(l => l.Id);
         sandCorn.Property(l => l.Id).ValueGeneratedOnAdd();
-        sandCorn.HasIndex(l => l.SandId);
         sandCorn.HasIndex(l => l.CornId);
         sandCorn.HasIndex(l => l.UnixMatchDate);
         sandCorn.HasIndex(l => new { l.SandId, l.CornId }).IsUnique(); // Order Matters
@@ -386,7 +375,6 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
             });
         spLink.HasKey(l => l.Id);
         spLink.Property(l => l.Id).ValueGeneratedOnAdd();
-        spLink.HasIndex(l => l.SandId);
         spLink.HasIndex(l => l.PlumbingId);
         spLink.HasIndex(l => l.UnixMatchDate);
         spLink.HasIndex(l => new { l.SandId, l.PlumbingId }).IsUnique(); // Order Matter
