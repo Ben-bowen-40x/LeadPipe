@@ -9,7 +9,7 @@ using System.Text;
 namespace LeadPipe.Infrastructure.Sqlite.Repository;
 
 public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<SandCaliperLinkRepository> logger)
-    : PlumbingContextRepository<SandCaliperLink, SandCaliperLinkRepository>(context, logger), IRepository<SandCaliperLink>
+    : PlumbingLinkContextRepository<SandCaliperLink, SandCaliperLinkRepository>(context, logger), IRepository<SandCaliperLink>
 {
     protected override IQueryable<SandCaliperLink> WithIncludes(IQueryable<SandCaliperLink> q)
     {
@@ -18,8 +18,43 @@ public sealed class SandCaliperLinkRepository(PlumbingContext context, ILogger<S
             .Include(c => c.CaliperEntity);
     }
 
+    protected override UpsertFields UpsertFieldValues { get; } = new(
+        TableName: TableNames.SandCaliperLinksName,
+        TempTable: $"temp_{TableNames.SandCaliperLinksName}",
+        Id1: nameof(SandCaliperLink.SandId),
+        Id2: nameof(SandCaliperLink.CaliperId),
+        PhoneCol: nameof(SandCaliperLink.MatchingPhone),
+        DateCol: nameof(SandCaliperLink.UnixMatchDate),
+        EntityName: nameof(SandCaliperLink)
+        );
+
+    protected override async Task AddLinks(List<SandCaliperLink> links, int batchSize, CancellationToken ct)
+    {
+        for (int i = 0; i < links.Count; i += batchSize)
+        {
+            var batch = links.GetRange(i, Math.Min(batchSize, links.Count - i));
+            var values = new List<object>();
+            var rows = new List<string>();
+
+            for (int j = 0; j < batch.Count; j++)
+            {
+                var link = batch[j];
+
+                int o = j * 4;
+                rows.Add($"({{{o}}}, {{{o + 1}}}, {{{o + 2}}}, {{{o + 3}}})");
+                values.Add(link.SandId);
+                values.Add(link.CaliperId);
+                values.Add(link.MatchingPhone);
+                values.Add(link.UnixMatchDate);
+            }
+
+            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
+        }
+    }
+
     public override async Task<Result<List<SandCaliperLink>>> UpsertRangeAsync(
-        List<SandCaliperLink> entities, 
-        CancellationToken ct = default) => await UpsertLinkRangeAsync(entities, ct);
+        List<SandCaliperLink> links,
+        CancellationToken ct = default) => await UpsertLinkRangeAsync(links, ct);
 
 }

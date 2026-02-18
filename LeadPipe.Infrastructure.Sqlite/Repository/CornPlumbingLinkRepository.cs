@@ -12,7 +12,7 @@ public sealed class CornPlumbingLinkRepository
     (
         PlumbingContext context,
         ILogger<CornPlumbingLinkRepository> logger
-    ) : PlumbingContextRepository<CornPlumbingLink, CornPlumbingLinkRepository>(context, logger), IRepository<CornPlumbingLink>
+    ) : PlumbingLinkContextRepository<CornPlumbingLink, CornPlumbingLinkRepository>(context, logger), IRepository<CornPlumbingLink>
 {
     protected override IQueryable<CornPlumbingLink> WithIncludes(IQueryable<CornPlumbingLink> q)
     {
@@ -21,8 +21,42 @@ public sealed class CornPlumbingLinkRepository
             .Include(q => q.PlumbingEntity);
     }
 
-    public override async Task<Result<List<CornPlumbingLink>>> UpsertRangeAsync(
-        List<CornPlumbingLink> entities, 
-        CancellationToken ct = default) => await UpsertLinkRangeAsync(entities, ct);
+    protected override UpsertFields UpsertFieldValues { get; } = new(
+        TableName: TableNames.CornPlumbingLinksName,
+        TempTable: $"temp_{TableNames.CornPlumbingLinksName}",
+        Id1: nameof(CornPlumbingLink.CornId),
+        Id2: nameof(CornPlumbingLink.PlumbingId),
+        PhoneCol: nameof(CornPlumbingLink.MatchingPhone),
+        DateCol: nameof(CornPlumbingLink.UnixMatchDate),
+        EntityName: nameof(CornPlumbingLink)
+        );
 
+    protected override async Task AddLinks(List<CornPlumbingLink> links, int batchSize, CancellationToken ct)
+    {
+        for (int i = 0; i < links.Count; i += batchSize)
+        {
+            var batch = links.GetRange(i, Math.Min(batchSize, links.Count - i));
+            var values = new List<object>();
+            var rows = new List<string>();
+
+            for (int j = 0; j < batch.Count; j++)
+            {
+                var link = batch[j];
+
+                int o = j * 4;
+                rows.Add($"({{{o}}}, {{{o + 1}}}, {{{o + 2}}}, {{{o + 3}}})");
+                values.Add(link.CornId);
+                values.Add(link.PlumbingId);
+                values.Add(link.MatchingPhone);
+                values.Add(link.UnixMatchDate);
+            }
+
+            string joined = $"INSERT INTO {UpsertFieldValues.TempTable} VALUES {string.Join(",", rows)}";
+            await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
+        }
+    }
+
+    public override async Task<Result<List<CornPlumbingLink>>> UpsertRangeAsync(
+        List<CornPlumbingLink> links,
+        CancellationToken ct = default) => await UpsertLinkRangeAsync(links, ct);
 }
