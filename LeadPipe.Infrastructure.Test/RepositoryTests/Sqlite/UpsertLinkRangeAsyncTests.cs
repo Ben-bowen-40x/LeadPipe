@@ -9,7 +9,7 @@ namespace LeadPipe.Infrastructure.Test.RepositoryTests.Sqlite;
 
 public class UpsertLinkRangeAsyncTests
 {
-    private readonly static PlumbingContext _context= SqliteTestContextFactory.Create(out _);
+    private readonly static PlumbingContext _context = SqliteTestContextFactory.Create(out _);
 
     [Fact]
     public async Task UpsertLinkRangeAsync_InsertsAndUpdatesCorrectly_WithEarliestMatchWinning()
