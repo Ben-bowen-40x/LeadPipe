@@ -277,5 +277,5 @@ public class AllLinkRepositoryTests
             x => x.UnixMatchDate,
             x => x.MatchingPhone);
     }
-}
 
+}
