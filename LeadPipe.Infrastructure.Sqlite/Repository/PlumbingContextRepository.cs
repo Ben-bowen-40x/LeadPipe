@@ -121,7 +121,11 @@ public abstract class PlumbingContextRepository<TEntity, TRepo>
     {
         // Empty check
         if (links.Count == 0)
+        {
+            _logger.LogInformation("{Entity} upsert reverted. No entities entered. Returning success state.",
+                typeof(T).Name);
             return Result.Success(links);
+        }
 
         // Mapping check
         IEntityType entityType = _context.Model.FindEntityType(typeof(T))
