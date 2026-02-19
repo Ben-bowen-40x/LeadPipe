@@ -55,11 +55,13 @@ public class TransformYellerReportTests
         List<SandEntity>? sands = null
     )
     {
+        var custardDateOffset = new DateTimeOffset(custardDate).ToUnixTimeSeconds();
         return new CustardEntity
         {
             Id = custardId,
             PhoneNumber = new PhoneNumber(phone),
             Date = custardDate,
+            UnixDate = custardDateOffset,
             SandEntities = sands ?? new List<SandEntity>(),
             CustardCaliperLinks = (calipers ?? new List<(long, DateTime)>())
                 .Select(c => new CustardCaliperLink
@@ -192,11 +194,14 @@ public class TransformYellerReportTests
         // Arrange
         long numb = 5551234567;
 
+        var dt = new DateTime(2026, 1, 1);
+        var d = new DateTimeOffset(dt);
         var custard = new CustardEntity
         {
             Id = 1,
             PhoneNumber = new PhoneNumber(numb),
-            Date = new DateTime(2026, 1, 1),
+            Date = d.UtcDateTime,
+            UnixDate = d.ToUnixTimeSeconds(),
             SandEntities = [],
             CustardCaliperLinks =
             [
@@ -298,11 +303,14 @@ public class TransformYellerReportTests
     {
         // Arrange
         long numb = 5551234567;
+        var dt = new DateTime(2026, 1, 1);
+        var d = new DateTimeOffset(dt);
         var custard = new CustardEntity
         {
             PhoneNumber = new PhoneNumber(numb),
             Id = 1,
-            Date = new DateTime(2026, 1, 1),
+            Date = d.UtcDateTime,
+            UnixDate = d.ToUnixTimeSeconds(),
             SandEntities = new List<SandEntity>
             {
                 new SandEntity { Id=1, CustardId=1, Offerman="1000" }
@@ -361,11 +369,14 @@ public class TransformYellerReportTests
     {
         long numb = 5551111111;
 
+        var dt = new DateTime(2026, 1, 1);
+        var d = new DateTimeOffset(dt);
         var custard = new CustardEntity
         {
             Id = 1,
             PhoneNumber = new PhoneNumber(numb),
-            Date = new DateTime(2026, 1, 1),
+            Date = d.UtcDateTime,
+            UnixDate = d.ToUnixTimeSeconds(),
             SandEntities = [],
             CustardCaliperLinks =
             [
@@ -412,11 +423,14 @@ public class TransformYellerReportTests
     {
         long numb = 5552222222;
 
+        var dt = new DateTime(2026, 1, 1);
+        var d = new DateTimeOffset(dt);
         var custard = new CustardEntity
         {
             Id = 1,
             PhoneNumber = new PhoneNumber(numb),
-            Date = new DateTime(2026, 1, 1),
+            Date = dt,
+            UnixDate = d.ToUnixTimeSeconds(),
             SandEntities =
             [
                 new SandEntity { Id = 1, CustardId = 1, Offerman = "1000" }
@@ -474,11 +488,14 @@ public class TransformYellerReportTests
     {
         long numb = 5553333333;
 
+        var dt = new DateTime(2026, 1, 1);
+        var d= new DateTimeOffset(dt);
         var custard = new CustardEntity
         {
             Id = 1,
             PhoneNumber = new PhoneNumber(numb),
-            Date = new DateTime(2026, 1, 1),
+            Date = dt,
+            UnixDate = d.ToUnixTimeSeconds(),
             SandEntities = [],
             CustardCaliperLinks =
             [
