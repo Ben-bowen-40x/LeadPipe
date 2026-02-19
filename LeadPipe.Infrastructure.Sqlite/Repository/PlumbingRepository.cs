@@ -66,7 +66,6 @@ public class PlumbingRepository
             {nameof(PlumbingEntity.Branch)} TEXT,
             PRIMARY KEY (
                 {nameof(PlumbingEntity.PhoneNumber)},
-                {nameof(PlumbingEntity.Date)},
                 {nameof(PlumbingEntity.UnixDate)}, 
                 {nameof(PlumbingEntity.Source)}, 
                 {nameof(PlumbingEntity.MetaData)}
@@ -82,7 +81,6 @@ public class PlumbingRepository
             {nameof(PlumbingEntity.Branch)} = temp.{nameof(PlumbingEntity.Branch)}
         FROM {EntityDetails.TempTable} temp
         WHERE {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.PhoneNumber)} = temp.{nameof(PlumbingEntity.PhoneNumber)}
-          AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Date)} = temp.{nameof(PlumbingEntity.Date)}
           AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.UnixDate)} = temp.{nameof(PlumbingEntity.UnixDate)}
           AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.Source)} = temp.{nameof(PlumbingEntity.Source)}
           AND {TableNames.PlumbingEntitiesName}.{nameof(PlumbingEntity.MetaData)} = temp.{nameof(PlumbingEntity.MetaData)};
@@ -112,7 +110,6 @@ public class PlumbingRepository
             SELECT 1
             FROM {TableNames.PlumbingEntitiesName} t
             WHERE t.{nameof(PlumbingEntity.PhoneNumber)} = temp.PhoneNumber
-              AND t.{nameof(PlumbingEntity.Date)} = temp.Date
               AND t.{nameof(PlumbingEntity.UnixDate)} = temp.UnixDate
               AND t.{nameof(PlumbingEntity.Source)} = temp.Source
               AND t.{nameof(PlumbingEntity.MetaData)} = temp.MetaData
