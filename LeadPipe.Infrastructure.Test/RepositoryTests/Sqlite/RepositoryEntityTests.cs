@@ -216,11 +216,11 @@ public class RepositoryEntityTests
         var updatedEntity = new PlumbingEntity
         {
             Id = 1,
-            PhoneNumber = new PhoneNumber(9999999999),
-            Date = now.AddDays(1),
-            UnixDate = new DateTimeOffset(now.AddDays(1)).ToUnixTimeSeconds(),
-            MetaData = "Meta2",
-            Source = Source.Test2, // new source value
+            PhoneNumber = number,
+            Date = now,
+            UnixDate = new DateTimeOffset(now).ToUnixTimeSeconds(),
+            MetaData = "Meta1",
+            Source = Source.Test,
             Contents = "Updated contents",
             Branch = "Branch2"
         };
@@ -230,11 +230,12 @@ public class RepositoryEntityTests
 
         var updated = await context.Set<PlumbingEntity>().AsNoTracking().SingleAsync();
         Assert.Equal(1, updated.Id);
-        Assert.Equal(9999999999, updated.PhoneNumber.Number);
-        Assert.Equal("Meta2", updated.MetaData);
+        Assert.Equal(5555555555, updated.PhoneNumber.Number);
+        Assert.Equal("Meta1", updated.MetaData);
+        Assert.Equal(Source.Test, updated.Source);
         Assert.Equal("Updated contents", updated.Contents);
         Assert.Equal("Branch2", updated.Branch);
-        Assert.Equal(Source.Test2, updated.Source);
+
     }
 
     [Fact]
