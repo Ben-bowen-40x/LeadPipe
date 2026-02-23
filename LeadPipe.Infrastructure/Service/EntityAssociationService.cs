@@ -145,8 +145,6 @@ internal sealed class EntityAssociationService(IRepositoryFactory repoFactory) :
         return results;
     }
 
-    #region Link Generation
-
     // Custard to Plumbing
     private static List<CustardPlumbingLink> GenerateCustardPlumbingLinks(
         List<CustardEntity> custards,
