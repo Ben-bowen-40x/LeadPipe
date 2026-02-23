@@ -107,8 +107,8 @@ public sealed class UpdateManager(
     {
         var key = SyncKey.Associate;
         bool shouldRun = await _syncGate.ShouldRunAsync(key);
-        //if (!shouldRun)
-        //    return Result.Success();
+        if (!shouldRun)
+            return Result.Success();
 
         Result result = await _associate.AssociateAsync();
         if (result.IsSuccess)
