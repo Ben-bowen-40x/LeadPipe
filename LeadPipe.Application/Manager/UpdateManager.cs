@@ -138,8 +138,8 @@ public sealed class UpdateManager(
     private async Task<Result> RunIfDue<T>(SyncKey key, bool refresh, bool withDetails, IUpdateService<T> service)
     {
         bool shouldRun = await _syncGate.ShouldRunAsync(key);
-        //if (!shouldRun)
-        //    return Result.Success();
+        if (!shouldRun)
+            return Result.Success();
 
         Result result = await UpdatedAndSaved(refresh, withDetails, service);
 
