@@ -48,9 +48,9 @@ internal sealed class TransformYellerReport(
                 c.Source == Domain.ValueObjects.Source.Yeller);
         if (plumbs.IsFailure) return Result.Failure<List<ReportYeller>>(plumbs.Error);
 
-        HashSet<long> plumbLookup = data.Select(x => x.Id).ToHashSet();
-        HashSet<long> caliperLookup = calipers.Value.Select(x => x.Id).ToHashSet();
-        HashSet<long> cornLookup = corns.Value.Select(x => x.Id).ToHashSet();
+        HashSet<long> plumbLookup = [.. data.Select(x => x.Id)];
+        HashSet<long> caliperLookup = [.. calipers.Value.Select(x => x.Id)];
+        HashSet<long> cornLookup = [.. corns.Value.Select(x => x.Id)];
 
         // Load custards with details
         Result<List<CustardEntity>> custards = await _custardRepo.FindWithDetailsAsync(c =>
