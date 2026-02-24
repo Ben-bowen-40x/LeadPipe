@@ -15,7 +15,7 @@ public sealed class SyncGate(
 {
     private readonly ISyncStateRepository _repo = repo;
     private readonly TimeSpan _noSourceInterval = TimeSpan.FromHours(settings.DefaultInterval);
-
+    private readonly TimeSpan _associationInterval = TimeSpan.FromHours(settings.DefaultAssociationInterval);
     private readonly TimeSpan _defaultSourceInterval = TimeSpan.FromHours(settings.DefaultSourceInterval);
     private readonly ImmutableDictionary<Source, TimeSpan> _interval =
         Enum.GetValues<Source>().ToImmutableDictionary(
@@ -68,31 +68,24 @@ public sealed class SyncGate(
 
         DateTime now = DateTime.UtcNow;
 
-        bool run = now - state.LastSyncUtc >= _noSourceInterval;
+        TimeSpan syncstatetiming = now - state.LastSyncUtc;
+        TimeSpan interval = key.Value == SyncKey.Associate.Value
+            ? _associationInterval
+            : _noSourceInterval;
+
+        bool run = syncstatetiming >= interval;
 
         return run;
     }
 
-    public async Task MarkSuccessAsync(Source source, SyncKey entity)
-    {
-        await UpsertAsync(source, entity);
-    }
+    public async Task MarkSuccessAsync(Source source, SyncKey entity) => await UpsertAsync(source, entity);
 
-    public async Task MarkSuccessAsync(SyncKey entity)
-    {
-        await UpsertAsync(null, entity);
-    }
+    public async Task MarkSuccessAsync(SyncKey entity) => await UpsertAsync(null, entity);
 
-    public async Task MarkFailureAsync(Source source, SyncKey entity, string error)
-    {
-        // don't currently persist error state.
-        await UpsertAsync(source, entity);
-    }
+    // don't currently persist error state.
+    public async Task MarkFailureAsync(Source source, SyncKey entity, string error) => await UpsertAsync(source, entity);
 
-    public async Task MarkFailureAsync(SyncKey entity, string error)
-    {
-        await UpsertAsync(null, entity);
-    }
+    public async Task MarkFailureAsync(SyncKey entity, string error) => await UpsertAsync(null, entity);
 
     private async Task UpsertAsync(Source? source, SyncKey entity)
     {
