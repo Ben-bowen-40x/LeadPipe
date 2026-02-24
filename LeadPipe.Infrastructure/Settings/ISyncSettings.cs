@@ -3,6 +3,7 @@
 public interface ISyncSettings
 {
     double DefaultInterval { get; set; }
+    double DefaultAssociationInterval { get; set; }
     double DefaultSourceInterval { get; set; }
     double CalliInterval { get; set; }
     double LabInterval { get; set; }
