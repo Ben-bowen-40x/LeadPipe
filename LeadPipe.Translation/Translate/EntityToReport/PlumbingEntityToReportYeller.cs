@@ -1,11 +1,13 @@
 ﻿using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class PlumbingEntityToReportYeller : IEntityToReport<PlumbingEntity, ReportYeller>
+internal sealed class PlumbingEntityToReportYeller(IYellerSettings settings) : IEntityToReport<PlumbingEntity, ReportYeller>
 {
+    private readonly string _action = settings.YellerActionSource!;
     public ReportYeller Translate(PlumbingEntity data)
     {
         long eventtime = data.UnixDate;
@@ -25,6 +27,7 @@ internal sealed class PlumbingEntityToReportYeller : IEntityToReport<PlumbingEnt
             event_id = eventid,
             event_name = eventName,
             event_time = eventtime,
+            action_source = _action,
             custom_data = custom,
             user_data = user
         };
