@@ -2,11 +2,13 @@
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class AttributionResultToReportYeller : IEntityToReport<AttributionResult, ReportYeller>
+internal sealed class AttributionResultToReportYeller(IYellerSettings settings) : IEntityToReport<AttributionResult, ReportYeller>
 {
+    private readonly string _action = settings.YellerActionSource!;
     public ReportYeller Translate(AttributionResult result)
     {
         var custard = result.Custard;
@@ -35,6 +37,7 @@ internal sealed class AttributionResultToReportYeller : IEntityToReport<Attribut
         return new ReportYeller
         {
             event_id = eventid,
+            action_source = _action,
             event_name = eventname,
             event_time = eventtime,
             custom_data = custom,
