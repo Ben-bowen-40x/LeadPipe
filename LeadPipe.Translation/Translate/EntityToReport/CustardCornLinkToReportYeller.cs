@@ -2,11 +2,13 @@
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class CustardCornLinkToReportYeller : IEntityToReport<CustardCornLink, ReportYeller>
+internal sealed class CustardCornLinkToReportYeller(IYellerSettings settings) : IEntityToReport<CustardCornLink, ReportYeller>
 {
+    private readonly string _action = settings.YellerActionSource!;
     public ReportYeller Translate(CustardCornLink data)
     {
         if (data.Custard is null)
@@ -34,6 +36,7 @@ internal sealed class CustardCornLinkToReportYeller : IEntityToReport<CustardCor
             event_name = eventname,
             event_time = eventtime,
             custom_data = custom,
+            action_source = _action,
             user_data = user
         };
         return result;
