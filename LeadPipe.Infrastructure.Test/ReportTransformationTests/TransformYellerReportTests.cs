@@ -94,6 +94,14 @@ public class TransformYellerReportTests
             });
 
         // TODO: Mock entity translators.Translate method
+        //cornToR
+        //    .Translate(Arg.Any<CornEntity>())
+        //    .Returns(ci =>
+        //    {
+        //        var r = ci.Arg<CornEntity>();
+        //        captured.Add(ci);
+        //    });
+        //plumbToR; caliperToR;
 
         return new TransformYellerReport(factory, translator, cornToR, plumbToR, caliperToR, settings);
     }
