@@ -2,11 +2,13 @@
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class SandEntityToReportYeller : IEntityToReport<SandEntity, ReportYeller>
+internal sealed class SandEntityToReportYeller(IYellerSettings settings) : IEntityToReport<SandEntity, ReportYeller>
 {
+    private readonly string _action = settings.YellerActionSource!;
     public ReportYeller Translate(SandEntity sub)
     {
         if(sub.CustardEntity is null)
@@ -37,6 +39,7 @@ internal sealed class SandEntityToReportYeller : IEntityToReport<SandEntity, Rep
             event_name = eventName,
             event_time = eventTime,
             custom_data = custom,
+            action_source = _action,
             user_data = user
         };
         return result;
