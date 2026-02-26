@@ -6,6 +6,8 @@ public interface ICatManSettings
     string? CatToken { get; set; }
     string? CatManDateFormat { get; set; }
     string? CatBaseEndpoint { get; set; }
+    string? CatmanSecret { get; set; }
+    string? CatmanKey { get; set; }
     CatAccountId? CatAccountId { get; set; }
 }
 public class CatAccountId
