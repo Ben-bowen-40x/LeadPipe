@@ -94,7 +94,7 @@ internal class LabService : ILabService
             if (!response.IsSuccessStatusCode)
             {
                 string errorMessage = $"Failed to get page {page}. Status code: {response.StatusCode}";
-                _logger.LogError("Failed to get page {Page}. Status Code: {StatusCode}", page, response.StatusCode);
+                _logger.LogError("{Service}: Failed to get page {Page}. Status Code: {StatusCode}", nameof(LabService), page, response.StatusCode);
                 return Result.Failure<LabHelperDto>(errorMessage);
             }
 
@@ -104,7 +104,7 @@ internal class LabService : ILabService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception fetching page {Page}: {Message}", page, ex.Message);
+            _logger.LogError(ex, "{Service}: Exception fetching page {Page}: {Message}", nameof(LabService), page, ex.Message);
             return Result.Failure<LabHelperDto>($"Exception fetching page {page}: {ex}");
         }
         finally
