@@ -28,6 +28,9 @@ public class TransformYellerReportTests
         var cornRepo = Substitute.For<IRepository<CornEntity>>();
         var caliperRepo = Substitute.For<IRepository<CaliperEntity>>();
         var translator = Substitute.For<IEntityToReport<AttributionResult, ReportYeller>>();
+        var cornToR = Substitute.For<IEntityToReport<CornEntity, ReportYeller>>();
+        var plumbToR = Substitute.For<IEntityToReport<PlumbingEntity, ReportYeller>>();
+        var caliperToR = Substitute.For<IEntityToReport<CaliperEntity, ReportYeller>>();
         var settings = Substitute.For<IYellerSettings>();
 
         settings.YellerCaliperSource1.Returns("source1");
@@ -80,7 +83,8 @@ public class TransformYellerReportTests
                     event_id = r.Custard.Id.ToString(),
                     event_time = r.FirstTouchUnixDate,
                     event_name = "purchase",
-                    user_data = new UserData { ph = new[] { "x" } },
+                    action_source = "action",
+                    user_data = new UserData { ph = [r.Custard.PhoneNumber.Number.ToString(), r.Custard.PhoneNumber2?.Number.ToString() ?? PhoneNumber.Default.ToString()] },
                     custom_data = new CustomData
                     {
                         currency = "USD",
@@ -89,7 +93,9 @@ public class TransformYellerReportTests
                 };
             });
 
-        return new TransformYellerReport(factory, translator, settings);
+        // TODO: Mock entity translators.Translate method
+
+        return new TransformYellerReport(factory, translator, cornToR, plumbToR, caliperToR, settings);
     }
     #endregion
 
@@ -138,7 +144,7 @@ public class TransformYellerReportTests
 
         AttributionResultAssert.Equivalent(expected, captured.Single());
     }
-    
+
     [Fact]
     public async Task Plumbing_FirstTouch_With_Valid_Sand()
     {
