@@ -12,8 +12,7 @@ internal class LabDtoToPlumbing : IDtoToVo<LabDto, Plumbing>
             ? p
             : new(PhoneNumber.Default);
 
-        DateTime d = DateTime.TryParse(dto.created_at?.date_utc, out DateTime r) ? r : DateTime.MinValue;
-        DateTimeOffset date = new(d, TimeSpan.Zero);
+        DateTimeOffset date = DateTimeOffset.TryParse(dto.created_at?.date_utc, out DateTimeOffset r) ? r : DateTimeOffset.MinValue;
 
         string contents = dto.display?.text is null ? string.Empty : dto.display.text;
 
