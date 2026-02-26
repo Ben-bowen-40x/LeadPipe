@@ -71,6 +71,7 @@ internal sealed class TransformYellerReport(
         //*********************************************************************************
 
         // Any entity matching the custard is non-attributable when ANY sand or custard date is before the entity date
+        // Only the first sand is relevant. It also has to be completed, but that is determined later
         custards = Result.Success(
             custards.Value
                 .Where(c => c.SandEntities != null && c.SandEntities.Count != 0) // filter out null/empty sands
@@ -93,15 +94,21 @@ internal sealed class TransformYellerReport(
         // Associations
         //*********************************************************************************
 
+        // We've loaded all the custards, regardless of how they're associated, and we've loaded all calipers, corns, and plumbs regardless of association
+        // Here, we're putting custards and calipers together in a record
         Dictionary<long, CaliperEntity> caliperById = calipers.Value.ToDictionary(c => c.Id);
         Dictionary<long, CornEntity> cornById = corns.Value.ToDictionary(c => c.Id);
         Dictionary<long, PlumbingEntity> plumbById = plumbs.Value.ToDictionary(c => c.Id);
 
+        // For every custard,
+        // And every link in every custard,
+        // If the entity is from yeller, then associate them together
+        // But not all custards have calipers that have a yeller source, so we eliminate those custards because they're not associated
         var custardCaliperAssociations =
-            from custard in custards.Value
-            from link in custard.CustardCaliperLinks
-            let entity = caliperById.TryGetValue(link.CaliperId, out var caliper) ? caliper : null
-            where entity != null
+            from custard in custards.Value                                                          
+            from link in custard.CustardCaliperLinks                                                
+            let entity = caliperById.TryGetValue(link.CaliperId, out var caliper) ? caliper : null  
+            where entity != null                                                                    
             select new CustardAssociation<CaliperEntity>(entity!, custard, entity!.PhoneNumber.Number, entity!.UnixDate);
 
         var custardCornAssociations =
@@ -118,14 +125,16 @@ internal sealed class TransformYellerReport(
             where entity != null
             select new CustardAssociation<PlumbingEntity>(entity!, custard, entity!.PhoneNumber.Number, entity!.UnixDate);
 
-        List<CustardAssociation<CaliperEntity>> caliperAttributable = Attributable(custardCaliperAssociations);
-        List<CustardAssociation<CornEntity>> cornAttributable = Attributable(custardCornAssociations);
-        List<CustardAssociation<PlumbingEntity>> plumbAttributable = Attributable(custardPlumbAssociations);
+        // Here, some custards are not attributable because the custard's first sand entity associated is not completed, 
+        List<CustardAssociation<CaliperEntity>> caliperAttributable = FilterAttributable(custardCaliperAssociations);
+        List<CustardAssociation<CornEntity>> cornAttributable = FilterAttributable(custardCornAssociations);
+        List<CustardAssociation<PlumbingEntity>> plumbAttributable = FilterAttributable(custardPlumbAssociations);
 
         //*********************************************************************************
         // Cross-entity first-touch filter
         //*********************************************************************************
 
+        // Gather all attributable associations together
         List<(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, AttributionSource Source, IEntity Entity)> allTouches =
         [
             .. plumbAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Plumbing, a.Entity)),
@@ -133,6 +142,7 @@ internal sealed class TransformYellerReport(
             .. caliperAttributable.Select(a => (a.EntityPhone, a.EntityDate, a.Custard, AttributionSource.Caliper, a.Entity))
         ];
 
+        // Cast associations into Effective Date Associated
         // For each custard, earliest effective date = min(link.UnixMatchDate, custard.UnixDate, firstSandDate)
         // Earliest sand regardless of completion affects tie-breaking
         List<EffectiveDateAssociated> touchesWithEffectiveDate = [.. allTouches
@@ -143,6 +153,7 @@ internal sealed class TransformYellerReport(
                 return new EffectiveDateAssociated(t.MatchingPhone, t.UnixMatchDate, t.Custard, EffectiveDate: effectiveDate, t.Source, t.Entity);
             })];
 
+        // Get the first effectiveDateAssociated by phone number. This gives us first touch by phone number
         Dictionary<long, List<EffectiveDateAssociated>> firstTouchesByPhone = touchesWithEffectiveDate
             .GroupBy(t => t.MatchingPhone)
             .ToDictionary(
@@ -168,9 +179,10 @@ internal sealed class TransformYellerReport(
                     return result;
                 });
 
-
+        // Convert All custards that have the same EntityDate, Custard.UnixDate, and SandEntities.Single().UnixDate across them
+        // These are ready for translation into the report
         List<AttributionResult> attributions = [.. firstTouchesByPhone
-            .SelectMany(d => d.Value.Select(v => // We are translating All custards that have the same EntityDate, Custard.UnixDate, and SandEntities.Single().UnixDate across them
+            .SelectMany(d => d.Value.Select(v => 
                 new AttributionResult()
                 {
                     MatchingPhone = v.MatchingPhone,
@@ -186,6 +198,7 @@ internal sealed class TransformYellerReport(
         //*********************************************************************************
 
         // Find first touch by phone number across all entities for non-attributed reporting
+        // Group by phone number and find the first one
         Dictionary<long, CaliperEntity> firstCalipers = calipers.Value
             .GroupBy(c => c.PhoneNumber.Number)
             .ToDictionary(
@@ -205,6 +218,7 @@ internal sealed class TransformYellerReport(
                     .ThenBy(c => c.Id)
                     .First()
             );
+
         Dictionary<long, PlumbingEntity> firstPlumbing = plumbs.Value
             .GroupBy(c => c.PhoneNumber.Number)
             .ToDictionary(
@@ -215,6 +229,8 @@ internal sealed class TransformYellerReport(
                     .First()
             );
 
+        // Put all first touch dictionaries together.
+        // Find the first by phone number, regardless of entity
         Dictionary<long, IPhoneDateIdEntity> crossEntityFirstTouches = firstCalipers.Values
             .Cast<IPhoneDateIdEntity>()
             .Concat(firstCorns.Values)
@@ -229,6 +245,7 @@ internal sealed class TransformYellerReport(
             );
 
         // Build lookup of attribution winners by phone
+        // This allows us to create a partition between attributed vs non attributed
         var attributionByPhone = attributions
             .GroupBy(a => a.MatchingPhone)
             .ToDictionary(g => g.Key, g => g.ToList());
@@ -253,14 +270,19 @@ internal sealed class TransformYellerReport(
 
     }
 
-    // Respect first sand after entity and Completed == true
-    static List<CustardAssociation<TEntity>> Attributable<TEntity>(IEnumerable<CustardAssociation<TEntity>> associations)
+    // If we have multiple custard-entity associations with the same custard id, we find the first touch of that entity by its entity date
+    // Then we ensure that only associations where the association is attributable, defined as
+    // 1. Sands cannot be null or empty.
+    // 2. The first sand must be complete.
+    // 3. The entity must be before BOTH the custard and sand date
+    // And we're removing any associations that are not attributable
+    private static List<CustardAssociation<TEntity>> FilterAttributable<TEntity>(IEnumerable<CustardAssociation<TEntity>> associations)
     {
         var result = associations
             .GroupBy(a => a.Custard.Id)
             .Select(g =>
             {
-                var earliest = g.MinBy(a => a.EntityDate);
+                CustardAssociation<TEntity>? earliest = g.MinBy(a => a.EntityDate);
                 return earliest != null && IsAttributable(earliest)
                     ? earliest
                     : null;
@@ -270,7 +292,7 @@ internal sealed class TransformYellerReport(
         return result;
     }
 
-    static bool IsAttributable<T>(CustardAssociation<T> a)
+    private static bool IsAttributable<T>(CustardAssociation<T> a)
     {
         var sands = a.Custard.SandEntities;
         if (sands == null || sands.Count == 0) // This is redundant, for safety
@@ -285,12 +307,11 @@ internal sealed class TransformYellerReport(
             return false;
 
         return a.EntityDate < a.Custard.UnixDate &&
-               a.EntityDate < firstSandDate.Value;
+               a.EntityDate < firstSandDate!;
     }
 
-
-    record CustardAssociation<T>(T Entity, CustardEntity Custard, long EntityPhone, long EntityDate);
-    record EffectiveDateAssociated(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, long EffectiveDate, AttributionSource Source, IEntity Entity);
+    private record CustardAssociation<T>(T Entity, CustardEntity Custard, long EntityPhone, long EntityDate);
+    private record EffectiveDateAssociated(long MatchingPhone, long UnixMatchDate, CustardEntity Custard, long EffectiveDate, AttributionSource Source, IEntity Entity);
 }
 
 #region Logic map
