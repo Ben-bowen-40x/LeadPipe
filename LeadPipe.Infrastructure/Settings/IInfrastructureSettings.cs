@@ -30,7 +30,7 @@ public interface IInfrastructureSettings :
 
     string? LatherReportLoc { get; set; }
     string? LatherSourceLoc { get; set; }
-    
+
     string[]? CornSources { get; set; }
 }
 
@@ -44,17 +44,20 @@ public class Ef
     public Sqlite? Sqlite { get; set; }
 }
 
-public class Mysql
+public abstract class Sql
 {
     public LogLevel LogLevel { get; set; }
     public bool SensitiveLogging { get; set; }
 }
 
-public class Sqlite
+public sealed class Mysql : Sql
 {
-    public LogLevel LogLevel { get; set; }
+    public bool UseInMemoryDatabase { get; set; }
+}
+
+public sealed class Sqlite : Sql
+{
     public bool UseInMemoryConnection { get; set; }
-    public bool SensitiveLogging { get; set; }
 }
 
 public class HttpClients
