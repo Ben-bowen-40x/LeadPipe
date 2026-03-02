@@ -57,21 +57,21 @@ internal class CatManClientService(ICatManSettings settings, IHttpClientFactory 
 
         while (nextEndpoint is not null)
         {
-            var result = await GetCallAsync(nextEndpoint);
+            Result<CatManRootDto> result = await GetCallAsync(nextEndpoint);
 
             if (result.IsFailure)
                 return Result.Failure<List<CatManDto>>(result.Error);
 
-            var calls = result.Value.Calls ?? [];
+            var calls = result.Value.calls ?? [];
             results.AddRange(calls);
 
             await Task.Delay(RateLimitDelay);
 
-            if (string.IsNullOrWhiteSpace(result.Value.NextPage) || result.Value.After == afterValueOfPreviousPage)
+            if (string.IsNullOrWhiteSpace(result.Value.next_page) || result.Value.after == afterValueOfPreviousPage)
                 break;
 
-            afterValueOfPreviousPage = result.Value.After;
-            nextEndpoint = new(result.Value.NextPage);
+            afterValueOfPreviousPage = result.Value.after;
+            nextEndpoint = new(result.Value.next_page);
         }
         return Result.Success(results);
     }
