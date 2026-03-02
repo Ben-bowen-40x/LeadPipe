@@ -69,6 +69,9 @@ public static class InjectTranslation
         services.AddScoped<IEntityToReport<CustardCornLink, ReportYeller>, CustardCornLinkToReportYeller>();
         services.AddScoped<IEntityToReport<AttributionResult, ReportYeller>, AttributionResultToReportYeller>();
 
+        // Factory
+        services.AddScoped<IEntityToYellerReportFactory, EntityToYellerReportFactory>();
+
         return services;
     }
 }
