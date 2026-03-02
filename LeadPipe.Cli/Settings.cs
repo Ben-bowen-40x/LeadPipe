@@ -105,7 +105,8 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? CatToken { get; set; }
     public string? CatManDateFormat { get; set; }
     public string? CatBaseEndpoint { get; set; }
-    public CatAccountId? CatAccountId { get; set; }
+    public int CatAccountId { get; set; }
+    public CatAccount? CatAccount { get; set; }
     public string? CatmanSecret { get; set; }
     public string? CatmanKey { get; set; }
 }
