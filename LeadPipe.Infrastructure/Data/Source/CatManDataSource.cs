@@ -18,6 +18,7 @@ public class CatManDataSource(ICatManService cat, ISyncStateRepository state) : 
         DateTime twentyTwelve = new(2025, 1, 1);
         Result<List<CatManDto>> get = await _cat.GetAllAsync(twentyTwelve, Today);
 
+        await SyncStateAsync();
         return get;
     }
 
@@ -31,6 +32,20 @@ public class CatManDataSource(ICatManService cat, ISyncStateRepository state) : 
         DateTime lastSync = DateTimeOffset.FromUnixTimeSeconds(state.Value.UnixLastSyncUtc).UtcDateTime;
         Result<List<CatManDto>> result = await _cat.GetAllAsync(lastSync, Today);
 
+        await SyncStateAsync();
         return result;
+    }
+
+    private async Task<Result> SyncStateAsync()
+    {
+        DateTimeOffset now = DateTimeOffset.Now;
+        SyncStateEntity catmanstate = new()
+        {
+            BusinessId = BusinessId.From(SyncKey.Catman.Value),
+            LastSyncUtc = now.UtcDateTime,
+            UnixLastSyncUtc = now.ToUnixTimeSeconds()
+        };
+        var upsert = await _state.UpsertRangeAsync([catmanstate]);
+        return upsert;
     }
 }

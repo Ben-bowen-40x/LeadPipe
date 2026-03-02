@@ -9,7 +9,7 @@ using System.ComponentModel.DataAnnotations;
 namespace LeadPipe.Infrastructure.Data.Source;
 
 public sealed class CalliFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<CalliFileDataSource> logging)
-    : FileDataSource<CalliDto, CalliFileDataSource>(new FileInfo(settings.CalliSourceLoc!), csv, json, logging), IDataSourceAsync<CalliDto>
+    : FileDataSource<CalliDto, CalliFileDataSource>(new FileInfo(settings.CalliLoc!.Source!), csv, json, logging), IDataSourceAsync<CalliDto>
 {
     protected override Result<List<CalliDto>> FlattenInvalid(Result<List<CalliDto>> fileContents)
     {

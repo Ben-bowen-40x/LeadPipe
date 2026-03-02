@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace LeadPipe.Infrastructure.Data.Source;
 
 internal class LibacionFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<LibacionFileDataSource> logging)
-    : FileDataSource<LibacionDto, LibacionFileDataSource>(new FileInfo(settings.LibacionSourceLoc!), csv, json, logging), IDataSourceAsync<LibacionDto>
+    : FileDataSource<LibacionDto, LibacionFileDataSource>(new FileInfo(settings.LibacionLoc!.Source!), csv, json, logging), IDataSourceAsync<LibacionDto>
 {
     protected override Result<List<LibacionDto>> FlattenInvalid(Result<List<LibacionDto>> fileContents)
     {

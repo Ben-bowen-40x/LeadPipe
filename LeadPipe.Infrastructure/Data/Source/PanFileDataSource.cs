@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace LeadPipe.Infrastructure.Data.Source;
 
 internal class PanFileDataSource(IInfrastructureSettings settings, ICsvRwService csv, IJsonRwService json, ILogger<PanFileDataSource> logging)
-    : FileDataSource<PanDto, PanFileDataSource>(new FileInfo(settings.PanSourceLoc!), csv, json, logging), IDataSourceAsync<PanDto>
+    : FileDataSource<PanDto, PanFileDataSource>(new FileInfo(settings.PanLoc!.Source!), csv, json, logging), IDataSourceAsync<PanDto>
 {
     protected override Result<List<PanDto>> FlattenInvalid(Result<List<PanDto>> fileContents)
     {

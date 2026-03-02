@@ -13,7 +13,7 @@ public sealed class LatherFileDataSource(
     ICsvRwService csv,
     IJsonRwService json,
     ILogger<LatherFileDataSource> logging)
-    : FileDataSource<LatherDto, LatherFileDataSource>(new FileInfo(settings.LatherSourceLoc!), csv, json, logging), IDataSourceAsync<LatherDto>
+    : FileDataSource<LatherDto, LatherFileDataSource>(new FileInfo(settings.LatherLoc!.Source!), csv, json, logging), IDataSourceAsync<LatherDto>
 {
     protected override Result<List<LatherDto>> FlattenInvalid(Result<List<LatherDto>> fileContents)
     {
