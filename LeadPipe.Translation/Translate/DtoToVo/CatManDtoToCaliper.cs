@@ -8,21 +8,21 @@ internal sealed class CatManDtoToCaliper : IDtoToVo<CatManDto, Caliper>
 {
     public Caliper Translate(CatManDto data)
     {
-        long id = data.Id;
-        
-        long unix = (long)(data.UnixTime is null ? 0 : data.UnixTime);
+        long id = data.id;
+
+        long unix = (long)(data.unix_time is null ? 0 : data.unix_time);
         DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(unix);
-        
-        PhoneNumber number = new(data.CallerNumberBare);
-        
-        double dur = (double)(data.Duration is null ? 0 : data.Duration);
+
+        PhoneNumber number = new(data.caller_number_bare);
+
+        double dur = (double)(data.duration is null ? 0 : data.duration);
         TimeSpan duration = TimeSpan.FromSeconds(dur);
-        
-        var location = data.Location!;
-        var note = data.Form;
-        string source = data.TrackingLabel!;
+
+        var location = data.location!;
+        string note = data.form?.ToString() ?? string.Empty;
+        string source = data.tracking_label!;
         bool billable = false;
-        
+
         Caliper result = new(
             Id: id,
             Date: date,
@@ -33,7 +33,7 @@ internal sealed class CatManDtoToCaliper : IDtoToVo<CatManDto, Caliper>
             Billable: billable,
             Location: location
         );
-        
+
         return result;
     }
 }
