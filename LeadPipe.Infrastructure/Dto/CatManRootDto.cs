@@ -2,10 +2,10 @@
 
 namespace LeadPipe.Infrastructure.Dto;
 
-public class CatmanDto
+public class CatManRootDto
 {
     [JsonPropertyName("calls")]
-    public Call[]? Calls { get; set; }
+    public CatManDto[]? Calls { get; set; }
     [JsonPropertyName("page")]
     public int? Page { get; set; }
     [JsonPropertyName("sort")]
@@ -26,7 +26,7 @@ public class CatmanDto
 public class Stats
 {
 }
-public class Call
+public class CatManDto
 {
     [JsonPropertyName("id")]
     public long Id { get; set; }
@@ -186,6 +186,8 @@ public class Call
     public float Longitude { get; set; }
     [JsonPropertyName("extended_lookup_on")]
     public bool ExtendedLookupOn { get; set; }
+    [JsonPropertyName("form")]
+    public string? Form { get; set; }
     [JsonPropertyName("legs")]
     public object[]? Legs { get; set; }
     [JsonPropertyName("touchpoints")]
