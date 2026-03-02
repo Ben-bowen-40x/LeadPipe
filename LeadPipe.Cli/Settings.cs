@@ -68,25 +68,6 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? YellerReportEndpoint { get; set; }
     public string? YellerActionSource { get; set; }
 
-    // Data
-    public string? CalliSourceLoc { get; set; }
-    public string? CalliReportLoc { get; set; }
-
-    public string? LabReportLoc { get; set; }
-    public string? LabSourceLoc { get; set; }
-
-    public string? LeasedSourceLoc { get; set; }
-    public string? LeasedReportLoc { get; set; }
-
-    public string? LibacionSourceLoc { get; set; }
-    public string? LibacionReportLoc { get; set; }
-
-    public string? PanReportLoc { get; set; }
-    public string? PanSourceLoc { get; set; }
-
-    public string? LatherReportLoc { get; set; }
-    public string? LatherSourceLoc { get; set; }
-
     // SyncState
     public double DefaultInterval { get; set; }
     public double DefaultAssociationInterval { get; set; }
@@ -109,4 +90,12 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public CatAccount? CatAccount { get; set; }
     public string? CatmanSecret { get; set; }
     public string? CatmanKey { get; set; }
+
+    // Data
+    public LocationPair? CalliLoc { get; set; }
+    public LocationPair? LabLoc { get; set; }
+    public LocationPair? LibacionLoc { get; set; }
+    public LocationPair? LeasedLoc { get; set; }
+    public LocationPair? PanLoc { get; set; }
+    public LocationPair? LatherLoc { get; set; }
 }
