@@ -10,5 +10,5 @@ namespace LeadPipe.Infrastructure.Service.Report;
 public sealed class LeafReporter(
     ICsvRwService csv,
     IInfrastructureSettings settings
-    ) : CsvReporter<ReportPlumbing>(csv, new FileInfo(settings.LabReportLoc!))
+    ) : CsvReporter<ReportPlumbing>(csv, new FileInfo(settings.LabLoc!.Report!))
 { }

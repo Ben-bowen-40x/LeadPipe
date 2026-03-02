@@ -10,5 +10,5 @@ namespace LeadPipe.Infrastructure.Service.Report;
 public sealed class CalliReporter(
     ICsvRwService csv,
     IInfrastructureSettings settings
-    ) : CsvReporter<ReportPlumbing>(csv, new FileInfo(settings.CalliReportLoc!))
+    ) : CsvReporter<ReportPlumbing>(csv, new FileInfo(settings.CalliLoc!.Report!))
 { }
