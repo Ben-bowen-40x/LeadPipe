@@ -27,7 +27,7 @@ public class DataSourceTests
         var jsonMock = Substitute.For<IJsonRwService>();
         var loggerMock = Substitute.For<ILogger<CalliFileDataSource>>();
         var settingsMock = Substitute.For<IInfrastructureSettings>();
-        settingsMock.CalliSourceLoc.Returns(tempFilePath);
+        settingsMock.CalliLoc.Returns(new LocationPair { Source = tempFilePath });
 
         List<CalliDto> dtoList = [new()];
         if (extension == ".csv")
