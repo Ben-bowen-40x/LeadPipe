@@ -26,12 +26,13 @@ internal class Program
         using IServiceScope scope = host.Services.CreateScope();
         IServiceProvider service = scope.ServiceProvider;
         IConfiguration config = service.GetRequiredService<IConfiguration>();
+        var settings = service.GetRequiredService<Settings>();
 
         // Make sure db is created if we're using inmemory
-        bool globalInMemoryDatabase = config.GetValue<bool>("Ef:UseInMemoryDatabase");
-        bool globalInMemoryConnection = config.GetValue<bool>("Ef:UseInMemoryConnection");
-        bool sqliteInMemory = config.GetValue<bool>("Ef:Sqlite:UseInMemoryConnection", globalInMemoryConnection);
-        bool mysqlInMemory = config.GetValue<bool>("Ef:MySql:UseInMemoryDatabase", globalInMemoryDatabase);
+        bool globalInMemoryDatabase = (bool)(settings.Ef?.UseInMemoryDatabase)!;
+        bool globalInMemoryConnection = (bool)(settings.Ef?.UseInMemoryConnection)!;
+        bool sqliteInMemory = (bool)(settings.Ef?.Sqlite?.UseInMemoryConnection)!;
+        bool mysqlInMemory = (bool)(settings.Ef?.MySql?.UseInMemoryDatabase)!;
 
         if (sqliteInMemory)
         {
