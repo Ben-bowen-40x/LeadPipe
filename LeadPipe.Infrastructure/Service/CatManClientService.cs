@@ -14,54 +14,56 @@ internal class CatManClientService(ICatManSettings settings, IHttpClientFactory 
     private const int MaxRequestsPerSecond = 8;
     private static readonly TimeSpan RateLimitDelay = TimeSpan.FromMilliseconds(1000d / MaxRequestsPerSecond);
 
-    private Uri BuildCallUri(DateTime start, DateTime end)
+    private string BuildCallEndpoint(DateTime start, DateTime end)
     {
         var formattedStart = start.ToString(_settings.CatManDateFormat!);
         var formattedEnd = end.ToString(_settings.CatManDateFormat!);
 
-        var uri = $"accounts/{_settings.CatAccountId}/calls.json" +
-                  $"?start_date = {formattedStart}&end_date={formattedEnd}";
+        var endpoint = $"accounts/{_settings.CatAccountId}/calls.json" +
+                  $"?start_date={formattedStart}&end_date={formattedEnd}" +
+                  "&direction[]=form";
 
-        return new Uri(uri);
+        return endpoint;
     }
 
-    private async Task<Result<CatmanDto>> GetCallAsync(Uri uri)
+    private async Task<Result<CatManRootDto>> GetCallAsync(string endpoint)
     {
         try
         {
-            HttpResponseMessage response = await _client.GetAsync(uri);
+            HttpResponseMessage response = await _client.GetAsync(endpoint);
             if (!response.IsSuccessStatusCode)
-                return Result.Failure<CatmanDto>(response.ReasonPhrase ?? $"{nameof(CatmanDto)} request failed");
+                return Result.Failure<CatManRootDto>(response.ReasonPhrase ?? $"{nameof(CatManRootDto)} request failed");
 
-            var value = await response.Content.ReadFromJsonAsync<CatmanDto>();
+            var value = await response.Content.ReadFromJsonAsync<CatManRootDto>();
 
             if (value is not null)
                 return Result.Success(value);
             var raw = await response.Content.ReadAsStringAsync();
 
-            return Result.Failure<CatmanDto>(
+            return Result.Failure<CatManRootDto>(
                 string.IsNullOrWhiteSpace(raw)
-                ? $"{nameof(CatmanDto)} deserialization returned null"
+                ? $"{nameof(CatManRootDto)} deserialization returned null"
                 : raw);
         }
-        catch (Exception ex) { return Result.Failure<CatmanDto>(ex.ToString()); }
+        catch (Exception ex) { return Result.Failure<CatManRootDto>(ex.ToString()); }
     }
 
-    public async Task<Result<List<CatmanDto>>> GetAllAsync(DateTime start, DateTime end)
+    public async Task<Result<List<CatManDto>>> GetAllAsync(DateTime start, DateTime end)
     {
-        List<CatmanDto> results = [];
+        List<CatManDto> results = [];
 
-        Uri? nextUri = BuildCallUri(start, end);
+        string nextEndpoint = BuildCallEndpoint(start, end);
         string? afterValueOfPreviousPage = null;
 
-        while (nextUri is not null)
+        while (nextEndpoint is not null)
         {
-            var result = await GetCallAsync(nextUri);
+            var result = await GetCallAsync(nextEndpoint);
 
             if (result.IsFailure)
-                return Result.Failure<List<CatmanDto>>(result.Error);
+                return Result.Failure<List<CatManDto>>(result.Error);
 
-            results.Add(result.Value);
+            var calls = result.Value.Calls ?? [];
+            results.AddRange(calls);
 
             await Task.Delay(RateLimitDelay);
 
@@ -69,7 +71,7 @@ internal class CatManClientService(ICatManSettings settings, IHttpClientFactory 
                 break;
 
             afterValueOfPreviousPage = result.Value.After;
-            nextUri = new(result.Value.NextPage);
+            nextEndpoint = new(result.Value.NextPage);
         }
         return Result.Success(results);
     }
