@@ -13,12 +13,14 @@ public class CatManDataSource(ICatManService cat, ISyncStateRepository state) : 
     private readonly ICatManService _cat = cat;
     private readonly ISyncStateRepository _state = state;
     private readonly DateTime Today = DateTime.UtcNow;
+    private readonly DateTimeOffset Now = DateTimeOffset.UtcNow;
     public async Task<Result<List<CatManDto>>> LoadAsync(bool _ = default)
     {
         DateTime twentyTwelve = new(2025, 1, 1);
         Result<List<CatManDto>> get = await _cat.GetAllAsync(twentyTwelve, Today);
 
-        await SyncStateAsync();
+        var syncDate = GetDate(get);
+        await SyncStateAsync(syncDate);
         return get;
     }
 
@@ -32,18 +34,23 @@ public class CatManDataSource(ICatManService cat, ISyncStateRepository state) : 
         DateTime lastSync = DateTimeOffset.FromUnixTimeSeconds(state.Value.UnixLastSyncUtc).UtcDateTime;
         Result<List<CatManDto>> result = await _cat.GetAllAsync(lastSync, Today);
 
-        await SyncStateAsync();
+        DateTimeOffset syncDate = GetDate(result);
+        await SyncStateAsync(syncDate);
         return result;
     }
-
-    private async Task<Result> SyncStateAsync()
+    internal DateTimeOffset GetDate(Result<List<CatManDto>> get)
     {
-        DateTimeOffset now = DateTimeOffset.Now;
+        return get.IsSuccess
+            ? DateTimeOffset.FromUnixTimeSeconds(get.Value.Min(v => v.unix_time) ?? Now.ToUnixTimeSeconds())
+            : Now;
+    }
+    private async Task<Result> SyncStateAsync(DateTimeOffset date)
+    {
         SyncStateEntity catmanstate = new()
         {
             BusinessId = BusinessId.From(SyncKey.Catman.Value),
-            LastSyncUtc = now.UtcDateTime,
-            UnixLastSyncUtc = now.ToUnixTimeSeconds()
+            LastSyncUtc = date.UtcDateTime,
+            UnixLastSyncUtc = date.ToUnixTimeSeconds()
         };
         var upsert = await _state.UpsertRangeAsync([catmanstate]);
         return upsert;
