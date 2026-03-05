@@ -1,26 +1,44 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.MySql;
+using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
 namespace LeadPipe.Infrastructure.Data.Source;
 
 public sealed class CustardMySqlDataSource(
-    ICustardMySqlRepository repo
-) : IDataSourceAsync<CustardMySqlEntity>
+    ICustardMySqlRepository repo,
+    ISyncStateRepository sync
+) : MySqlDataSource, IDataSourceAsync<CustardMySqlEntity>
 {
     private readonly ICustardMySqlRepository _repo = repo;
+    private readonly ISyncStateRepository _sync = sync;
     public async Task<Result<List<CustardMySqlEntity>>> LoadAsync(bool withDetails)
     {
         DateTime twentyTwelve = new(new DateOnly(2012, 1, 1), new TimeOnly(0), DateTimeKind.Utc);
         Result<List<CustardMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded >= twentyTwelve, withDetails);
+        
+        DateTimeOffset latest = Latest(found);
+        await SyncStateAsync(_sync, latest, SyncKey.Custard);
         return found;
     }
 
     public async Task<Result<List<CustardMySqlEntity>>> RefreshAsync(bool withDetails)
     {
-        DateTime lastMonth = DateTime.Now.AddDays(-30);
-        Result<List<CustardMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded >= lastMonth, withDetails);
+        // Retrieve data from sync
+        DateTimeOffset syncDate = await LatestSyncDate(_sync, DateTimeOffset.UtcNow.AddDays(-30), SyncKey.Custard);
+
+        Result<List<CustardMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded >= syncDate, withDetails);
+        
+        DateTimeOffset latest = Latest(found);
+        await SyncStateAsync(_sync, latest, SyncKey.Custard);
+        
         return found;
     }
+
+    private static DateTimeOffset Latest(Result<List<CustardMySqlEntity>> found) => 
+        found.IsSuccess
+            ? new(found.Value.Max(v => v.dateAdded) ?? DateTime.UtcNow.AddDays(-30), TimeSpan.Zero)
+            : DateTimeOffset.UtcNow.AddDays(-30);
 }
