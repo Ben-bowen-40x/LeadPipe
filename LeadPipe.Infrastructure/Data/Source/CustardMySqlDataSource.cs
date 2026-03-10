@@ -10,29 +10,28 @@ namespace LeadPipe.Infrastructure.Data.Source;
 public sealed class CustardMySqlDataSource(
     ICustardMySqlRepository repo,
     ISyncStateRepository sync
-) : MySqlDataSource, IDataSourceAsync<CustardMySqlEntity>
+) : MySqlDataSource(sync), IDataSourceAsync<CustardMySqlEntity>
 {
     private readonly ICustardMySqlRepository _repo = repo;
-    private readonly ISyncStateRepository _sync = sync;
     public async Task<Result<List<CustardMySqlEntity>>> LoadAsync(bool withDetails)
     {
         DateTime twentyTwelve = new(new DateOnly(2012, 1, 1), new TimeOnly(0), DateTimeKind.Utc);
         Result<List<CustardMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded >= twentyTwelve, withDetails);
         
         DateTimeOffset latest = Latest(found);
-        await SyncStateAsync(_sync, latest, SyncKey.Custard);
+        await SyncStateAsync(latest, SyncKey.Custard);
         return found;
     }
 
     public async Task<Result<List<CustardMySqlEntity>>> RefreshAsync(bool withDetails)
     {
         // Retrieve data from sync
-        DateTimeOffset syncDate = await LatestSyncDate(_sync, DateTimeOffset.UtcNow.AddDays(-30), SyncKey.Custard);
+        DateTimeOffset syncDate = await LatestSyncDate(earliestAllowableDate: DateTimeOffset.UtcNow.AddDays(-30), SyncKey.Custard);
 
         Result<List<CustardMySqlEntity>> found = await _repo.FindAsync(s => s.dateAdded >= syncDate, withDetails);
         
         DateTimeOffset latest = Latest(found);
-        await SyncStateAsync(_sync, latest, SyncKey.Custard);
+        await SyncStateAsync(latest, SyncKey.Custard);
         
         return found;
     }
