@@ -34,26 +34,7 @@ internal class Program
         IConfiguration config = service.GetRequiredService<IConfiguration>();
         var settings = service.GetRequiredService<Settings>();
 
-        // Make sure db is created if we're using inmemory
-        bool globalInMemoryDatabase = (bool)(settings.Ef?.UseInMemoryDatabase)!;
-        bool globalInMemoryConnection = (bool)(settings.Ef?.UseInMemoryConnection)!;
-        bool sqliteInMemory = (bool)(settings.Ef?.Sqlite?.UseInMemoryConnection)!;
-        bool mysqlInMemory = (bool)(settings.Ef?.MySql?.UseInMemoryDatabase)!;
-
-        if (sqliteInMemory)
-        {
-            var pCtx = service.GetRequiredService<PlumbingContext>();
-            pCtx.Database.EnsureCreated();
-        }
-        if (mysqlInMemory)
-        {
-            var mysql1Ctx = service.GetRequiredService<MySqlSchema1Context>();
-            var mysql2Ctx = service.GetRequiredService<MySqlSchema2Context>();
-            var mysql3Ctx = service.GetRequiredService<MySqlSchema3Context>();
-            mysql1Ctx.Database.EnsureCreated();
-            mysql2Ctx.Database.EnsureCreated();
-            mysql3Ctx.Database.EnsureCreated();
-        }
+        EnsureInMemoryDbIsMade(service, settings);
 
         Execute(args, service);
     }
@@ -107,6 +88,30 @@ internal class Program
         {
             Console.WriteLine(o.ToString());
             return ProgramErrorCodes.Error;
+        }
+    }
+
+    private static void EnsureInMemoryDbIsMade(IServiceProvider service, Settings settings)
+    {
+        // Make sure db is created if we're using inmemory
+        bool globalInMemoryDatabase = (bool)(settings.Ef?.UseInMemoryDatabase)!;
+        bool globalInMemoryConnection = (bool)(settings.Ef?.UseInMemoryConnection)!;
+        bool sqliteInMemory = (bool)(settings.Ef?.Sqlite?.UseInMemoryConnection)!;
+        bool mysqlInMemory = (bool)(settings.Ef?.MySql?.UseInMemoryDatabase)!;
+
+        if (sqliteInMemory)
+        {
+            var pCtx = service.GetRequiredService<PlumbingContext>();
+            pCtx.Database.EnsureCreated();
+        }
+        if (mysqlInMemory)
+        {
+            var mysql1Ctx = service.GetRequiredService<MySqlSchema1Context>();
+            var mysql2Ctx = service.GetRequiredService<MySqlSchema2Context>();
+            var mysql3Ctx = service.GetRequiredService<MySqlSchema3Context>();
+            mysql1Ctx.Database.EnsureCreated();
+            mysql2Ctx.Database.EnsureCreated();
+            mysql3Ctx.Database.EnsureCreated();
         }
     }
     #endregion
