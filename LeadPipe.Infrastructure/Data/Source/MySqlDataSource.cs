@@ -22,12 +22,13 @@ public class MySqlDataSource(ISyncStateRepository sync)
         return upsert;
     }
 
-    protected async Task<DateTimeOffset> LatestSyncDate(DateTimeOffset earliestAllowableDate, SyncKey key)
+    protected async Task<Result<DateTimeOffset>> LatestSyncDate(SyncKey key)
     {
         Result<SyncStateEntity> state = await _sync.GetByKeyAsync(null, key);
-        DateTimeOffset syncDate = state.IsFailure
-            ? earliestAllowableDate
-            : DateTimeOffset.FromUnixTimeSeconds(state.Value.UnixLastSyncUtc);
+        if (state.IsFailure)
+            return Result.Failure<DateTimeOffset>(state.Error);
+
+        DateTimeOffset syncDate = DateTimeOffset.FromUnixTimeSeconds(state.Value.UnixLastSyncUtc);
 
         return syncDate;
     }
