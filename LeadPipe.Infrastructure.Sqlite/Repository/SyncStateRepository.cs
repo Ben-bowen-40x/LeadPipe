@@ -29,14 +29,14 @@ public class SyncStateRepository(PlumbingContext context) : ISyncStateRepository
 
             if (entity is null)
                 return Result.Failure<SyncStateEntity>(
-                    $"SyncState not found for BusinessId '{id}'");
+                    $"{nameof(SyncStateEntity)} not found for {nameof(BusinessId)} '{id}'");
 
             return Result.Success(entity);
         }
         catch (Exception ex)
         {
             return Result.Failure<SyncStateEntity>(
-                $"Failed to retrieve SyncState for BusinessId '{id}': {ex}");
+                $"Failed to retrieve {nameof(SyncStateEntity)} for {nameof(BusinessId)} '{id}': {ex}");
         }
     }
 
@@ -79,7 +79,7 @@ public class SyncStateRepository(PlumbingContext context) : ISyncStateRepository
         catch (Exception ex)
         {
             return Result.Failure<List<SyncStateEntity>>(
-                $"Failed to upsert SyncState range: {ex}");
+                $"Failed to upsert {nameof(SyncStateEntity)} range: {ex}");
         }
     }
 }
