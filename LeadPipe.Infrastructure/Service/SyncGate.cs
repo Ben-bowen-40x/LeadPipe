@@ -38,55 +38,66 @@ public sealed class SyncGate(
         _ => throw new ArgumentOutOfRangeException(nameof(source), source, null)
     };
 
-    public async Task<bool> ShouldRunAsync(Source source, SyncKey key)
+    #region Should Run
+
+    public async Task<bool> ShouldRunAsync(Source? source, SyncKey key)
     {
+        if (source is null)
+            return await ShouldRunAsync(key);
+
         Result<SyncStampEntity> found = await _repo.GetByKeyAsync(source, key);
 
-        // First run: allow
-        if (found.IsFailure)
-            return true;
-
-        SyncStampEntity state = found.Value;
-
-        DateTimeOffset now = DateTime.UtcNow;
-
-        TimeSpan interval = _interval.TryGetValue(source, out TimeSpan inter)
-            ? inter
-            : _defaultSourceInterval;
-        DateTimeOffset syncDate = DateTimeOffset.FromUnixTimeSeconds(state.UnixSyncUtc);
-        bool run = now - syncDate >= interval;
+        if (found.IsFailure) return true;
+        bool run = ShouldRun((Source)source!, found.Value);
 
         return run;
     }
 
-    public async Task<bool> ShouldRunAsync(SyncKey key)
+    private async Task<bool> ShouldRunAsync(SyncKey key)
     {
         Result<SyncStampEntity> found = await _repo.GetByKeyAsync(null, key);
 
         if (found.IsFailure) return true;
-
-        SyncStampEntity state = found.Value;
-
-        DateTimeOffset now = DateTime.UtcNow;
-
-        TimeSpan syncstatetiming = now - DateTimeOffset.FromUnixTimeSeconds(state.UnixSyncUtc);
-        TimeSpan interval = key.Value == SyncKey.Associate.Value
-            ? _associationInterval
-            : _noSourceInterval;
-
-        bool run = syncstatetiming >= interval;
+        bool run = ShouldRun(key, found.Value);
 
         return run;
     }
 
-    public async Task MarkSuccessAsync(Source source, SyncKey entity) => await UpsertAsync(source, entity, true);
+    private bool ShouldRun(Source source, SyncStampEntity found)
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
 
-    public async Task MarkSuccessAsync(SyncKey entity) => await UpsertAsync(null, entity, true);
+        TimeSpan interval = _interval.TryGetValue(source, out TimeSpan inter)
+            ? inter
+            : _defaultSourceInterval;
 
-    // don't currently persist error state.
-    public async Task MarkFailureAsync(Source source, SyncKey entity, string error) => await UpsertAsync(source, entity, false);
+        DateTimeOffset syncDate = DateTimeOffset.FromUnixTimeSeconds(found.UnixSyncUtc);
 
-    public async Task MarkFailureAsync(SyncKey entity, string error) => await UpsertAsync(null, entity, false);
+        bool run = now - syncDate >= interval && found.SuccessState is true;
+
+        return run;
+    }
+
+    private bool ShouldRun(SyncKey key, SyncStampEntity found)
+    {
+        DateTimeOffset now = DateTimeOffset.UtcNow;
+
+        TimeSpan syncstatetiming = now - DateTimeOffset.FromUnixTimeSeconds(found.UnixSyncUtc);
+
+        TimeSpan interval = key.Value == SyncKey.Associate.Value
+            ? _associationInterval
+            : _noSourceInterval;
+
+        bool run = syncstatetiming >= interval && found.SuccessState is true;
+
+        return run;
+    }
+
+    #endregion
+
+    public async Task MarkSuccessAsync(Source? source, SyncKey entity) => await UpsertAsync(source, entity, true);
+
+    public async Task MarkFailureAsync(Source? source, SyncKey entity) => await UpsertAsync(source, entity, false);
 
     private async Task UpsertAsync(Source? source, SyncKey entity, bool successState)
     {
