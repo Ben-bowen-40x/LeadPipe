@@ -2,7 +2,7 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.Load;
 using LeadPipe.Infrastructure.Data.Persistence;
-using LeadPipe.Infrastructure.Data.Source;
+using LeadPipe.Infrastructure.Data.DataSource;
 using LeadPipe.Infrastructure.Data.Transform;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.MySql;
@@ -70,12 +70,14 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<LibacionDto>, LibacionFileDataSource>();
         services.AddScoped<IDataSourceAsync<PanDto>, PanFileDataSource>();
         services.AddScoped<IDataSourceAsync<LatherDto>, LatherFileDataSource>();
-        services.AddScoped<IDataSourceAsync<CatManDto>, CatManDataSource>();
+        services.AddScoped<IDataSourceAsync<CatManDto>, CatManDataSourceBased>();
 
-        services.AddScoped<IDataSourceAsync<CaliperMySqlEntity>, CaliperMySqlDataSource>();
+        services.AddScoped<IDataSourceAsync<CaliperMySqlEntity>, SyncedCaliperMySqlDataSource>();
         services.AddScoped<IDataSourceAsync<SandMySqlEntity>, SandMySqlDataSource>();
-        services.AddScoped<IDataSourceAsync<CustardMySqlEntity>, CustardMySqlDataSource>();
-        services.AddScoped<IDataSourceAsync<CornMySqlEntity>, CornMySqlDataSource>();
+        services.AddScoped<IDataSourceAsync<CustardMySqlEntity>, CustardMySqlDataSourceBased>();
+        services.AddScoped<IDataSourceAsync<CornMySqlEntity>, CornMySqlDataSourceBased>();
+
+        services.AddScoped<IClock, SystemClock>();
 
         #endregion
         // *****************************************
