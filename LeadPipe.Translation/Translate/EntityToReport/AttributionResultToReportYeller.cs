@@ -1,5 +1,4 @@
-﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Dto;
+﻿using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
 using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Settings;
@@ -8,41 +7,45 @@ namespace LeadPipe.Translation.Translate.EntityToReport;
 
 internal sealed class AttributionResultToReportYeller(IYellerSettings settings) : IEntityToReport<AttributionResult, ReportYeller>
 {
-    private readonly string _action = settings.YellerActionSource!;
-    public ReportYeller Translate(AttributionResult result)
+    private readonly string _corn = settings.YellerCornName!;
+    private readonly string _plumbing = settings.YellerPlumbingName!;
+    private readonly string _caliper = settings.YellerCaliperName!;
+    private const string _unk = "Unknown";
+    public ReportYeller Translate(AttributionResult attr)
     {
-        var custard = result.Custard;
-
-        long eventtime = result.FirstTouchUnixDate;
-        string eventname = "purchase";
-        string eventid = custard.Id.ToString();
-
-        string num1 = YellerReportHelper.HashSha256(
-            custard.PhoneNumber.Number.ToString());
-
-        string n2 = custard.PhoneNumber2 is null
-            ? PhoneNumber.Default.ToString()
-            : custard.PhoneNumber2.Number.ToString();
-
-        string num2 = YellerReportHelper.HashSha256(n2);
-
-        UserData user = new() { ph = [num1, num2] };
-
-        CustomData custom = new()
+        string medium = attr.Source switch
         {
-            currency = YellerReportHelper.Currency,
-            value = result.Value
+            AttributionSource.Plumbing => _plumbing,
+            AttributionSource.Caliper => _caliper,
+            AttributionSource.Corn => _corn,
+            _ => _unk
         };
 
-        return new ReportYeller
+        string s2 = attr.Sand.Seller2 == 0 ? string.Empty : $" | {attr.Sand.Seller2}";
+        string s3 = attr.Sand.Seller3 == 0 ? string.Empty : $" | {attr.Sand.Seller3}";
+        string sellers = $"{attr.Sand.Seller}{s2}{s3}";
+
+        long phone = attr.MatchingPhone;
+
+
+        DateTime eventDate = DateTimeOffset.FromUnixTimeSeconds(attr.Entity.UnixDate).UtcDateTime;
+        long unixCloseDate = attr.Custard.UnixDate < attr.Sand.UnixDate ? attr.Custard.UnixDate : attr.Sand.UnixDate;
+        DateTime closeDate = DateTimeOffset.FromUnixTimeSeconds(unixCloseDate).UtcDateTime;
+
+        var result = new ReportYeller()
         {
-            event_id = eventid,
-            action_source = _action,
-            event_name = eventname,
-            event_time = eventtime,
-            custom_data = custom,
-            user_data = user
+            EventMedium = medium,
+            PhoneNumber = phone,
+            EventDateUtc = eventDate,
+            CloseDateUtc = closeDate,
+            Value = attr.Value,
+            Type = attr.Sand.Type is null ? _unk : attr.Sand.Type,
+            CombinedSellers = sellers,
+            SId = attr.Sand.Id,
+            EId = attr.Entity.Id,
         };
+
+        return result;
     }
 
 }
