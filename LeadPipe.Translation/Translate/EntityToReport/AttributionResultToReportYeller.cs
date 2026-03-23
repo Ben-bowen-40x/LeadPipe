@@ -21,12 +21,12 @@ internal sealed class AttributionResultToReportYeller(IYellerSettings settings) 
             _ => _unk
         };
 
+        string s1 = attr.Sand.Seller == 0 ? _unk : attr.Sand.Seller.ToString();
         string s2 = attr.Sand.Seller2 == 0 ? string.Empty : $" | {attr.Sand.Seller2}";
         string s3 = attr.Sand.Seller3 == 0 ? string.Empty : $" | {attr.Sand.Seller3}";
-        string sellers = $"{attr.Sand.Seller}{s2}{s3}";
+        string sellers = $"{s1}{s2}{s3}";
 
         long phone = attr.MatchingPhone;
-
 
         DateTime eventDate = DateTimeOffset.FromUnixTimeSeconds(attr.Entity.UnixDate).UtcDateTime;
         long unixCloseDate = attr.Custard.UnixDate < attr.Sand.UnixDate ? attr.Custard.UnixDate : attr.Sand.UnixDate;
