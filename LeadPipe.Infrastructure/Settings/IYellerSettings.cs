@@ -23,4 +23,7 @@ public interface IYellerSettings
     string? YellerCornSource { get; set; }
     string? YellerReportEndpoint { get; set; }
     string? YellerActionSource { get; set; }
+    string? YellerPlumbingName { get; set; }
+    string? YellerCaliperName { get; set; }
+    string? YellerCornName { get; set; }
 }
