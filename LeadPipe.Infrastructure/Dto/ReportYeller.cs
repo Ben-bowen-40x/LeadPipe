@@ -1,7 +1,7 @@
 ﻿namespace LeadPipe.Infrastructure.Dto;
 
 #pragma warning disable IDE1006 // Naming Styles
-public class ReportYeller
+public class ReportYeller_Old
 {
     public required string event_id { get; set; }
     public required long event_time { get; set; }
@@ -40,3 +40,16 @@ public class CustomData
 }
 
 #pragma warning restore IDE1006 // Naming Styles
+
+public class ReportYeller
+{
+    public required string EventMedium { get; set; }
+    public long PhoneNumber { get; set; }
+    public DateTime EventDateUtc { get; set; }
+    public DateTime CloseDateUtc { get; set; }
+    public decimal Value { get; set; }
+    public required string Type { get; set; }
+    public required string CombinedSellers { get; set; }
+    public required long SId { get; set; } // This is the SandId
+    public required long EId { get; set; } // This is the entity Id
+}
