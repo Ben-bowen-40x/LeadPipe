@@ -26,8 +26,7 @@ internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLi
 
         long phoneNumber = plumb.PhoneNumber.Number;
 
-        DateTime d = DateTime.SpecifyKind(plumb.Date, DateTimeKind.Utc);
-        DateTimeOffset date = new(d, TimeSpan.Zero);
+        DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(plumb.UnixDate);
         string formattedDate = date.ToString(dateFormat);
 
         string message = plumb.Contents is string c ? c : string.Empty;
@@ -40,19 +39,15 @@ internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLi
         bool completed = sub.Complete;
 
         // Dates
-        DateTime cd = DateTime.SpecifyKind(sub.Date, DateTimeKind.Utc);
-        DateTimeOffset custDate = new(cd, TimeSpan.Zero);
+        DateTimeOffset custDate = DateTimeOffset.FromUnixTimeSeconds(sub.UnixDate);
         string formattedCustDate = custDate.ToString(dateFormat);
 
-        DateTime cxl = DateTime.SpecifyKind(sub.CancelDate, DateTimeKind.Utc);
-        DateTimeOffset custCxlDate = new(cxl, TimeSpan.Zero);
+        DateTimeOffset custCxlDate = DateTimeOffset.FromUnixTimeSeconds(sub.UnixCancelDate);
 
-        DateTime sd = DateTime.SpecifyKind(sub.Date, DateTimeKind.Utc);
-        DateTimeOffset subDate = new(sd, TimeSpan.Zero);
+        DateTimeOffset subDate = DateTimeOffset.FromUnixTimeSeconds(sub.UnixDate);
         string formattedSubDate = subDate.ToString(dateFormat);
 
-        DateTime sCxl = DateTime.SpecifyKind(sub.CancelDate, DateTimeKind.Utc);
-        DateTimeOffset subCxlDate = new(sCxl, TimeSpan.Zero);
+        DateTimeOffset subCxlDate = DateTimeOffset.FromUnixTimeSeconds(sub.UnixCancelDate);
 
         bool msgBeforeCust = date < custDate && date < subDate;
         bool isSale = msgBeforeCust && completed;
