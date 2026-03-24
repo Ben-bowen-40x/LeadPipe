@@ -1,6 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Settings;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -10,9 +11,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public sealed class CaliperRepository
     (
         PlumbingContext context,
-        ILogger<CaliperRepository> logger
+        ILogger<CaliperRepository> logger,
+        IInfrastructureSettings settings
     ) : PlumbingContextEntityRepository<CaliperEntity, CaliperRepository>(context, logger), IRepository<CaliperEntity>
 {
+    private readonly IInfrastructureSettings _settings = settings;
     protected override IQueryable<CaliperEntity> WithIncludes(IQueryable<CaliperEntity> q)
     {
         return q
