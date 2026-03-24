@@ -60,13 +60,9 @@ public static class InjectTranslation
 
         // IEntityToReport
         services.AddScoped<IEntityToReport<SandPlumbingLink, ReportPlumbing>, SandPlumbingLinkToReportPlumbing>();
-        services.AddScoped<IEntityToReport<SandEntity, ReportYeller>, SandEntityToReportYeller>();
         services.AddScoped<IEntityToReport<PlumbingEntity, ReportYeller>, PlumbingEntityToReportYeller>();
         services.AddScoped<IEntityToReport<CaliperEntity, ReportYeller>, CaliperEntityToReportYeller>();
         services.AddScoped<IEntityToReport<CornEntity, ReportYeller>, CornEntityToReportYeller>();
-        services.AddScoped<IEntityToReport<CustardPlumbingLink, ReportYeller>, CustardPlumbingLinkToReportYeller>();
-        services.AddScoped<IEntityToReport<CustardCaliperLink, ReportYeller>, CustardCaliperLinkToReportYeller>();
-        services.AddScoped<IEntityToReport<CustardCornLink, ReportYeller>, CustardCornLinkToReportYeller>();
         services.AddScoped<IEntityToReport<AttributionResult, ReportYeller>, AttributionResultToReportYeller>();
 
         // Factory
