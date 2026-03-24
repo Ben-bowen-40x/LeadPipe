@@ -14,6 +14,7 @@ public sealed class CaliperToCaliperEntityTests
             Duration: TimeSpan.FromSeconds(durationSeconds),
             Note: "test note",
             Source: "unit",
+            Label: "label",
             Location: "lab",
             Billable: true
         );
