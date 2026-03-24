@@ -11,8 +11,8 @@ namespace LeadPipe.Infrastructure.Service.Update;
 [SourceKey(Source.Yeller)]
 internal sealed class CatManUpdateService(
     IDataSourceAsync<CatManDto> source,
-    IDtoToVo<CatManDto, Caliper> dtoToVo,
-    IVoToEntity<Caliper, CaliperEntity> voToEntity,
-    IDataPersistence<CaliperEntity> persistence
-    ) : UpdateService<CatManDto, Caliper, CaliperEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Caliper>
+    IDtoToVo<CatManDto, CornFormula> dtoToVo,
+    IVoToEntity<CornFormula, CornEntity> voToEntity,
+    IDataPersistence<CornEntity> persistence
+    ) : UpdateService<CatManDto, CornFormula, CornEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<CornFormula>
 { }
