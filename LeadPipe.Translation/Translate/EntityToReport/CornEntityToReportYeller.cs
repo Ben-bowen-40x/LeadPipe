@@ -1,36 +1,14 @@
-﻿using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Entity.Sqlite;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+﻿using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
-
-internal sealed class CornEntityToReportYeller(IYellerSettings settings) : IEntityToReport<CornEntity, ReportYeller>
+internal sealed class CornEntityToReportYeller(IYellerSettings settings) : EntityToReportYeller<CornEntity>
 {
-    private readonly string _action = settings.YellerActionSource!;
-    public ReportYeller Translate(CornEntity data)
-    {
-        long eventTime = data.UnixDate;
-        string eventName = "lead";
-        string num = YellerReportHelper.HashSha256(data.PhoneNumber.Number.ToString());
-        string eventId = data.Id.ToString() + "-31518"; // 3 == c, 15 == o, 18 == r
+    protected override string Type => settings.YellerCornName!;
 
-        UserData user = new() { ph = [num] };
-        CustomData custom = new()
-        {
-            currency = YellerReportHelper.Currency,
-            value = 0
-        };
+    protected override long GetEntityId(CornEntity e) => e.Id;
 
-        ReportYeller result = new()
-        {
-            event_id = eventId,
-            event_name = eventName,
-            event_time = eventTime,
-            custom_data = custom,
-            action_source = _action,
-            user_data = user
-        };
-        return result;
-    }
+    protected override long GetPhoneNumber(CornEntity e) => e.PhoneNumber.Number;
+
+    protected override long GetUnixDate(CornEntity e) => e.UnixDate;
 }
