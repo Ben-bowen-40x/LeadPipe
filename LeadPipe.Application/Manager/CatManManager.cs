@@ -10,7 +10,7 @@ public interface ICatManManager
 }
 internal class CatManManager(IUpdateFactory factory) : ICatManManager
 {
-    private readonly IUpdateService<Caliper> _catMan = factory.GetService<Caliper>(Source.Yeller);
+    private readonly IUpdateService<CornFormula> _catMan = factory.GetService<CornFormula>(Source.Yeller);
     public async Task<Result> Manage(bool refresh)
     {
         var data = refresh
