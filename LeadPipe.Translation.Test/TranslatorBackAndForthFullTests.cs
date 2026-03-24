@@ -53,6 +53,7 @@ public class TranslatorBackAndForthFullTests
             Duration = 120,
             Note = "Note",
             Source = "Source",
+            Label = "Label",
             Location = "Location",
             Billable = true
         };
