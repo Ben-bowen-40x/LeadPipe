@@ -36,6 +36,7 @@ internal class CaliperMySqlEntityToCaliper : IEntityToVo<CaliperMySqlEntity, Cal
                 Duration: duration,
                 Note: notes,
                 Source: source,
+                Label: entity.numbers_name ?? "Unknown",
                 Location: location,
                 Billable: billable
             );
