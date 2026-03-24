@@ -5,31 +5,44 @@ using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal sealed class CaliperEntityToReportYeller(IYellerSettings settings) : IEntityToReport<CaliperEntity, ReportYeller>
+internal sealed class CaliperEntityToReportYeller(IYellerSettings settings) : EntityToReportYeller<CaliperEntity>
 {
-    private readonly string _action = settings.YellerActionSource!;
-    public ReportYeller Translate(CaliperEntity data)
-    {
-        long eventtime = data.UnixDate;
-        string eventname = "lead";
-        string num = YellerReportHelper.HashSha256(data.PhoneNumber.Number.ToString());
-        string eventid = data.Id.ToString() + "-3112"; // 3 == c, 1 == a, 12 == l
+    protected override string Type => settings.YellerCaliperName!;
 
-        UserData user = new() { ph = [num] };
-        CustomData custom = new()
+    protected override long GetEntityId(CaliperEntity e) => e.Id;
+
+    protected override long GetPhoneNumber(CaliperEntity e) => e.PhoneNumber.Number;
+
+    protected override long GetUnixDate(CaliperEntity e) => e.UnixDate;
+}
+
+
+internal abstract class EntityToReportYeller<TEntity> : IEntityToReport<TEntity, ReportYeller>
+{
+    private const string _none = "None";
+    protected abstract string Type { get; }
+    protected abstract long GetUnixDate(TEntity e);
+    protected abstract long GetEntityId(TEntity e);
+    protected abstract long GetPhoneNumber(TEntity e);
+    public ReportYeller Translate(TEntity data)
+    {
+        var phone = GetPhoneNumber(data);
+        var eventDate = DateTimeOffset.FromUnixTimeSeconds(GetUnixDate(data)).UtcDateTime;
+        var entityId = GetEntityId(data);
+
+        var result = new ReportYeller
         {
-            currency = YellerReportHelper.Currency,
-            value = 0
+            EventMedium = Type,
+            PhoneNumber = phone,
+            EventDateUtc = eventDate,
+            CloseDateUtc = DateTimeOffset.MinValue.UtcDateTime,
+            Value = 0m,
+            Type = _none,
+            CombinedSellers = _none,
+            SId = 0,
+            EId = entityId
         };
-        ReportYeller result = new()
-        {
-            event_id = eventid,
-            event_name = eventname,
-            event_time = eventtime,
-            custom_data = custom,
-            action_source = _action,
-            user_data = user
-        };
+        
         return result;
     }
 }
