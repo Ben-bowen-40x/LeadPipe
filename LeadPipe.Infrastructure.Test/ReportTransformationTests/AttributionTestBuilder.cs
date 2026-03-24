@@ -107,6 +107,7 @@ internal sealed class AttributionTestBuilder
             UnixDate = matchDate,
             Note = "x",
             Source = "x",
+            Label = "x",
             Location = "x"
         };
 
