@@ -24,6 +24,7 @@ internal class CaliperEntityToCaliper : IEntityToVo<CaliperEntity, Caliper>
                 Duration: duration, 
                 Note: note, 
                 Source: source, 
+                Label: c.Label,
                 Location: location, 
                 Billable: billable
             );
