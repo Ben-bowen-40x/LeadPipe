@@ -79,27 +79,27 @@ public class TransformYellerReportTests
             .FindAsync(Arg.Any<Expression<Func<CaliperEntity, bool>>>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(Result.Success(SafeQuery(caliper).ToList())));
 
-        attrToR
-            .Translate(Arg.Any<AttributionResult>())
-            .Returns(ci =>
-            {
-                var r = ci.Arg<AttributionResult>();
-                captured.Add(r);
+        //attrToR
+        //    .Translate(Arg.Any<AttributionResult>())
+        //    .Returns(ci =>
+        //    {
+        //        var r = ci.Arg<AttributionResult>();
+        //        captured.Add(r);
 
-                return new ReportYeller
-                {
-                    event_id = r.Custard.Id.ToString(),
-                    event_time = r.FirstTouchUnixDate,
-                    event_name = "purchase",
-                    action_source = "action",
-                    user_data = new UserData { ph = [r.Custard.PhoneNumber.Number.ToString(), r.Custard.PhoneNumber2?.Number.ToString() ?? PhoneNumber.Default.ToString()] },
-                    custom_data = new CustomData
-                    {
-                        currency = "USD",
-                        value = r.Value
-                    }
-                };
-            });
+        //        return new ReportYeller
+        //        {
+        //            event_id = r.Custard.Id.ToString(),
+        //            event_time = r.FirstTouchUnixDate,
+        //            event_name = "purchase",
+        //            action_source = "action",
+        //            user_data = new UserData { ph = [r.Custard.PhoneNumber.Number.ToString(), r.Custard.PhoneNumber2?.Number.ToString() ?? PhoneNumber.Default.ToString()] },
+        //            custom_data = new CustomData
+        //            {
+        //                currency = "USD",
+        //                value = r.Value
+        //            }
+        //        };
+        //    });
 
         // TODO: Mock entity translators.Translate method
         //cornToR
@@ -155,7 +155,8 @@ public class TransformYellerReportTests
             MatchingPhone = custard.PhoneNumber.Number,
             FirstTouchUnixDate = 1000,
             Sand = sand,
-            Source = AttributionSource.Plumbing
+            Source = AttributionSource.Plumbing,
+            Entity = p1
         };
 
         AttributionResultAssert.Equivalent(expected, captured.Single());
@@ -199,7 +200,8 @@ public class TransformYellerReportTests
             MatchingPhone = custard.PhoneNumber.Number,
             FirstTouchUnixDate = 1000,
             Sand = sand,
-            Source = AttributionSource.Plumbing
+            Source = AttributionSource.Plumbing,
+            Entity = plumbing
         };
 
         AttributionResultAssert.Equivalent(expected, captured.Single());
@@ -336,7 +338,8 @@ public class TransformYellerReportTests
             MatchingPhone = custard.PhoneNumber.Number,
             FirstTouchUnixDate = 1000,
             Sand = earlier,
-            Source = AttributionSource.Plumbing
+            Source = AttributionSource.Plumbing,
+            Entity = plumbing
         };
 
         AttributionResultAssert.Equivalent(expected, captured.Single());
