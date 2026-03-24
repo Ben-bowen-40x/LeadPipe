@@ -35,25 +35,28 @@ internal sealed class TransformYellerReport(
         // Load All Relevant data
         //*********************************************************************************
 
+        Result<List<CornEntity>> corns =
+            await _cornRepo.FindAsync(c =>
+                c.Source.ToLowerInvariant().Contains(_settings.YellerCornSource!, StringComparison.InvariantCultureIgnoreCase) ||
+                c.Source == _settings.YellerCaliperSource1 ||
+                c.Source == _settings.YellerCaliperSource2);
+        if (corns.IsFailure) return Result.Failure<List<ReportYeller>>(corns.Error);
+
+
         Result<List<CaliperEntity>> calipers =
             await _caliperRepo.FindAsync(c =>
                 c.Source == _settings.YellerCaliperSource1 ||
                 c.Source == _settings.YellerCaliperSource2);
         if (calipers.IsFailure) return Result.Failure<List<ReportYeller>>(calipers.Error);
 
-        Result<List<CornEntity>> corns =
-            await _cornRepo.FindAsync(c =>
-                c.Source == _settings.YellerCornSource);
-        if (corns.IsFailure) return Result.Failure<List<ReportYeller>>(corns.Error);
-
         Result<List<PlumbingEntity>> plumbs =
             await _plumbRepo.FindAsync(c =>
-                c.Source == Domain.ValueObjects.Source.Yeller);
+                c.Source == Source.Yeller);
         if (plumbs.IsFailure) return Result.Failure<List<ReportYeller>>(plumbs.Error);
 
+        HashSet<long> cornLookup = [.. corns.Value.Select(x => x.Id)];
         HashSet<long> plumbLookup = [.. data.Select(x => x.Id)];
         HashSet<long> caliperLookup = [.. calipers.Value.Select(x => x.Id)];
-        HashSet<long> cornLookup = [.. corns.Value.Select(x => x.Id)];
 
         // Load custards with details
         Result<List<CustardEntity>> custardsResult = await _custardRepo.FindWithDetailsAsync(c =>
@@ -102,10 +105,10 @@ internal sealed class TransformYellerReport(
         // If the entity is from yeller, then associate them together
         // But not all custards have calipers that have a yeller source, so we eliminate those custards because they're not associated
         var custardCaliperAssociations =
-            from custard in custards.Value                                                          
-            from link in custard.CustardCaliperLinks                                                
-            let entity = caliperById.TryGetValue(link.CaliperId, out var caliper) ? caliper : null  
-            where entity != null                                                                    
+            from custard in custards.Value
+            from link in custard.CustardCaliperLinks
+            let entity = caliperById.TryGetValue(link.CaliperId, out var caliper) ? caliper : null
+            where entity != null
             select new CustardAssociation<CaliperEntity>(entity!, custard, entity!.PhoneNumber.Number, entity!.UnixDate);
 
         var custardCornAssociations =
@@ -179,7 +182,7 @@ internal sealed class TransformYellerReport(
         // Convert All custards that have the same EntityDate, Custard.UnixDate, and SandEntities.Single().UnixDate across them
         // These are ready for translation into the report
         List<AttributionResult> attributions = [.. firstTouchesByPhone
-            .SelectMany(d => d.Value.Select(v => 
+            .SelectMany(d => d.Value.Select(v =>
                 new AttributionResult()
                 {
                     MatchingPhone = v.MatchingPhone,
