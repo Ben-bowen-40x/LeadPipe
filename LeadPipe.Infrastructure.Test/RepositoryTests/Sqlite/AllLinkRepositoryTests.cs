@@ -47,6 +47,7 @@ public class AllLinkRepositoryTests
             PhoneNumber = TestNumber,
             Note = "",
             Source = "",
+            Label = "",
             Location = ""
         };
 
