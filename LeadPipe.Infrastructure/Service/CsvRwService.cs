@@ -146,7 +146,7 @@ internal class CsvRwService : ICsvRwService
             csv.WriteRecords(unparsedObject);
 
             // Ensure buffered data is flushed asynchronously
-            await writer.FlushAsync();
+            await writer.FlushAsync(cancellationToken);
             await stream.FlushAsync(cancellationToken);
 
             return Result.Success();
