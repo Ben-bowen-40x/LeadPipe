@@ -15,12 +15,13 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
 {
     protected record UpsertFields(string TableName, string TempTable, string EntityName, int ColumnCount);
     protected abstract UpsertFields EntityDetails { get; }
+    protected virtual string DropTempTable => $"DROP TABLE IF EXISTS {EntityDetails.TempTable};";
     protected abstract string CreateTempTable { get; }
     protected abstract string UpdateSql { get; }
     protected abstract string InsertSql { get; }
     protected abstract bool IsUpdatable { get; }
+    protected abstract int[] ColumnIndexes { get; }
     protected abstract void InsertBatch(List<TEntity> batch);
-
     internal async Task<Result<List<TEntity>>> UpsertEntityRangeAsync(
         List<TEntity> entities,
         CancellationToken ct = default)
@@ -42,6 +43,8 @@ public abstract class PlumbingContextEntityRepository<TEntity, TRepo>
         try
         {
             await using var transaction = await _context.Database.BeginTransactionAsync(ct);
+
+            await _context.Database.ExecuteSqlRawAsync(DropTempTable, ct);
 
             await _context.Database.ExecuteSqlRawAsync(CreateTempTable, ct);
 
