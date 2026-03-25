@@ -14,18 +14,20 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
     where TEntity : class, IEntity
 {
     protected record ParentFields(string Parent1Name, string Parent1Id, string Parent2Name, string Parent2Id);
-    protected record UpsertFields(string TableName, string TempTable, string Id1, string Id2, string PhoneCol, string DateCol, string EntityName);
+    protected record UpsertFields(string TableName, string TempTable, string Id1, string Id2, string PhoneCol, string DateCol, string EntityName, int ColumnCount);
     protected abstract Task AddLinks(List<TEntity> links, int batchSize, CancellationToken ct);
     protected abstract UpsertFields LinkDetails { get; }
     protected abstract ParentFields Parent { get; }
-    protected string TempId1 = "id1";
-    protected string TempId2 = "id2";
-    protected string TempPhone = "phone";
-    protected string TempDate = "matchDate";
-    protected string DropTemp => $"""
-        DROP TABLE IF EXISTS {LinkDetails.TempTable};
-    """;
-    protected string TempTable => $"""
+    protected abstract int[] ColumnIndexes { get; }
+    private readonly static string TempId1 = "id1";
+    private readonly static string TempId2 = "id2";
+    private readonly static string TempPhone = "phone";
+    private readonly static string TempDate = "matchDate";
+    protected string DropTempTable => $"DROP TABLE IF EXISTS {LinkDetails.TempTable};";
+    /// <summary>
+    /// If any of the child repositories changes its the number of columns, the sql strings must be overridden
+    /// </summary>
+    protected virtual string CreateTempTable => $"""
         CREATE TEMP TABLE {LinkDetails.TempTable} (
             {TempId1} INTEGER,
             {TempId2} INTEGER,
@@ -33,7 +35,7 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
             {TempDate} INTEGER
         );
     """;
-    protected string UpdateSql => $"""
+    protected virtual string UpdateSql => $"""
         UPDATE {LinkDetails.TableName}
         SET {LinkDetails.PhoneCol} = (
                 SELECT t.{TempPhone}
@@ -64,7 +66,7 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
               AND t.{TempDate} < {LinkDetails.TableName}.{LinkDetails.DateCol}
         );
     """;
-    protected string InsertSql => $"""
+    protected virtual string InsertSql => $"""
         INSERT INTO {LinkDetails.TableName} 
         (
             {LinkDetails.Id1}, 
@@ -107,7 +109,7 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
     """;
     internal async Task<Result<List<TEntity>>> UpsertLinkRangeAsync(
         List<TEntity> links,
-        CancellationToken ct) 
+        CancellationToken ct)
     {
         if (links.Count == 0)
         {
@@ -123,10 +125,10 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
             await using var transaction = await _context.Database.BeginTransactionAsync(ct);
 
             // Drop temp table in case it exists
-            await _context.Database.ExecuteSqlRawAsync(DropTemp, ct);
+            await _context.Database.ExecuteSqlRawAsync(DropTempTable, ct);
 
             // Create temp table with id1/id2
-            await _context.Database.ExecuteSqlRawAsync(TempTable, ct);
+            await _context.Database.ExecuteSqlRawAsync(CreateTempTable, ct);
 
             // Insert in batches
             int batchSize = 999 / 4;
