@@ -21,39 +21,9 @@ public sealed class CustardRepository
             .Include(q => q.CustardCornLinks)
             .Include(q => q.CustardPlumbingLinks);
     }
-    protected override void InsertBatch(List<CustardEntity> batch)
-    {
-#pragma warning disable CS8604
-        var values = new List<object>();
-        var rows = new List<string>();
 
-        for (int i = 0; i < batch.Count; i++)
-        {
-            var e = batch[i];
-            int offset = i * EntityDetails.ColumnCount;
-
-            rows.Add($"({{{offset}}}, {{{offset + 1}}}, {{{offset + 2}}}, {{{offset + 3}}}, {{{offset + 4}}}, {{{offset + 5}}}, {{{offset + 6}}}, {{{offset + 7}}})");
-
-            values.Add(e.Id);
-            values.Add(e.Active ? 1 : 0);
-            values.Add(e.PhoneNumber.Number);
-            values.Add(e.PhoneNumber2?.Number); // Null is fine because we're executing Sql. DON'T USE DBNull.Value. It's a .net thing, not a sql thing
-            values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-            values.Add(e.UnixDate);
-
-            // Handle potentially uninitialized or null DateTime
-            values.Add(
-                e.CancelDate == default
-                ? null // Null is fine because we're executing Sql. EF core understands how to convert null. DON'T USE DBNull.Value. It's a .net thing, not a sql thing
-                : e.CancelDate.ToString("yyyy-MM-dd HH:mm:ss"));
-            values.Add(e.UnixCancelDate);
-        }
-
-        string sql = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)};";
-        _context.Database.ExecuteSqlRaw(sql, [.. values]);
-#pragma warning restore CS8604
-    }
-    protected override UpsertFields EntityDetails => new(
+    protected override UpsertFields EntityDetails { get; } =
+    new(
         TableName: TableNames.CustardEntitiesName,
         TempTable: $"temp_{TableNames.CustardEntitiesName}",
         EntityName: nameof(CustardEntity),
@@ -116,6 +86,58 @@ public sealed class CustardRepository
     """;
 
     protected override bool IsUpdatable => true;
+
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, EntityDetails.ColumnCount)];
+    protected override void InsertBatch(List<CustardEntity> batch)
+    {
+#pragma warning disable CS8604
+        var values = new List<object>();
+        var rows = new List<string>();
+
+        for (int i = 0; i < batch.Count; i++)
+        {
+            var e = batch[i];
+            int offset = i * EntityDetails.ColumnCount;
+
+            var placeholders = ColumnIndexes.Select(ci => $"{{{offset + ci}}}");
+            rows.Add($"({string.Join(", ", placeholders)})");
+
+            // Handle potentially uninitialized or null DateTime
+            var etCancelDate =
+                e.CancelDate == default
+                ? null // Null is fine because we're executing Sql. EF core understands how to convert null. DON'T USE DBNull.Value. It's a .net thing, not a sql thing
+                : e.CancelDate.ToString(IsoString);
+
+            // Order here must match order below
+            values.Add(e.Id);
+            values.Add(e.Active ? 1 : 0);
+            values.Add(e.PhoneNumber.Number);
+            values.Add(e.PhoneNumber2?.Number); // Null is fine because we're executing Sql. DON'T USE DBNull.Value. It's a .net thing, not a sql thing
+            values.Add(e.Date.ToString(IsoString));
+            values.Add(e.UnixDate);
+            values.Add(etCancelDate);
+            values.Add(e.UnixCancelDate);
+        }
+
+        // Order here must match order above
+        string sql = $"""
+            INSERT INTO {EntityDetails.TempTable} (
+                {nameof(CustardEntity.Id)},
+                {nameof(CustardEntity.Active)},
+                {nameof(CustardEntity.PhoneNumber)},
+                {nameof(CustardEntity.PhoneNumber2)},
+                {nameof(CustardEntity.Date)},
+                {nameof(CustardEntity.UnixDate)},
+                {nameof(CustardEntity.CancelDate)},
+                {nameof(CustardEntity.UnixCancelDate)}
+            )
+            VALUES {string.Join(",", rows)};
+            """;
+        _context.Database.ExecuteSqlRaw(sql, [.. values]);
+#pragma warning restore CS8604
+    }
+
     public override async Task<Result<List<CustardEntity>>> UpsertRangeAsync(
         List<CustardEntity> entities,
         CancellationToken ct = default) => await UpsertEntityRangeAsync(entities, ct);
