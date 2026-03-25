@@ -22,40 +22,8 @@ public sealed class SandRepository
             .Include(c => c.SandCornLinks);
     }
 
-    protected override void InsertBatch(List<SandEntity> batch)
-    {
-#pragma warning disable CS8604
-        var values = new List<object>();
-        var rows = new List<string>();
-
-        for (int i = 0; i < batch.Count; i++)
-        {
-            var e = batch[i];
-            int o = i * EntityDetails.ColumnCount;
-            rows.Add($"({{{o}}},{{{o + 1}}},{{{o + 2}}},{{{o + 3}}},{{{o + 4}}},{{{o + 5}}},{{{o + 6}}},{{{o + 7}}},{{{o + 8}}},{{{o + 9}}},{{{o + 10}}},{{{o + 11}}},{{{o + 12}}},{{{o + 13}}})");
-
-            values.Add(e.Id);
-            values.Add(e.CustardId);
-            values.Add(e.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-            values.Add(e.UnixDate);
-            values.Add(e.CancelDate == default ? null : e.CancelDate.ToString("yyyy-MM-dd HH:mm:ss"));
-            values.Add(e.UnixCancelDate);
-            values.Add(e.Active ? 1 : 0);
-            values.Add(e.Complete ? 1 : 0);
-            values.Add(e.Value.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            values.Add(e.Type);
-            values.Add(e.Seller);
-            values.Add(e.Seller2);
-            values.Add(e.Seller3);
-            values.Add(e.Offerman ?? string.Empty);
-        }
-
-        string joined = $"INSERT INTO {EntityDetails.TempTable} VALUES {string.Join(",", rows)};";
-        _context.Database.ExecuteSqlRaw(joined, [.. values]);
-#pragma warning restore CS8604
-    }
-
-    protected override UpsertFields EntityDetails => new(
+    protected override UpsertFields EntityDetails { get; } =
+    new(
         TableName: TableNames.SandEntitiesName,
         TempTable: $"temp_{TableNames.SandEntitiesName}",
         EntityName: nameof(SandEntity),
@@ -141,7 +109,65 @@ public sealed class SandRepository
             WHERE t.{nameof(SandEntity.Id)} = temp.{nameof(SandEntity.Id)}
         );
     """;
+
     protected override bool IsUpdatable => true;
+
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, EntityDetails.ColumnCount)];
+    protected override void InsertBatch(List<SandEntity> batch)
+    {
+#pragma warning disable CS8604
+        var values = new List<object>();
+        var rows = new List<string>();
+
+        for (int i = 0; i < batch.Count; i++)
+        {
+            var e = batch[i];
+            int o = i * EntityDetails.ColumnCount;
+            var placeholders = ColumnIndexes.Select(ci => $"{{{o + ci}}}");
+            rows.Add($"({string.Join(", ", placeholders)})");
+
+            // Order here must match order below
+            values.Add(e.Id);
+            values.Add(e.CustardId);
+            values.Add(e.Date.ToString(IsoString));
+            values.Add(e.UnixDate);
+            values.Add(e.CancelDate == default ? null : e.CancelDate.ToString(IsoString));
+            values.Add(e.UnixCancelDate);
+            values.Add(e.Active ? 1 : 0);
+            values.Add(e.Complete ? 1 : 0);
+            values.Add(e.Value.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            values.Add(e.Type);
+            values.Add(e.Seller);
+            values.Add(e.Seller2);
+            values.Add(e.Seller3);
+            values.Add(e.Offerman ?? string.Empty);
+        }
+
+        // Order here must match order above
+        string joined = $"""
+            INSERT INTO {EntityDetails.TempTable} (
+                {nameof(SandEntity.Id)},
+                {nameof(SandEntity.CustardId)},
+                {nameof(SandEntity.Date)},
+                {nameof(SandEntity.UnixDate)},
+                {nameof(SandEntity.CancelDate)},
+                {nameof(SandEntity.UnixCancelDate)},
+                {nameof(SandEntity.Active)},
+                {nameof(SandEntity.Complete)},
+                {nameof(SandEntity.Value)},
+                {nameof(SandEntity.Type)},
+                {nameof(SandEntity.Seller)},
+                {nameof(SandEntity.Seller2)},
+                {nameof(SandEntity.Seller3)},
+                {nameof(SandEntity.Offerman)}
+            )
+            VALUES {string.Join(",", rows)};
+            """;
+        _context.Database.ExecuteSqlRaw(joined, [.. values]);
+#pragma warning restore CS8604
+    }
+
     public override async Task<Result<List<SandEntity>>> UpsertRangeAsync(
         List<SandEntity> entities,
         CancellationToken ct = default)
