@@ -1,13 +1,14 @@
-﻿using LeadPipe.Infrastructure.Attributes;
+﻿using LeadPipe.Domain.ValueObjects;
+using LeadPipe.Infrastructure.Attributes;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Service;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Infrastructure.Service.Report;
 
-[SourceKey(Domain.ValueObjects.Source.Yeller)]
+[SourceKey(Source.Yeller)]
 public sealed class YellerCsvReporter(
     ICsvRwService csv,
     IInfrastructureSettings settings
-    ) : CsvReporter<ReportPlumbing>(csv, new FileInfo(settings.LabLoc!.Report!))
+    ) : CsvReporter<ReportPlumbing>(csv, new FileInfo(settings.YellerLoc!.Report!))
 { }
