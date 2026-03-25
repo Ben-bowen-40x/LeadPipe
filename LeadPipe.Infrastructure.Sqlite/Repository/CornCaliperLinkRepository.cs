@@ -19,24 +19,29 @@ public sealed class CornCaliperLinkRepository
             .Include(c => c.CornEntity)
             .Include(c => c.CaliperEntity);
     }
-    
-    protected override UpsertFields LinkDetails { get; } = new(
+
+    protected override UpsertFields LinkDetails { get; } =
+    new(
         TableName: TableNames.CornCaliperLinksName,
         TempTable: $"temp_{TableNames.CornCaliperLinksName}",
         Id1: nameof(CornCaliperLink.CornId),
         Id2: nameof(CornCaliperLink.CaliperId),
         PhoneCol: nameof(CornCaliperLink.MatchingPhone),
         DateCol: nameof(CornCaliperLink.UnixMatchDate),
-        EntityName: nameof(CornCaliperLink)
+        EntityName: nameof(CornCaliperLink),
+        ColumnCount: 4
         );
-
-    protected override ParentFields Parent => new(
+    
+    protected override ParentFields Parent { get; } = 
+    new(
         Parent1Name: TableNames.CornEntitiesName,
         Parent1Id: nameof(CornEntity.Id),
         Parent2Name: TableNames.CaliperEntitiesName,
         Parent2Id: nameof(CaliperEntity.Id)
     );
-    
+
+    private static int[]? _columnIndexes;
+    protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, LinkDetails.ColumnCount)];
     protected override async Task AddLinks(List<CornCaliperLink> links, int batchSize, CancellationToken ct)
     {
         for (int i = 0; i < links.Count; i += batchSize)
@@ -49,15 +54,27 @@ public sealed class CornCaliperLinkRepository
             {
                 var link = batch[j];
 
-                int o = j * 4;
-                rows.Add($"({{{o}}}, {{{o + 1}}}, {{{o + 2}}}, {{{o + 3}}})");
+                int o = j * LinkDetails.ColumnCount;
+                var placeholders = ColumnIndexes.Select(columnIndex => $"{{{o + columnIndex}}}");
+                rows.Add($"({string.Join(", ", placeholders)})");
+
+                // Order here must match order below
                 values.Add(link.CornId);
                 values.Add(link.CaliperId);
                 values.Add(link.MatchingPhone);
                 values.Add(link.UnixMatchDate);
             }
 
-            string joined = $"INSERT INTO {LinkDetails.TempTable} VALUES {string.Join(",", rows)}";
+            // Order here must match order above
+            string joined = $"""
+                INSERT INTO {LinkDetails.TempTable} (
+                    {nameof(CornCaliperLink.CornId)},
+                    {nameof(CornCaliperLink.CaliperId)},
+                    {nameof(CornCaliperLink.MatchingPhone)},
+                    {nameof(CornCaliperLink.UnixMatchDate)}
+                )
+                VALUES {string.Join(",", rows)}
+                """;
             await _context.Database.ExecuteSqlRawAsync(joined, values, ct);
         }
     }
