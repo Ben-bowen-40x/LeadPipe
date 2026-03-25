@@ -38,6 +38,7 @@ public abstract class PlumbingContextBaseRepository<TEntity, TRepo>
             throw new InvalidOperationException(
                 $"{typeof(T).Name}.{propertyName} must not be string when used in raw SQL upsert.");
     }
+    protected static string IsoString { get; } = "yyyy-MM-dd HH:mm:ss";
     #endregion
 
     public async Task<Result<List<TEntity>>> GetAllWithDetailsAsync(CancellationToken ct = default)
