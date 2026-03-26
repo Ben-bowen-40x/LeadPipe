@@ -22,6 +22,7 @@ public class PlumbingEntity : ISourceEntity, IPhoneDateIdEntity
         SandPlumbingLinks = [.. p.SandPlumbingLinks.Select(c => c)];
         PlumbingCaliperLinks = [.. p.PlumbingCaliperLinks.Select(c => c)];
         CornPlumbingLinks = [.. p.CornPlumbingLinks.Select(c => c)];
+        PhoneNumbers = [.. p.PhoneNumbers.Select(c => c)];
 
     }
     public required long Id { get; set; }
@@ -37,6 +38,7 @@ public class PlumbingEntity : ISourceEntity, IPhoneDateIdEntity
     public ICollection<SandPlumbingLink> SandPlumbingLinks { get; set; } = [];
     public ICollection<PlumbingCaliperLink> PlumbingCaliperLinks { get; set; } = [];
     public ICollection<CornPlumbingLink> CornPlumbingLinks { get; set; } = [];
+    public ICollection<PlumbingPhoneNumber> PhoneNumbers { get; set; } = [];
 
     internal PlumbingEntity Clone() => new(this);
 }
