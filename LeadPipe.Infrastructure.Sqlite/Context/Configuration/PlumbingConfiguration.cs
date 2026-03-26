@@ -18,8 +18,7 @@ internal sealed class PlumbingConfiguration : IEntityTypeConfiguration<PlumbingE
             p.UnixDate,
             p.Source,
             p.MetaData
-        }
-        ).IsUnique();
+        }).IsUnique();
         plumb.HasIndex(p => p.Date);
         plumb.Property(p => p.Source)
             .HasConversion<string>()
@@ -27,5 +26,10 @@ internal sealed class PlumbingConfiguration : IEntityTypeConfiguration<PlumbingE
         plumb.Property(c => c.PhoneNumber)
             .HasConversion(PlumbingConversionsHelper.PhoneNumberAndLongConversion)
             .Metadata.SetValueComparer(PlumbingConversionsHelper.PhoneNumberComparer);
+
+        plumb.HasMany(p => p.PhoneNumbers)
+            .WithOne(pn => pn.Plumbing)
+            .HasForeignKey(pn => pn.PlumbingId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
