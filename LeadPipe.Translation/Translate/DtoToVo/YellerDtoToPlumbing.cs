@@ -1,28 +1,31 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interfaces.Translate;
-using LeadPipe.Translation.Primitives;
 using System.Data;
 
 namespace LeadPipe.Translation.Translate.DtoToVo;
 
-internal class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
+internal partial class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
 {
     public Plumbing Translate(YellerDto data)
     {
         // Find Phone Number
-        PhoneNumber number = new(PhoneNumber.Default);
-        if (data.project?.survey_answers is SurveyAnswer[] answers)
-        {
-            foreach (SurveyAnswer ans in answers)
-                if (ans.answer_text is string[] answerText)
-                    foreach (string a in answerText)
-                        if (PhoneNumber.TryParse(a, out PhoneNumber? parsed) && parsed.Number != PhoneNumber.Default && parsed is not null)
-                        {
-                            number = parsed;
-                            break;
-                        }
-        }
+        HashSet<long> seen = [];
+        var collectedNumbers = (data.project?.survey_answers?
+            .OfType<SurveyAnswer>()
+            .SelectMany(ans => ans.answer_text ?? Array.Empty<string>()) // flatten all answer_text arrays
+            .SelectMany(raw =>
+                PhoneNumber.TryParseMany(raw, out var nums)
+                    ? nums.Where(n => seen.Add(n.Number)) // only keep new numbers
+                    : []
+            )
+            .ToList()
+        ) ?? [];
+
+        PhoneNumber canonicalPhoneNumber = collectedNumbers.Count == 0
+            ? PhoneNumber.DefaultPhoneNumber
+            : collectedNumbers[^1];
+
 
         // Date
         DateTimeOffset date =
@@ -51,47 +54,14 @@ internal class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
         string metadata = string.Empty;
         return new(
             Id: 0,
-            PhoneNumber: number,
+            PhoneNumber: canonicalPhoneNumber,
             Date: date,
             Contents: contents,
             Branch: null,
             MetaData: metadata,
-            Source.Yeller
+            Source.Yeller,
+            Numbers: [.. collectedNumbers]
         );
     }
-}
 
-internal class LatherDtoToPlumbing(IDateTimeTranslate translate) : IDtoToVo<LatherDto, Plumbing>
-{
-    private readonly IDateTimeTranslate _translate = translate;
-    public Plumbing Translate(LatherDto data)
-    {
-        long id = long.TryParse(data.LeadId, out long i) ? i : 0;
-        PhoneNumber phoneNumber = PhoneNumber.TryParse(data.Phone, out PhoneNumber p) ? p : new(PhoneNumber.Default);
-
-        DateTime dt = DateTime.TryParse(string.Join(" ", [data.Date, data.Time]), out DateTime d) ? d : DateTime.MinValue;
-        ETimeZone zone = data.TimeZone?.ToLowerInvariant() switch
-        {
-            "est" or "edt" => ETimeZone.Eastern,
-            "pst" or "pdt" => ETimeZone.Pacific,
-            "cst" or "cdt" => ETimeZone.Central,
-            "utc" => ETimeZone.Utc,
-            _ => ETimeZone.Mountain, // Default to mountain
-
-        };
-        DateTimeOffset date = _translate.Convert(dt, zone);
-        string metaData = $"Lead Id: {id}";
-
-        Plumbing result = new(
-            Id: id,
-            PhoneNumber: phoneNumber,
-            Date: date,
-            Contents: null,
-            Branch: null,
-            MetaData: metaData,
-            Source: Source.Lather
-            );
-
-        return result;
-    }
 }
