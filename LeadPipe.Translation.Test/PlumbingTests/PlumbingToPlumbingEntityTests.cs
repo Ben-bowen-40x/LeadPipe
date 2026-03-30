@@ -14,7 +14,8 @@ public sealed class PlumbingToPlumbingEntityTests
             Contents: "Rodents",
             MetaData: "Meta",
             Branch: "Elm",
-            Source: Source.Calli
+            Source: Source.Calli,
+            Numbers: null
         );
 
     [Fact]
@@ -56,7 +57,8 @@ public sealed class PlumbingToPlumbingEntityTests
             Contents: null,
             MetaData: "Meta",
             Branch: "Elm",
-            Source: Source.Leaf
+            Source: Source.Leaf,
+            Numbers: null
         );
         var translator = new PlumbingToPlumbingEntity();
 
