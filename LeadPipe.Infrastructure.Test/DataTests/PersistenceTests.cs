@@ -10,16 +10,16 @@ namespace LeadPipe.Infrastructure.Test.DataTests;
 public class PersistenceTests
 {
     #region PlumbingPersistence
-
+    private readonly IRepository<PlumbingEntity> repo = Substitute.For<IRepository<PlumbingEntity>>();
+    private readonly IRepository<PlumbingPhoneNumber> phoneRepo = Substitute.For<IRepository<PlumbingPhoneNumber>>();
     [Fact]
     public async Task PlumbingPersistence_SaveAsync_ReturnsSuccess()
     {
-        var repo = Substitute.For<IRepository<PlumbingEntity>>();
         var entity = new PlumbingEntity() { Id = 0, MetaData = string.Empty, PhoneNumber = new(PhoneNumber.Default) };
         repo.UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<PlumbingEntity> { entity })));
 
-        var persistence = new PlumbingPersistence(repo);
+        var persistence = new PlumbingPersistence(repo, phoneRepo);
 
         var result = await persistence.SaveAsync(new List<PlumbingEntity> { entity });
 
@@ -30,11 +30,10 @@ public class PersistenceTests
     [Fact]
     public async Task PlumbingPersistence_SaveAsync_ReturnsFailure()
     {
-        var repo = Substitute.For<IRepository<PlumbingEntity>>();
         repo.UpsertRangeAsync(Arg.Any<List<PlumbingEntity>>())
             .Returns(Task.FromResult(Result.Failure<List<PlumbingEntity>>("error")));
 
-        var persistence = new PlumbingPersistence(repo);
+        var persistence = new PlumbingPersistence(repo, phoneRepo);
 
         var result = await persistence.SaveAsync(new List<PlumbingEntity> { new PlumbingEntity() { Id = 0, MetaData = string.Empty, PhoneNumber = new(PhoneNumber.Default) } });
 
@@ -51,7 +50,7 @@ public class PersistenceTests
     public async Task CaliperEntityPersistence_SaveAsync_ReturnsSuccess()
     {
         var repo = Substitute.For<IRepository<CaliperEntity>>();
-        var entity = new CaliperEntity() { Id = 0, Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}", Label = "label", PhoneNumber = new(PhoneNumber.Default)};
+        var entity = new CaliperEntity() { Id = 0, Note = string.Empty, Location = string.Empty, Source = $"{Source.Test}", Label = "label", PhoneNumber = new(PhoneNumber.Default) };
         repo.UpsertRangeAsync(Arg.Any<List<CaliperEntity>>())
             .Returns(Task.FromResult(Result.Success(new List<CaliperEntity> { entity })));
 
