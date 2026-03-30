@@ -33,7 +33,8 @@ public class TranslatorBackAndForthTests
             Contents: dto.PestProblem,
             Branch: "Elm",
             MetaData: "Test",
-            Source: Source.Calli
+            Source: Source.Calli,
+            Numbers: null
         );
 
         // Act: Perform 1000 back-and-forth translations
@@ -86,7 +87,8 @@ public class TranslatorBackAndForthTests
             Contents: dto.messages[0].message!,
             Branch: "Elm",
             MetaData: "Test",
-            Source: Source.Leaf
+            Source: Source.Leaf,
+            Numbers: null
         );
 
         // Act: 1000 round-trip translations
