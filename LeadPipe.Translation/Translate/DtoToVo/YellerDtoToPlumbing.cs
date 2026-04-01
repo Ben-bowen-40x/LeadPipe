@@ -11,9 +11,8 @@ internal partial class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
     {
         // Find Phone Number
         HashSet<long> seen = [];
-        var collectedNumbers = (data.project?.survey_answers?
-            .OfType<SurveyAnswer>()
-            .SelectMany(ans => ans.answer_text ?? Array.Empty<string>()) // flatten all answer_text arrays
+        List<PhoneNumber> collectedNumbers = (data.project?.survey_answers?
+            .SelectMany(ans => ans.answer_text ?? []) // flatten all answer_text arrays
             .SelectMany(raw =>
                 PhoneNumber.TryParseMany(raw, out var nums)
                     ? nums.Where(n => seen.Add(n.Number)) // only keep new numbers
@@ -22,21 +21,28 @@ internal partial class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
             .ToList()
         ) ?? [];
 
+        collectedNumbers.AddRange(
+        data.events?.events?
+            .SelectMany(e =>
+                PhoneNumber.TryParseMany(FindTextInEvents(e), out var phoneNumbers)
+                    ? phoneNumbers.Where(n => seen.Add(n.Number))
+                    : []
+            ) ?? []);
+
         PhoneNumber canonicalPhoneNumber = collectedNumbers.Count == 0
             ? PhoneNumber.DefaultPhoneNumber
             : collectedNumbers[^1];
-
 
         // Date
         DateTimeOffset date =
             data.time_created is DateTime dtc
                 ? new(DateTime.SpecifyKind(dtc, DateTimeKind.Utc), TimeSpan.Zero)
-                : DateTimeOffset.MaxValue;
+                : DateTimeOffset.MaxValue; // This is a domain rule. When compared, there is significance to MaxValue vs MinValue
 
         // Contents
-        IEnumerable<string> contentsStr = [];
+        List<string> contentsStr = [];
         if (data.project?.survey_answers is SurveyAnswer[] surveyAnswers)
-            contentsStr = surveyAnswers.Select(a =>
+            contentsStr = [.. surveyAnswers.Select(a =>
             {
                 string question = a.question_text ?? "(Question text missing)";
                 string[] answers = a.answer_text ?? [];
@@ -46,12 +52,20 @@ internal partial class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
                         ? [question, "(Answer missing)"]
                         : [question, .. answers]
                 );
-            });
-        else contentsStr = [""];
+            })];
 
-        string contents = string.Join(" <|> ", contentsStr);
+        if (data.events?.events is Event[] events)
+        {
+            contentsStr.AddRange(
+                events
+                    .OrderBy(e => e.time_created ?? DateTime.MaxValue)
+                    .Select(FindTextInEvents)
+            );
+        }
 
-        string metadata = string.Empty;
+        string contents = string.Join(" <> ", contentsStr);
+
+        string metadata = $"ID: {data.id}";
         return new(
             Id: 0,
             PhoneNumber: canonicalPhoneNumber,
@@ -64,4 +78,15 @@ internal partial class YellerDtoToPlumbing : IDtoToVo<YellerDto, Plumbing>
         );
     }
 
+    private static string FindTextInEvents(Event e)
+    {
+        string? t = e.event_content?.text;
+        string? fallback = e.event_content?.fallback_text;
+
+        if (string.Equals(t, fallback, StringComparison.InvariantCultureIgnoreCase))
+            return t ?? string.Empty;
+
+        return string.Join(" | ", new[] { t, fallback }
+            .Where(s => !string.IsNullOrWhiteSpace(s)));
+    }
 }
