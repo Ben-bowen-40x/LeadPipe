@@ -27,4 +27,6 @@ public interface IYellerSettings
     string? YellerPlumbingName { get; set; }
     string? YellerCaliperName { get; set; }
     string? YellerCornName { get; set; }
+    string? YellerEventsEndpoint { get; set; }
+    string? YellerRecursion { get; set; }
 }
