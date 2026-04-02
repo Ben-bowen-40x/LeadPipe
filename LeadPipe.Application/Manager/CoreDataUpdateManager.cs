@@ -33,16 +33,16 @@ internal class CoreDataUpdateManager : ICoreDataUpdateManager
 
         _handlers = new()
         {
-            { SyncKey.Caliper, refresh => RunIfDue(SyncKey.Caliper, refresh, false, _caliper, _syncGate) },
-            { SyncKey.Custard, refresh => RunIfDue(SyncKey.Custard, refresh, true, _custard, _syncGate) },
-            { SyncKey.Sandwich, refresh => RunIfDue(SyncKey.Sandwich, refresh, true, _sandwich, _syncGate) },
-            { SyncKey.CornFormula, refresh => RunIfDue(SyncKey.CornFormula, refresh, false, _corn, _syncGate) }
+            { SyncKey.Caliper, refresh => RunIfDue(refresh, false, _caliper, _syncGate) },
+            { SyncKey.Custard, refresh => RunIfDue(refresh, true, _custard, _syncGate) },
+            { SyncKey.Sandwich, refresh => RunIfDue(refresh, true, _sandwich, _syncGate) },
+            { SyncKey.CornFormula, refresh => RunIfDue(refresh, false, _corn, _syncGate) }
         };
     }
-
-    public Task<Result> Manage(bool refresh) => Manage(refresh, [.. _handlers.Keys]);
     
     private static string InvalidKey(SyncKey key) => $"Invalid key: {key}";
+
+    public Task<Result> Manage(bool refresh) => Manage(refresh, [.. _handlers.Keys]);
 
     public async Task<Result> Manage(bool refresh, params SyncKey[] keys)
     {
@@ -59,18 +59,18 @@ internal class CoreDataUpdateManager : ICoreDataUpdateManager
         return Result.Success();
     }
 
-    private static async Task<Result> RunIfDue<T>(SyncKey key, bool refresh, bool withDetails, IUpdateService<T> service, ISyncGate syncGate)
+    private static async Task<Result> RunIfDue<T>(bool refresh, bool withDetails, IUpdateService<T> service, ISyncGate syncGate)
     {
-        bool shouldRun = await syncGate.ShouldRunAsync(null, key);
+        bool shouldRun = await syncGate.ShouldRunAsync(null, service.SyncKey);
         if (!shouldRun)
             return Result.Success();
 
         Result result = await UpdatedAndSaved(refresh, withDetails, service);
 
         if (result.IsSuccess)
-            await syncGate.MarkSuccessAsync(null, key);
+            await syncGate.MarkSuccessAsync(null, service.SyncKey);
         else
-            await syncGate.MarkFailureAsync(null, key);
+            await syncGate.MarkFailureAsync(null, service.SyncKey);
 
         return result;
     }
