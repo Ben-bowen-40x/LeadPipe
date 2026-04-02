@@ -9,22 +9,32 @@ public interface ISourceDataUpdateManager
     Task<Result> Manage(bool refresh);
     Task<Result> Manage(bool refresh, params Source[] sources);
 }
-public class SourceDataUpdateManager(
-    IUpdateFactory updateFactory,
-    ISyncGate syncGate
-    ) : ISourceDataUpdateManager
+public class SourceDataUpdateManager : ISourceDataUpdateManager
 {
-    private readonly IUpdateFactory _updateFactory = updateFactory;
-    private readonly ISyncGate _syncGate = syncGate;
-    private static readonly Source[] ValidSources = [.. Enum.GetValues<Source>().Except([Source.Test,Source.Test2])];
+    private readonly Source[] _validSources;
+    private readonly ISyncGate _syncGate;
+    private readonly Dictionary<Source, IUpdateService<Plumbing>> _services;
 
-    public Task<Result> Manage(bool refresh) => Manage(refresh, ValidSources);
+    public SourceDataUpdateManager(
+        IUpdateFactory updateFactory,
+        ISyncGate syncGate
+    )
+    {
+        _syncGate = syncGate;
+        _validSources = [.. Enum.GetValues<Source>().Except([Source.Test, Source.Test2])];
+        _services = _validSources.ToDictionary(
+        s => s,
+        updateFactory.GetService<Plumbing>
+    );
+    }
+
+    public Task<Result> Manage(bool refresh) => Manage(refresh, _validSources);
 
     public async Task<Result> Manage(bool refresh, params Source[] sources)
     {
-        foreach(var source in sources)
+        foreach (var source in sources)
         {
-            var result = await RunIfDue(source, refresh, _updateFactory.GetService<Plumbing>(source), _syncGate);
+            var result = await RunIfDue(source, refresh, _services[source], _syncGate);
             if (result.IsFailure)
                 return result;
         }
