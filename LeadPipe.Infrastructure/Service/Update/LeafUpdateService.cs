@@ -14,5 +14,5 @@ internal sealed class LeafUpdateService(
     IDtoToVo<LeafDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
     IDataPersistence<PlumbingEntity> persistence
-    ) : UpdateService<LeafDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
+    ) : UpdateService<LeafDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence, SyncKey.Plumbing), IUpdateService<Plumbing>
 { }
