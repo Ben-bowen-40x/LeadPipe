@@ -14,5 +14,5 @@ internal sealed class LatherUpdateService(
     IDtoToVo<LatherDto, Plumbing> dtoToVo,
     IVoToEntity<Plumbing, PlumbingEntity> voToEntity,
     IDataPersistence<PlumbingEntity> persistence
-) : UpdateService<LatherDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<Plumbing>
+) : UpdateService<LatherDto, Plumbing, PlumbingEntity>(source, dtoToVo, voToEntity, persistence, SyncKey.Plumbing), IUpdateService<Plumbing>
 { }
