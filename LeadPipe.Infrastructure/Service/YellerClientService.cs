@@ -90,7 +90,8 @@ internal class YellerClientService(
             return dtoResult;
 
         // Retrieve events
-        Result<List<YellerDto>> dtoWithEvents = await GetEvents([.. dtoResult.Value.Where(r => r.id is not null)], ct);
+        List<YellerDto> notNullIds = [.. dtoResult.Value.Where(r => r.id is not null)];
+        Result<List<YellerDto>> dtoWithEvents = await GetEvents(notNullIds, ct);
 
         return dtoWithEvents;
     }
@@ -164,7 +165,7 @@ internal class YellerClientService(
         return deepCopy;
 
     }
-    string GetEventEndpoint(string id) => $"{_settings.YellerFinalEndpoint!}/{id}/{_settings.YellerEventsEndpoint!}";
+    string GetEventEndpoint(string id) => $"{_settings.YellerFinalEndpoint!}/{id}{_settings.YellerEventsEndpoint!}";
     string GetOlderEndpoint(string id, string specialId) => GetEventEndpoint(id) + $"?{_settings.YellerRecursion!}={specialId}";
 
     private static YellerDto DeepCopySetter(YellerDto dto, List<Event> events)
@@ -222,9 +223,10 @@ internal class YellerClientService(
                         "Response failure ({Reason}). Errors: {Errors}/{Limit}. Process: {Process}. Endpoint: {Endpoint}",
                         response.ReasonPhrase, errors, errorLimit, process, endpoint);
 
-                    if (response.ReasonPhrase is not null && response.StatusCode == HttpStatusCode.Unauthorized)
+                    // If 404 NotFound, then there's a problem with the endpoint
+                    if (response.ReasonPhrase is not null && (response.StatusCode == HttpStatusCode.Unauthorized || response.StatusCode == HttpStatusCode.NotFound))
                     {
-                        errorMsg = response.ReasonPhrase;
+                        errorMsg = response.ReasonPhrase; //response.StatusCode == HttpStatusCode.NotFound ? response.ReasonPhrase  + " Note: Fix Endpoint" : response.ReasonPhrase;
                         break;
                     }
 
