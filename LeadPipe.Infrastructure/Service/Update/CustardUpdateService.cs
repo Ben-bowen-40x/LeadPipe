@@ -10,5 +10,5 @@ internal sealed class CustardUpdateService(
     IDataSourceAsync<CustardMySqlEntity> custard,
     IEntityToVo<CustardMySqlEntity, Custard> eToVo,
     IDataPersistence<Custard> persist
-    ) : ValueObjectUpdateService<CustardMySqlEntity, Custard>(custard, eToVo, persist), IUpdateService<Custard>
+    ) : ValueObjectUpdateService<CustardMySqlEntity, Custard>(custard, eToVo, persist, SyncKey.Custard), IUpdateService<Custard>
 { }
