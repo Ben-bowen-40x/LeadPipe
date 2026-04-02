@@ -24,8 +24,6 @@ public class SourceDataUpdateManager(
     {
         foreach(var source in sources)
         {
-            if (source == Source.Test || source == Source.Test2)
-                continue;
             var result = await RunIfDue(source, refresh, _updateFactory.GetService<Plumbing>(source), _syncGate);
             if (result.IsFailure)
                 return result;
@@ -35,16 +33,16 @@ public class SourceDataUpdateManager(
 
     private static async Task<Result> RunIfDue<T>(Source source, bool refresh, IUpdateService<T> service, ISyncGate syncGate)
     {
-        bool shouldRun = await syncGate.ShouldRunAsync(source, SyncKey.Plumbing);
+        bool shouldRun = await syncGate.ShouldRunAsync(source, service.SyncKey);
         if (!shouldRun)
             return Result.Success();
 
         Result result = await UpdatedAndSaved(refresh, false, service);
 
         if (result.IsSuccess)
-            await syncGate.MarkSuccessAsync(source, SyncKey.Plumbing);
+            await syncGate.MarkSuccessAsync(source, service.SyncKey);
         else
-            await syncGate.MarkFailureAsync(source, SyncKey.Plumbing);
+            await syncGate.MarkFailureAsync(source, service.SyncKey);
 
         return result;
     }
