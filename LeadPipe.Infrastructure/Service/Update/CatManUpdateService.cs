@@ -14,5 +14,5 @@ internal sealed class CatManUpdateService(
     IDtoToVo<CatManDto, CornFormula> dtoToVo,
     IVoToEntity<CornFormula, CornEntity> voToEntity,
     IDataPersistence<CornEntity> persistence
-    ) : UpdateService<CatManDto, CornFormula, CornEntity>(source, dtoToVo, voToEntity, persistence), IUpdateService<CornFormula>
+    ) : UpdateService<CatManDto, CornFormula, CornEntity>(source, dtoToVo, voToEntity, persistence, SyncKey.CornFormula), IUpdateService<CornFormula>
 { }
