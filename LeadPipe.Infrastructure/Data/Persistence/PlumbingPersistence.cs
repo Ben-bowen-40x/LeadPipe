@@ -3,23 +3,26 @@ using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Core;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 
 namespace LeadPipe.Infrastructure.Data.Persistence;
 
 internal class PlumbingPersistence(
     IRepository<PlumbingEntity> plumbing,
+    IMetaDataEntityToMetaDataDb<PlumbingEntity, string> metaTranslate,
     IRepository<PlumbingPhoneNumber> phone
     ) : IDataPersistence<PlumbingEntity>
 {
     private readonly IRepository<PlumbingEntity> _plumbing = plumbing;
     private readonly IRepository<PlumbingPhoneNumber> _phone = phone;
+    private readonly IMetaDataEntityToMetaDataDb<PlumbingEntity, string> _metaTranslate = metaTranslate;
 
     public async Task<Result> SaveAsync(List<PlumbingEntity> t)
     {
         var phonesToUpsert = t
             .Where(p => p.PhoneNumbers is not null && p.PhoneNumbers.Count > 0)
             .ToDictionary(
-                p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, p.MetaData ?? string.Empty),
+                p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, _metaTranslate.Translate(p)),
                 p => p.PhoneNumbers);
 
         Result<List<PlumbingEntity>> result = await _plumbing.UpsertRangeAsync(t);
@@ -29,7 +32,7 @@ internal class PlumbingPersistence(
             return result;
 
         Dictionary<PlumbingKey, PlumbingEntity> inputMap = t
-            .GroupBy(p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, p.MetaData ?? string.Empty))
+            .GroupBy(p => new PlumbingKey(p.PhoneNumber, p.UnixDate, p.Source, _metaTranslate.Translate(p)))
             .ToDictionary(g => g.Key, g => g.First());
 
         List<PhoneNumber> inputNumbers = [.. t.Select(t => t.PhoneNumber).Distinct()];
@@ -45,7 +48,7 @@ internal class PlumbingPersistence(
             return Result.Failure($"Failed to retrieve {nameof(PlumbingEntity)} list for {nameof(PlumbingPhoneNumber)} attribution sequence: {retrieved.Error}");
 
         Dictionary<PlumbingKey, PlumbingEntity> dbMap = retrieved.Value.ToDictionary(r =>
-            new PlumbingKey(r.PhoneNumber, r.UnixDate, r.Source, r.MetaData ?? string.Empty)
+            new PlumbingKey(r.PhoneNumber, r.UnixDate, r.Source, _metaTranslate.Translate(r))
         );
 
         List<PlumbingPhoneNumber> phones = [];
