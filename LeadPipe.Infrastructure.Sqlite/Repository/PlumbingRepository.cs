@@ -11,11 +11,11 @@ namespace LeadPipe.Infrastructure.Sqlite.Repository;
 public class PlumbingRepository
     (
         PlumbingContext context,
-        IMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> metaTranslator,
+        IPlumbingMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> metaTranslator,
         ILogger<PlumbingRepository> logger
     ) : PlumbingContextEntityRepository<PlumbingEntity, PlumbingRepository>(context, logger), IRepository<PlumbingEntity>
 {
-    private readonly IMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> _metaTranslator = metaTranslator;
+    private readonly IPlumbingMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> _metaTranslator = metaTranslator;
     protected override IQueryable<PlumbingEntity> WithIncludes(IQueryable<PlumbingEntity> q)
     {
         return q
