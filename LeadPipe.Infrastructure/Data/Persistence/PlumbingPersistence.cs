@@ -9,13 +9,13 @@ namespace LeadPipe.Infrastructure.Data.Persistence;
 
 internal class PlumbingPersistence(
     IRepository<PlumbingEntity> plumbing,
-    IMetaDataEntityToMetaDataDb<PlumbingEntity, string> metaTranslate,
+    IMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> metaTranslate,
     IRepository<PlumbingPhoneNumber> phone
     ) : IDataPersistence<PlumbingEntity>
 {
     private readonly IRepository<PlumbingEntity> _plumbing = plumbing;
     private readonly IRepository<PlumbingPhoneNumber> _phone = phone;
-    private readonly IMetaDataEntityToMetaDataDb<PlumbingEntity, string> _metaTranslate = metaTranslate;
+    private readonly IMetaDataCanonicalPersistenceFormat<PlumbingEntity, string> _metaTranslate = metaTranslate;
 
     public async Task<Result> SaveAsync(List<PlumbingEntity> t)
     {
