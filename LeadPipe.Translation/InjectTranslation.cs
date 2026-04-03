@@ -23,6 +23,7 @@ public static class InjectTranslation
 
         // Primitives
         services.AddScoped<IDateTimeTranslate, DateTimeTranslate>();
+        services.AddScoped<IPlumbingMetaDataCanonicalPersistenceFormat<PlumbingEntity, string>, PlumbingMetaDataCanonicalPersistenceFormat>();
 
         // IDtoToVo
         services.AddScoped<IDtoToVo<CalliDto, Plumbing>, CalliDtoToPlumbing>();
