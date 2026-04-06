@@ -2,6 +2,8 @@
 using LeadPipe.Infrastructure.Entity.MySql;
 using LeadPipe.Infrastructure.MySql.Context;
 using LeadPipe.Infrastructure.MySql.Repository;
+using LeadPipe.Infrastructure.Settings;
+using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.RepositoryTests.MySql;
 
@@ -9,8 +11,9 @@ public class CaliperMySqlRepositoryTests
 {
     private static CaliperMySqlRepository CreateRepo(out MySqlSchema2Context context, string name)
     {
+        IInfrastructureSettings settings = Substitute.For<IInfrastructureSettings>();
         context = DbContextTestFactory.CreateTestContext<MySqlSchema2Context>(nameof(CaliperMySqlRepositoryTests) + name);
-        return new CaliperMySqlRepository(context);
+        return new CaliperMySqlRepository(settings, context);
     }
 
     [Fact]
