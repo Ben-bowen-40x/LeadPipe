@@ -48,6 +48,7 @@ public class ReportYeller
     public DateTime EventDateUtc { get; set; }
     public DateTime CloseDateUtc { get; set; }
     public decimal Value { get; set; }
+    public required bool Completed { get; set; }
     public required string Type { get; set; }
     public required string CombinedSellers { get; set; }
     public required long SId { get; set; } // This is the SandId
