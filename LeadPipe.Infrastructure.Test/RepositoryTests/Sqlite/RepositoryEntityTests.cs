@@ -1,5 +1,6 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
+using LeadPipe.Infrastructure.Interfaces.Translate;
 using LeadPipe.Infrastructure.Sqlite.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -26,6 +27,7 @@ public class RepositoryEntityTests
             Date = DateTime.UtcNow,
             UnixDate = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             Note = "Note1",
+            Label = "label",
             Source = "Source1",
             Location = "Location1",
             Duration = 123,
@@ -173,14 +175,15 @@ public class RepositoryEntityTests
         Assert.Equal(now.AddDays(20).ToString(), updated.CancelDate.ToString());
         Assert.False(updated.Active);
     }
-    
+
     [Fact]
     public async Task Plumbing_UpsertEntityRangeAsync_InsertsAndUpdatesCorrectly()
     {
         // Arrange
         var context = SqliteTestContextFactory.Create(out _);
         var logger = NSubstitute.Substitute.For<ILogger<PlumbingRepository>>();
-        var repo = new PlumbingRepository(context, logger);
+        var translator = Substitute.For<IPlumbingMetaDataCanonicalPersistenceFormat<PlumbingEntity, string>>();
+        var repo = new PlumbingRepository(context, translator, logger);
 
         var now = DateTime.UtcNow;
         var number = new PhoneNumber(5555555555);
