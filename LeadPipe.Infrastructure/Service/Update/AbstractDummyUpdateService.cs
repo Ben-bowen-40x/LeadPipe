@@ -5,10 +5,10 @@ using LeadPipe.Infrastructure.Attributes;
 
 namespace LeadPipe.Infrastructure.Service.Update;
 
-internal abstract class AbstractDummyUpdateService(SyncKey key): IUpdateService<Plumbing>
+internal abstract class AbstractDummyUpdateService(SyncKey key) : IUpdateService<Plumbing>
 {
     public SyncKey SyncKey => key;
-
+    public Task<Result<List<Plumbing>>> GetDataAsync() => GetDataAsync(default);
     public Task<Result<List<Plumbing>>> GetDataAsync(bool _)
     {
         return Task.FromResult(Result.Success(new List<Plumbing>()));
