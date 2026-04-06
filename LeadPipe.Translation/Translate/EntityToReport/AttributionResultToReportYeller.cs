@@ -40,6 +40,7 @@ internal sealed class AttributionResultToReportYeller(IYellerSettings settings) 
             CloseDateUtc = closeDate,
             Value = attr.Value,
             Type = attr.Sand.Type is null ? _unk : attr.Sand.Type,
+            Completed = attr.Sand.Complete,
             CombinedSellers = sellers,
             SId = attr.Sand.Id,
             EId = attr.Entity.Id,
