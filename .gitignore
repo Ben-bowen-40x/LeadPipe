@@ -20,3 +20,4 @@
 # Added Later
 /LeadPipe.Cli/Properties/appsettings.Development.json
 /LeadPipe.Cli/LeadPipe.Cli.csproj.user
+/LeadPipe.Infrastructure/Dto/ReportPlumbingColumnNames.cs
