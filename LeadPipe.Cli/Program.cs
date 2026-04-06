@@ -60,17 +60,14 @@ internal class Program
         };
     }
 
-    private static Type[] LoadVerbs()
-    {
-        return 
-            [
-                .. Assembly.GetExecutingAssembly()
-                    .GetTypes()
-                    .Where(t => t.IsClass && !t.IsAbstract)
-                    .Where(t => typeof(IVerb).IsAssignableFrom(t) || typeof(IVerbAsync).IsAssignableFrom(t))
-                    .Where(t => t.IsClass)
-            ];
-    }
+    private static Type[] LoadVerbs() =>
+        [
+            .. Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(t => t.IsClass && !t.IsAbstract)
+                .Where(t => typeof(IVerb).IsAssignableFrom(t) || typeof(IVerbAsync).IsAssignableFrom(t))
+                .Where(t => t.IsClass)
+        ];
 
     private static int HandleError(object o)
     {
@@ -114,5 +111,6 @@ internal class Program
             mysql3Ctx.Database.EnsureCreated();
         }
     }
+    
     #endregion
 }
