@@ -6,14 +6,13 @@ namespace LeadPipe.Application.Manager;
 
 public interface ICoreDataUpdateManager
 {
-    // Refreshes all
-    Task<Result> Manage(bool refresh);
-    Task<Result> Manage(bool refresh, params SyncKey[] keys);
+    Task<Result> Manage(bool refresh, bool forceRun);
+    Task<Result> Manage(bool refresh, bool forceRun, params SyncKey[] keys);
 }
 
 internal class CoreDataUpdateManager : ICoreDataUpdateManager
 {
-    private readonly Dictionary<SyncKey, Func<bool, Task<Result>>> _handlers;
+    private readonly Dictionary<SyncKey, Func<bool, bool, Task<Result>>> _handlers;
 
     public CoreDataUpdateManager(
         ISyncGate syncGate,
@@ -27,25 +26,25 @@ internal class CoreDataUpdateManager : ICoreDataUpdateManager
 
         _handlers = new()
         {
-            { SyncKey.Caliper, refresh => RunIfDue(refresh, false, caliper, syncGate) },
-            { SyncKey.Custard, refresh => RunIfDue(refresh, true, custard, syncGate) },
-            { SyncKey.Sandwich, refresh => RunIfDue(refresh, true, sandwich, syncGate) },
-            { SyncKey.CornFormula, refresh => RunIfDue(refresh, false, cornFormula, syncGate) },
+            { SyncKey.Caliper, (refresh, forceRun) => RunIfDue(forceRun, refresh, false, caliper, syncGate) },
+            { SyncKey.Custard, (refresh, forceRun) => RunIfDue(forceRun, refresh, true, custard, syncGate) },
+            { SyncKey.Sandwich, (refresh, forceRun) => RunIfDue(forceRun, refresh, true, sandwich, syncGate) },
+            { SyncKey.CornFormula, (refresh, forceRun) => RunIfDue(forceRun, refresh, false, cornFormula, syncGate) },
         };
     }
-    
+
     private static string InvalidKey(SyncKey key) => $"Invalid key: {key}";
 
-    public Task<Result> Manage(bool refresh) => Manage(refresh, [.. _handlers.Keys]);
+    public Task<Result> Manage(bool refresh, bool forceRun) => Manage(refresh, forceRun, [.. _handlers.Keys]);
 
-    public async Task<Result> Manage(bool refresh, params SyncKey[] keys)
+    public async Task<Result> Manage(bool refresh, bool forceRun, params SyncKey[] keys)
     {
         foreach (var key in keys)
         {
-            if (!_handlers.TryGetValue(key, out Func<bool, Task<Result>>? handler))
+            if (!_handlers.TryGetValue(key, out Func<bool, bool, Task<Result>>? handler))
                 return Result.Failure(InvalidKey(key));
 
-            var result = await handler(refresh);
+            var result = await handler(forceRun, refresh);
 
             if (result.IsFailure)
                 return result;
@@ -53,9 +52,9 @@ internal class CoreDataUpdateManager : ICoreDataUpdateManager
         return Result.Success();
     }
 
-    private static async Task<Result> RunIfDue<T>(bool refresh, bool withDetails, IUpdateService<T> service, ISyncGate syncGate)
+    private static async Task<Result> RunIfDue<T>(bool forceRun, bool refresh, bool withDetails, IUpdateService<T> service, ISyncGate syncGate)
     {
-        bool shouldRun = await syncGate.ShouldRunAsync(null, service.SyncKey);
+        bool shouldRun = forceRun || await syncGate.ShouldRunAsync(null, service.SyncKey);
         if (!shouldRun)
             return Result.Success();
 
