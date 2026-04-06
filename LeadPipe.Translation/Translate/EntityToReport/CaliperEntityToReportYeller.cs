@@ -38,6 +38,7 @@ internal abstract class EntityToReportYeller<TEntity> : IEntityToReport<TEntity,
             CloseDateUtc = DateTimeOffset.MinValue.UtcDateTime,
             Value = 0m,
             Type = _none,
+            Completed = false,
             CombinedSellers = _none,
             SId = 0,
             EId = entityId
