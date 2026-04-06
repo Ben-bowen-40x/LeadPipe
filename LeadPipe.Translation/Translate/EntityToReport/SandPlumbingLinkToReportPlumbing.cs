@@ -1,10 +1,11 @@
 ﻿using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Translate;
+using System.Text.RegularExpressions;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;
 
-internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLink, ReportPlumbing>
+internal partial class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLink, ReportPlumbing>
 {
     private const string dateFormat = "yyyy-MM-dd HH:mm:ss";
     public ReportPlumbing Translate(SandPlumbingLink link)
@@ -29,7 +30,9 @@ internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLi
         DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(plumb.UnixDate);
         string formattedDate = date.ToString(dateFormat);
 
-        string message = plumb.Contents is string c ? c : string.Empty;
+        string message = plumb.Contents is string c 
+            ? NewLineRegex().Replace(c.Replace(',', ';')," | ") 
+            : string.Empty;
         string source = plumb.Source.ToString();
         string metadata = plumb.MetaData;
 
@@ -75,4 +78,7 @@ internal class SandPlumbingLinkToReportPlumbing : IEntityToReport<SandPlumbingLi
         };
         return result;
     }
+
+    [GeneratedRegex(@"(\s*(\n\r|\r\n|\n|\r)\s*)+")]
+    private static partial Regex NewLineRegex();
 }
