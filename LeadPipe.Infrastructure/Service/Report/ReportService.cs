@@ -13,10 +13,9 @@ internal abstract class ReportService<TVo, TReport>(
     private readonly ITransform<TVo, TReport> _transform = transform;
     private readonly ILoadData<TVo> _load = load;
     private readonly IReport<TReport> _report = report;
-    public async Task<Result<List<TVo>>> GetDataAsync(bool withDetails)
-    {
-        return await _load.LoadAsync(withDetails);
-    }
+    public Task<Result<List<TVo>>> GetDataAsync() => GetDataAsync(false);
+    public async Task<Result<List<TVo>>> GetDataAsync(bool withDetails) =>
+        await _load.LoadAsync(withDetails);
 
     public async Task<Result> ReportAsync(List<TVo> data)
     {
