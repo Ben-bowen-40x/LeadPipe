@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
@@ -32,7 +33,7 @@ public sealed class TransformPlumbingReport(
         List<SandPlumbingLink> links = linkResult.Value;
 
         // Turn sandplumbinglinks into a hashset of plumbingids for fast lookup
-        HashSet<long> ids = [.. links.Select(e => e.PlumbingId)];
+        HashSet<long> ids = links.ToHashSetFast(e => e.PlumbingId);
 
         // Turn empty PlumbingEntities into sandplumbinglinks
         List<SandPlumbingLink> unfoundPlumbing =
