@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity.Sqlite;
 using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
@@ -55,7 +56,7 @@ public class SyncStateRepository(PlumbingContext context) : ISyncStateRepository
                 .ToListAsync();
 
             Dictionary<BusinessId, SyncStateEntity> existingByBusinessId = existing
-                .ToDictionary(x => x.BusinessId);
+                .ToDictionaryFast(x => x.BusinessId);
 
             foreach (var incoming in entities)
             {
