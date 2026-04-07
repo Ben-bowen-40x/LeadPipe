@@ -1,4 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
+using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity.Sqlite;
@@ -212,7 +213,7 @@ public class LeafClientService : ILeafService
             .SelectMany(r => r.Value)
             .Where(m => m.thread is not null)
             .GroupBy(m => m.thread!)
-            .ToDictionary(
+            .ToDictionaryFast(
                 g => g.Key,
                 g => g.ToArray() // Message[]
             );
