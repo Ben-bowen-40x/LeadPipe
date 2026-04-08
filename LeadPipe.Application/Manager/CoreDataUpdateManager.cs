@@ -54,8 +54,8 @@ internal class CoreDataUpdateManager : ICoreDataUpdateManager
 
     private static async Task<Result> RunIfDue<T>(bool forceRun, bool refresh, bool withDetails, IUpdateService<T> service, ISyncGate syncGate)
     {
-        bool shouldRun = forceRun || await syncGate.ShouldRunAsync(null, service.SyncKey);
-        if (!shouldRun)
+        bool shouldRun = await syncGate.ShouldRunAsync(null, service.SyncKey);
+        if (!shouldRun && !forceRun)
             return Result.Success();
 
         Result result = await UpdatedAndSaved(refresh, withDetails, service);
