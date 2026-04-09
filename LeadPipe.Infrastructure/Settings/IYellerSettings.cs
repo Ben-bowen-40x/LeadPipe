@@ -8,7 +8,7 @@ public interface IYellerSettings
     string? YellerGetterName { get; set; }
     string? YellerReporterName { get; set; }
     string? YellerSecret { get; set; }
-    Token? YellerToken { get; set; }
+    TokenDto? YellerToken { get; set; }
     string? YellerBase { get; set; }
     string? YellerPrelimEndpoint1 { get; set; }
     string? YellerPrelimEndpoint2 { get; set; }
@@ -29,4 +29,6 @@ public interface IYellerSettings
     string? YellerCornName { get; set; }
     string? YellerEventsEndpoint { get; set; }
     string? YellerRecursion { get; set; }
+    string? YellerAuthUrl { get; set; }
+    string? YellerOAuthName { get; set; }
 }
