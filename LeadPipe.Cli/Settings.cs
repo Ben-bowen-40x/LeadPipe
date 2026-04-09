@@ -12,6 +12,7 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? SqlConnectionString2 { get; set; }
 
     // Lab
+    public string? LabAuthorizationUrl { get; set; }
     public string? LabId { get; set; }
     public string? LabSecret { get; set; }
     public string? LabName { get; set; }
@@ -19,16 +20,18 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? LabPlumbing { get; set; }
     public string? LabAuth { get; set; }
     public int LabConcurrentMax { get; set; }
-    public Token? LabToken { get; set; }
+    public TokenDto? LabToken { get; set; }
     public string? LabAccept { get; set; }
+    public string? LabOAuthName { get; set; } = "lab-oauth";
 
     // Infrastructure
     public Ef? Ef { get; set; }
     public HttpClients? HttpClients { get; set; }
 
     // Leaf
+    public string? LeafOAuthName { get; set; } = "leaf-oauth";
     public string? LeafName { get; set; }
-    public Token? LeafToken { get; set; }
+    public TokenDto? LeafToken { get; set; }
     public string? LeafBase { get; set; }
     public string? LeafAcctUuid { get; set; }
     public string? LeafUuid { get; set; }
@@ -49,10 +52,12 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public string? CornFilter { get; set; }
 
     // Yeller 
+    public string? YellerAuthUrl { get; set; }
+    public string? YellerOAuthName { get; set; } = "yeller-oauth";
     public string? YellerGetterName { get; set; }
     public string? YellerReporterName { get; set; }
     public string? YellerSecret { get; set; }
-    public Token? YellerToken { get; set; }
+    public TokenDto? YellerToken { get; set; }
     public string? YellerBase { get; set; }
     public string? YellerId { get; set; }
     public string? YellerPrelimEndpoint1 { get; set; }
@@ -106,4 +111,6 @@ internal class Settings : IInfrastructureSettings, IDomainSettings, IMySqlSettin
     public LocationPair? PanLoc { get; set; }
     public LocationPair? LatherLoc { get; set; }
     public LocationPair? YellerLoc { get; set; }
+
+
 }
