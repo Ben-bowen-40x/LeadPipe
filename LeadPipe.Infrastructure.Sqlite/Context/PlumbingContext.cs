@@ -7,6 +7,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 {
 #pragma warning disable IDE0079
     // Entities
+    public DbSet<OAuthTokenEntity> OAuthTokens { get; set; }
     public DbSet<SyncStateEntity> SyncState { get; set; }
     public DbSet<SyncStampEntity> SyncStamp { get; set; }
     public DbSet<CaliperEntity> CaliperEntities { get; set; }
