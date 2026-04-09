@@ -56,13 +56,6 @@ internal static class ConfigureCommandLine
             .GetConnectionString("Schema3")!
             .Replace("{DbPassword}", password);
 
-        // Tokens
-        configuration.GetSection("LabToken").Bind(settings.LabToken);
-
-        configuration.GetSection("YellerToken").Bind(settings.YellerToken);
-
-        configuration.GetSection("LeafToken").Bind(settings.LeafToken);
-
         // Add CornSourcs
         if (settings.CornSources is null || settings.CornSources.Length == 0)
             throw new InvalidOperationException(
