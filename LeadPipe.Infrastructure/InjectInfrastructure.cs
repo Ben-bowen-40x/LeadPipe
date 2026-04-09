@@ -20,6 +20,11 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using LeadPipe.Infrastructure.Api;
+using LeadPipe.Infrastructure.Interfaces.Api;
+using LeadPipe.Infrastructure.Interfaces.Translate;
+using Microsoft.Extensions.Logging;
+using LeadPipe.Infrastructure.Interfaces.Repository.Sqlite;
 
 namespace LeadPipe.Infrastructure;
 
@@ -153,6 +158,18 @@ public static class InjectInfrastructure
 
         // *****************************************
         #region ADD CLIENTS
+        services.AddKeyedScoped<IOAuthTokenProvider>(settings.YellerGetterName, (sp, key)=>
+            new YellerOAuthTokenProvider(
+                sp.GetRequiredService<IYellerSettings>(),
+                sp.GetRequiredService<IOAuthTokenRepository>(),
+                sp.GetRequiredService<IClock>(),
+                sp.GetRequiredService<ITranslate<TokenDto, OAuthTokenEntity>>(),
+                sp.GetRequiredService<IHttpClientFactory>(),
+                sp.GetRequiredService<ILogger<YellerOAuthTokenProvider>>(),
+                key!.ToString()!
+            ));
+        services.AddKeyedScoped<IOAuthTokenProvider, LabOAuthTokenProvider>(settings.LabName);
+        services.AddKeyedScoped<IOAuthTokenProvider, LeafOAuthTokenProvider>(settings.LeafName);
 
         bool useTestClientsGlobal = settings.HttpClients is not null && settings.HttpClients.UseTestClients;
         bool useClientReporter = settings.HttpClients?.Yeller?.Reporter?.UseTestClients ?? useTestClientsGlobal;
@@ -160,19 +177,15 @@ public static class InjectInfrastructure
         string accept = "application/json";
 
         // Add Leaf Client
-        RegisterHttpClientWithToken(settings.LeafName, settings.LeafBase, accept, settings.LeafToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_leafDto));
+        RegisterHttpClientWithToken(settings.LeafName, settings.LeafBase, accept, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_leafDto));
 
         // Add Lab Client
         if (string.IsNullOrWhiteSpace(settings.LabAccept))
             throw new Exception($"{nameof(settings.LabAccept)} cannot be null");
-        RegisterHttpClientWithToken(settings.LabName, settings.LabBase, settings.LabAccept, settings.LabToken, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_labDto));
+        RegisterHttpClientWithToken(settings.LabName, settings.LabBase, settings.LabAccept, services, useTestClientsGlobal, new BaseTestHttpMessageHandler(_labDto));
 
         // Add Yeller Getter Client
-        RegisterHttpClientWithToken(settings.YellerGetterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerGetterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
-
-        // Add Yeller Reporter Client
-        bool useYellerReporterTestClient = settings.HttpClients?.Yeller?.Reporter?.UseTestClients ?? useTestClientsGlobal;
-        RegisterHttpClientWithToken(settings.YellerReporterName, settings.YellerBase, accept, settings.YellerToken, services, useYellerReporterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
+        RegisterHttpClientWithToken(settings.YellerGetterName, settings.YellerBase, accept, services, useYellerGetterTestClient, new YellerTestHttpMessageHandler(_yellerHelperDto, _yellerDto, settings));
 
         // Add catman client
         if (string.IsNullOrWhiteSpace(settings.CatManClientName))
@@ -181,7 +194,7 @@ public static class InjectInfrastructure
             throw new Exception($"{nameof(settings.CatBaseEndpoint)} cannot be null");
         if (string.IsNullOrWhiteSpace(settings.CatmanSecret))
             throw new Exception($"{nameof(settings.CatmanSecret)} cannot be null");
-        if (string.IsNullOrWhiteSpace(settings.CatmanSecret))
+        if (string.IsNullOrWhiteSpace(settings.CatmanKey))
             throw new Exception($"{nameof(settings.CatmanKey)} cannot be null");
         services.AddHttpClient(settings.CatManClientName, c =>
         {
@@ -199,6 +212,10 @@ public static class InjectInfrastructure
             }
         );
 
+        // Add Oauth Clients
+        services.AddHttpClient(settings.YellerOAuthName!);
+        services.AddHttpClient(settings.LabOAuthName!);
+
         #endregion
         // *****************************************
 
@@ -209,38 +226,38 @@ public static class InjectInfrastructure
         string? clientName,
         string? baseUri,
         string acceptType,
-        Token? token,
         IServiceCollection services,
         bool useTestClients,
         BaseTestHttpMessageHandler handler)
     {
         if (string.IsNullOrWhiteSpace(clientName))
             throw new Exception($"{nameof(clientName)} cannot be null");
+
         if (string.IsNullOrWhiteSpace(baseUri))
             throw new Exception($"{nameof(baseUri)} cannot be null");
-        services.AddHttpClient(clientName, c =>
+
+        IHttpClientBuilder builder = services.AddHttpClient(clientName, c =>
         {
             c.BaseAddress = new Uri(baseUri);
             c.DefaultRequestHeaders.Add("Accept", acceptType);
+        });
 
-            if (!useTestClients)
-            {
-                if (token is null)
-                    throw new Exception($"{nameof(Token)} cannot be null");
-
-                c.DefaultRequestHeaders.Authorization = new(token.Token_type, token.Access_token);
-            }
-        }).ConfigurePrimaryHttpMessageHandler(() =>
+        if (!useTestClients)
         {
-            return useTestClients
+            builder.AddHttpMessageHandler(sp =>
+                new OAuthHeaderHandler(
+                    sp.GetRequiredKeyedService<IOAuthTokenProvider>(clientName)));
+        }
+
+        builder.ConfigurePrimaryHttpMessageHandler(() =>
+            useTestClients
                 ? handler
                 : new HttpClientHandler()
                 {
                     AutomaticDecompression =
                         DecompressionMethods.GZip |
                         DecompressionMethods.Deflate
-                };
-        });
+                });
     }
 
     // Marker base class for DI-compatible test HTTP handlers
