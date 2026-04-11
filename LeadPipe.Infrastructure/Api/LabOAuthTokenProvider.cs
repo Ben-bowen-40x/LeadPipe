@@ -33,7 +33,7 @@ internal sealed class LabOAuthTokenProvider(
         HttpClient client = _httpClientFactory.CreateClient(_settings.LabOAuthName!);
 
         // Post and check response
-        for (var attempt = 0; attempt <= _errorLimit; attempt++)
+        for (var attempt = 0; attempt < _errorLimit; attempt++)
         {
             try
             {
@@ -46,9 +46,9 @@ internal sealed class LabOAuthTokenProvider(
                     { "client_id", _settings.LabId! },
                     { "client_secret", _settings.LabSecret! }
                 };
-                FormUrlEncodedContent content = new(rawContent);
+                using FormUrlEncodedContent content = new(rawContent);
 
-                HttpResponseMessage response = await client.PostAsync(_settings.LabAuthorizationUrl!, content, ct);
+                using HttpResponseMessage response = await client.PostAsync(_settings.LabAuthorizationUrl!, content, ct);
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogError("Provider={Provider}. Status Code={StatusCode}. Reason Phrase={ReasonPhrase}. Total Errors={Errors}",
@@ -61,7 +61,7 @@ internal sealed class LabOAuthTokenProvider(
                     continue;
                 }
                 // Convert the response
-                string responseString = await response.Content.ReadAsStringAsync(ct);
+                string responseString = await response.Content.ReadAsStringAsync(CancellationToken.None);
                 TokenDto? tokenDto = JsonSerializer.Deserialize<TokenDto>(responseString);
                 if (tokenDto is null)
                 {
@@ -81,7 +81,7 @@ internal sealed class LabOAuthTokenProvider(
                 e.Provider = _providerName;
 
                 // Persist the token
-                Result<OAuthTokenEntity> persisted = await _tokenPersistence.UpsertAsync(e, ct);
+                Result<OAuthTokenEntity> persisted = await _tokenPersistence.UpsertAsync(e, CancellationToken.None);
                 if (persisted.IsFailure)
                 {
                     _logger.LogError("Provider failed to persist the token. Provider={Provider}. Token={Token}. Total Errors={Errors}. Error Message={ErrorMessage}",
@@ -96,6 +96,7 @@ internal sealed class LabOAuthTokenProvider(
 
                 return persisted.Value.AccessToken;
             }
+catch (OperationCanceledException) { throw; }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Execution error. Provider={Provider}", _providerName);
