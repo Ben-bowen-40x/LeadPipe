@@ -30,6 +30,7 @@ internal abstract class OAuthTokenProvider(
             return await ForceRefreshAsync(ct);
 
         // If token is expired, refresh it
+// TODO: ensure refresh occurs when it needs to (defined by implementers)
         var now = _clock.UtcNow.ToUnixTimeSeconds();
         long bufferSeconds = 60;
         if (entity.Value.UnixExpiresAtUtc <= now + bufferSeconds)
