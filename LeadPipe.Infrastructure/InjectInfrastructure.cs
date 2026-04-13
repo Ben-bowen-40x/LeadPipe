@@ -82,7 +82,7 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<CustardMySqlEntity>, CustardMySqlDataSourceBased>();
         services.AddScoped<IDataSourceAsync<CornMySqlEntity>, CornMySqlDataSourceBased>();
 
-        services.AddScoped<IClock, SystemClock>();
+        services.AddSingleton<IClock, SystemClock>();
 
         #endregion
         // *****************************************
@@ -150,8 +150,10 @@ public static class InjectInfrastructure
         services.AddScoped<IEntityAssociationService, EntityAssociationService>();
         services.AddScoped<IYellerService, YellerClientService>();
         services.AddScoped<ICatManService, CatManClientService>();
+        services.AddSingleton<ITokenCacheService, TokenCacheService>();
 
         services.AddScoped<ISyncGate, SyncGate>();
+        services.AddMemoryCache();
 
         #endregion
         // *****************************************
@@ -161,31 +163,34 @@ public static class InjectInfrastructure
         services.AddKeyedScoped<IOAuthTokenProvider>(settings.YellerGetterName, (sp, key) =>
             new YellerOAuthTokenProvider(
                 sp.GetRequiredService<IYellerSettings>(),
+                sp.GetRequiredService<ITokenCacheService>(),
                 sp.GetRequiredService<IOAuthTokenRepository>(),
+                sp.GetRequiredService<IHttpClientFactory>(),
                 sp.GetRequiredService<IClock>(),
                 sp.GetRequiredService<ITranslate<TokenDto, OAuthTokenEntity>>(),
-                sp.GetRequiredService<IHttpClientFactory>(),
                 sp.GetRequiredService<ILogger<YellerOAuthTokenProvider>>(),
                 key!.ToString()!
             ));
         services.AddKeyedScoped<IOAuthTokenProvider, LabOAuthTokenProvider>(settings.LabName, (sp, key) =>
             new LabOAuthTokenProvider(
                 sp.GetRequiredService<ILabSettings>(),
+                sp.GetRequiredService<ITokenCacheService>(),
+                sp.GetRequiredService<IOAuthTokenRepository>(),
                 sp.GetRequiredService<IHttpClientFactory>(),
-                sp.GetRequiredService<ILogger<LabOAuthTokenProvider>>(),
                 sp.GetRequiredService<IClock>(),
                 sp.GetRequiredService<ITranslate<TokenDto, OAuthTokenEntity>>(),
-                sp.GetRequiredService<IOAuthTokenRepository>(),
+                sp.GetRequiredService<ILogger<LabOAuthTokenProvider>>(),
                 key!.ToString()!
             ));
         services.AddKeyedScoped<IOAuthTokenProvider, LeafOAuthTokenProvider>(settings.LeafName, (sp, key) =>
             new LeafOAuthTokenProvider(
                 sp.GetRequiredService<ILeafSettings>(),
+                sp.GetRequiredService<ITokenCacheService>(),
+                sp.GetRequiredService<IOAuthTokenRepository>(),
                 sp.GetRequiredService<IHttpClientFactory>(),
-                sp.GetRequiredService<ILogger<LeafOAuthTokenProvider>>(),
                 sp.GetRequiredService<IClock>(),
                 sp.GetRequiredService<ITranslate<TokenDto, OAuthTokenEntity>>(),
-                sp.GetRequiredService<IOAuthTokenRepository>(),
+                sp.GetRequiredService<ILogger<LeafOAuthTokenProvider>>(),
                 key!.ToString()!
             ));
 
