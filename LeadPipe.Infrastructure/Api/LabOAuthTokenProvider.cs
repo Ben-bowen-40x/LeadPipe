@@ -40,6 +40,7 @@ internal sealed class LabOAuthTokenProvider(
             { "client_secret", _settings.LabSecret! }
         };
         FormUrlEncodedContent content = new(rawContent);
+
         return Task.FromResult(Result.Success(content));
     }
 }
