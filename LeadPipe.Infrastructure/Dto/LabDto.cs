@@ -1,6 +1,10 @@
-﻿namespace LeadPipe.Infrastructure.Dto;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace LeadPipe.Infrastructure.Dto;
 
 #pragma warning disable IDE1006 // Naming Styles
+
 public class LabHelperDto
 {
     public bool status { get; set; }
@@ -15,32 +19,21 @@ public class Data
     public int per_page { get; set; }
     public int current_page { get; set; }
     public int last_page { get; set; }
-    public LabDto[]? items { get; set; }
+    public Item[]? items { get; set; }
     public string? next_page { get; set; }
     public object[]? checked_projects { get; set; }
-    public Filters? filters { get; set; }
-    public object[]? customer_orders { get; set; }
+    public int response_statuses_count { get; set; }
     public int unfiltered_total { get; set; }
-    public int count { get; set; }
 }
 
-public class Filters
+public class Item
 {
-    public object[]? credits { get; set; }
-    public Categories? categories { get; set; }
-    public Date[]? dates { get; set; }
-}
-
-public class Categories
-{
-    public string? PestControl { get; set; }
-}
-
-public class Date
-{
-    public string? title { get; set; }
-    public string? value { get; set; }
-    public bool default_selected { get; set; }
+    [JsonPropertyName(LabDtoAttributeNames.LabDtoAttributeName)]
+    public LabDto? labDto { get; set; }
+    public Created_At? created_at { get; set; }
+    public Quote? quote { get; set; }
+    public string? note { get; set; }
+    public Last_Message? last_message { get; set; }
 }
 
 public class LabDto
@@ -52,7 +45,8 @@ public class LabDto
     public Created_At? created_at { get; set; }
     public Display? display { get; set; }
     public Interactions? interactions { get; set; }
-    public Entities? entities { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<Entities>))]
+    public List<Entities>? entities { get; set; }
     public Metadata? metadata { get; set; }
     public int project_response_status { get; set; }
     public bool is_urgent { get; set; }
@@ -75,15 +69,14 @@ public class Display
 {
     public string? html { get; set; }
     public string? text { get; set; }
-    public string? url { get; set; }
 }
 
 public class Interactions
 {
     public bool is_shortlisted { get; set; }
-    public object? interaction_types { get; set; }
-    public object? last_interaction { get; set; }
-    public object? last_message { get; set; }
+    public string? interaction_types { get; set; }
+    public int last_interaction { get; set; }
+    public string? last_message { get; set; }
 }
 
 public class Entities
@@ -96,8 +89,9 @@ public class Buyer
     public string? name { get; set; }
     public string? email { get; set; }
     public string? telephone { get; set; }
-    public object? telephone_formatted { get; set; }
+    public string? telephone_formatted { get; set; }
     public object? business_name { get; set; }
+    public string? short_name { get; set; }
 }
 
 public class Metadata
@@ -160,4 +154,53 @@ public class Trusted_Form
     public string? certificate_url { get; set; }
 }
 
+public class Quote
+{
+    public object? type { get; set; }
+    public object? value { get; set; }
+    public string? detail { get; set; }
+}
+
+public class Last_Message
+{
+    public string? type { get; set; }
+    public string? label { get; set; }
+    public int time { get; set; }
+    public bool is_read { get; set; }
+    public string? sender { get; set; }
+}
+
 #pragma warning restore IDE1006 // Naming Styles
+
+public class SingleOrArrayConverter<T> : JsonConverter<List<T>>
+{
+    public override List<T>? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return reader.TokenType switch
+        {
+            JsonTokenType.StartArray => JsonSerializer.Deserialize<List<T>>(ref reader, options),
+            JsonTokenType.StartObject => StartObjectFunction(ref reader, options),
+            JsonTokenType.Null => null,
+            _ => throw new JsonException($"Unexpected token {reader.TokenType}")
+        };
+
+        static List<T> StartObjectFunction(ref Utf8JsonReader reader, JsonSerializerOptions options)
+        {
+            var single = JsonSerializer.Deserialize<T>(ref reader, options);
+
+            if (single == null)
+                return [];
+
+            // Optional: filter "empty" objects
+            if (EqualityComparer<T>.Default.Equals(single, default!))
+                return [];
+
+            return [single];
+        }
+    }
+
+    public override void Write(Utf8JsonWriter writer, List<T> value, JsonSerializerOptions options)
+    {
+        JsonSerializer.Serialize(writer, value, options);
+    }
+}
