@@ -46,6 +46,10 @@ public partial class PhoneNumber
         result = new(number);
         return result.Number != Default;
     }
+    public static bool TryParseMany(string?[] input, out List<PhoneNumber> result)
+    {
+        return TryParseMany(string.Join(' ', input), out result);
+    }
 
     public static bool TryParseMany(string? input, out List<PhoneNumber> results)
     {
