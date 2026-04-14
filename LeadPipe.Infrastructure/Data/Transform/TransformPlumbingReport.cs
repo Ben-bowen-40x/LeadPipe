@@ -26,19 +26,13 @@ public sealed class TransformPlumbingReport(
         Result<List<PlumbingEntity>> plumbs = await _plumbs.FindAsync(p => sources.Contains(p.Source));
         if (plumbs.IsFailure) return Result.Failure<List<ReportPlumbing>>(plumbs.Error);
 
-        var keys = data.Select(d =>
-        {
-            var UnixDate = d.Date.ToUnixTimeSeconds();
-            return new { d.PhoneNumber, UnixDate, d.Source, d.MetaData };
-        }).ToList();
-        var keySet = keys.ToHashSetFast(k => (k.PhoneNumber, k.UnixDate, k.Source, k.MetaData));
+        HashSet<(PhoneNumber PhoneNumber, long UnixDate, Source Source, string MetaData)> keySet = 
+            data.ToHashSetFast(k => (k.PhoneNumber, UnixDate: k.Date.ToUnixTimeSeconds(), k.Source, k.MetaData));
         List<PlumbingEntity> plumbingEntities = [.. plumbs.Value.Where(p => keySet.Contains((p.PhoneNumber, p.UnixDate, p.Source, p.MetaData)))];
 
         // Get links to the plumbing
         List<long> plumbingIds = [.. plumbingEntities.Select(e => e.Id)];
         Result<List<SandPlumbingLink>> linkResult = await _repo.FindWithDetailsAsync(l => plumbingIds.Contains(l.PlumbingId));
-
-        // Check Success
         if (linkResult.IsFailure)
             return Result.Failure<List<ReportPlumbing>>(linkResult.Error);
         List<SandPlumbingLink> links = linkResult.Value;
@@ -49,7 +43,7 @@ public sealed class TransformPlumbingReport(
         // Turn empty PlumbingEntities into sandplumbinglinks
         List<SandPlumbingLink> unfoundPlumbing =
             [.. plumbingEntities
-                .Where(e => !ids.Contains(e.Id)) // We are creating a partition
+                .Where(e => !ids.Contains(e.Id)) // We are creating a partition between linked plumbing entities and unlinked plumbing entities
                 .Select(e => new SandPlumbingLink
                 {
                     PlumbingId = e.Id,
