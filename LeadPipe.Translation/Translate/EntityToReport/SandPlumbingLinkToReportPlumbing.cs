@@ -11,7 +11,6 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
     private readonly IClock _clock = clock;
 
     private readonly static DateTimeOffset _twentyTwelve = new(2012, 1, 1, 0, 0, 0, TimeSpan.Zero);
-    private const string dateFormat = "yyyy-MM-dd HH:mm:ss";
     private const string _unk = "Unknown";
     public ReportPlumbing Translate(SandPlumbingLink t)
     {
@@ -32,40 +31,39 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
 
         long phoneNumber = plumb.PhoneNumber.Number;
 
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(plumb.UnixDate);
+        DateTime date = DateTimeOffset.FromUnixTimeSeconds(plumb.UnixDate).UtcDateTime;
 
         string contents = plumb.Contents is string c
             ? NewLineRegex().Replace(
-                c.Replace(',', ';'), 
+                c.Replace(',', ';'),
                 " | ")
             : string.Empty;
         string source = plumb.Source.ToString();
         string metadata = plumb.MetaData;
 
-        long custardId = sand.CustardId;
-        long sandId = sand.Id;
-        bool sandActive = sand.Active;
-        bool completed = sand.Complete;
+        long? custardId = sand.CustardId == 0 ? null : sand.CustardId;
+        long? sandId = sand.Id == 0 ? null : sand.Id;
+        bool? sandActive = sandId is null ? null : sand.Active;
 
         // Dates
-        DateTimeOffset? custDate = 
+        DateTime? custDate =
             _twentyTwelve.ToUnixTimeSeconds() >= sand.UnixDate || _clock.UtcNow.ToUnixTimeSeconds() <= sand.UnixDate
                 ? null
-                : DateTimeOffset.FromUnixTimeSeconds(sand.UnixDate);
+                : DateTimeOffset.FromUnixTimeSeconds(sand.UnixDate).UtcDateTime;
 
-        DateTimeOffset? custCxlDate = 
+        DateTime? custCxlDate =
             _twentyTwelve.ToUnixTimeSeconds() >= sand.UnixCancelDate || _clock.UtcNow.ToUnixTimeSeconds() <= sand.UnixCancelDate
                 ? null
-                : DateTimeOffset.FromUnixTimeSeconds(sand.UnixCancelDate);
+                : DateTimeOffset.FromUnixTimeSeconds(sand.UnixCancelDate).UtcDateTime;
 
-        DateTimeOffset? subDate = custDate;
+        DateTime? subDate = custDate;
 
-        DateTimeOffset? subCxlDate = custCxlDate;
+        DateTime? subCxlDate = custCxlDate;
 
         bool msgBeforeCust = date < custDate && date < subDate;
-        bool isSale = msgBeforeCust && completed;
+        bool isSale = msgBeforeCust && sand.Complete;
 
-        string s1 = sand.Seller == 0 ? _unk : sand.Seller.ToString();
+        string s1 = sand.Seller == 0 ? string.Empty : sand.Seller.ToString();
         string s2 = sand.Seller2 == 0 ? string.Empty : $" | {sand.Seller2}";
         string s3 = sand.Seller3 == 0 ? string.Empty : $" | {sand.Seller3}";
         string sellers = $"{s1}{s2}{s3}";
@@ -73,21 +71,21 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
         ReportPlumbing result = new()
         {
             PhoneNumber = phoneNumber,
-            Date = date,
+            DateUtc = date,
             Contents = contents,
             Source = source,
             MsgBC = msgBeforeCust,
             IsS = isSale,
             CustardId = custardId,
             SandActive = sandActive,
-            CustardDate = custDate,
-            CustardCxlDate = custCxlDate,
+            CustardDateUtc = custDate,
+            CustardCxlDateUtc = custCxlDate,
             SandId = sandId,
-            Completed = completed,
-            Value = sand.Value,
-            SandDate = subDate,
-            SandCxlDate = subCxlDate,
-            Sellers = sellers,
+            Completed = sandId is null ? null : sand.Complete,
+            Value = sandId is null ? null : sand.Value,
+            SandDateUtc = subDate,
+            SandCxlDateUtc = subCxlDate,
+            Sellers = string.IsNullOrWhiteSpace(sellers) ? null : sellers,
             MetaData = metadata,
         };
 
