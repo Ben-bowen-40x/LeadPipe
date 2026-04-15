@@ -94,6 +94,20 @@
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
+    "Data update only | Get all data | Lab": {
+      "commandName": "Project",
+      "commandLineArgs": "data -us Lab",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update only | Refresh data | Lab": {
+      "commandName": "Project",
+      "commandLineArgs": "data -Rus Lab",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
     "Data update only | Get all data | Lather": {
       "commandName": "Project",
       "commandLineArgs": "data -us Lather",
