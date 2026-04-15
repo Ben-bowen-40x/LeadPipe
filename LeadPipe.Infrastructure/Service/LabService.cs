@@ -135,7 +135,9 @@ internal class LabService : ILabService
                     totalErrors);
                 if (totalErrors >= errorLimit || result.Error.Contains("unauthorized", StringComparison.InvariantCultureIgnoreCase))
                     return Result.Failure<List<LabDto>>($"{nameof(GetLabsAsync)} failed after {totalErrors} errors. Last error: {result.Error}");
-                page++;
+                
+                if (pageErrors >= errorLimit / 2)
+                    page++;
                 continue;
             }
 
