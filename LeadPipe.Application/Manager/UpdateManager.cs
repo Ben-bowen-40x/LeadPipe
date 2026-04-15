@@ -21,8 +21,8 @@ internal sealed class UpdateManager(
     public async Task<Result> Manage(Source source, ForceRunRefresh frr)
     {
         var core = await _core.Manage(frr);
-        var sourceData = await _source.Manage(refresh: frr.Refresh, source);
-        var associate = await _associate.Manage();
+        var sourceData = await _source.Manage(frr, source);
+        var associate = await _associate.Manage(frr);
         var combined = Result.Combine(core, sourceData, associate);
         return combined;
     }
@@ -30,8 +30,8 @@ internal sealed class UpdateManager(
     public async Task<Result> Manage(ForceRunRefresh frr)
     {
         var core = await _core.Manage(frr);
-        var sourceData = await _source.Manage(refresh: frr.Refresh);
-        var associate = await _associate.Manage();
+        var sourceData = await _source.Manage(frr);
+        var associate = await _associate.Manage(frr);
         var combined = Result.Combine(core, sourceData, associate);
         return combined;
     }
