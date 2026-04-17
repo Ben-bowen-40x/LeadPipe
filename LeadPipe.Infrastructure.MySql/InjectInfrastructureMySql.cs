@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MySqlConnector;
 using System.Collections.Concurrent;
 
 namespace LeadPipe.Infrastructure.MySql;
@@ -15,17 +16,35 @@ public static class InjectInfrastructureMySql
     public static IServiceCollection AddInfrastructureMySql(this IServiceCollection services, IMySqlSettings settings, IConfiguration config)
     {
         #region Register Contexts
+
         // Register MySqlContext for Schema1
         if (string.IsNullOrWhiteSpace(settings.Schema1ConnectionString))
             throw new InvalidOperationException("MySqlConnectionString for Schema1 is missing.");
 
-        bool globalUseInMemory = config.GetValue<bool>("Ef:UseInMemoryDatabase", false);
-        bool globalSensitiveLogging = config.GetValue<bool>("Ef:SensitiveLogging", false);
+        bool globalUseInMemory = config.GetValue("Ef:UseInMemoryDatabase", false);
+        bool globalSensitiveLogging = config.GetValue("Ef:SensitiveLogging", false);
         LogLevel globalLogLevel = config.GetValue("Ef:LogLevel", LogLevel.Information);
 
-        bool useInMemory = config.GetValue(
-        "Ef:MySql:UseInMemoryDatabase",
+        bool requestedInMemory = config.GetValue(
+            "Ef:MySql:UseInMemoryDatabase",
             globalUseInMemory);
+        bool useInMemory = requestedInMemory;
+        if (!useInMemory)
+        {
+            bool isDevelopment = config.GetValue("ASPNETCORE_ENVIRONMENT", "Production") == "Development";
+            bool canConnect = CanConnect(settings.Schema1ConnectionString);
+
+            if (!canConnect && !isDevelopment)
+                throw new InvalidOperationException("Database unavailable.");
+
+            useInMemory = !canConnect;
+        }
+
+        // Log decision about using in memory DB
+        string whyNotAvailable = requestedInMemory ? "explicitly configured" : "unavailable";
+        Console.WriteLine(useInMemory
+            ? $"Using InMemoryDatabase (MySql {whyNotAvailable})"
+            : "Using MySql Database");
 
         bool sensitiveLogging = config.GetValue(
             "Ef:MySql:SensitiveLogging",
@@ -108,8 +127,11 @@ public static class InjectInfrastructureMySql
         // NOTE: InMemory DB is shared per service provider by name.
         // This is intentional for read-only semantics.
         if (useInMemory)
+        {
             options.UseInMemoryDatabase(inMemoryDbName);
+        }
         else
+        {
             options.UseMySql(
                 connectionString,
                 GetServerVersion(connectionString),
@@ -117,6 +139,7 @@ public static class InjectInfrastructureMySql
                 {
                     mySqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 });
+        }
 
     }
 
@@ -128,5 +151,17 @@ public static class InjectInfrastructureMySql
             connectionString,
             ServerVersion.AutoDetect);
     }
-
+    private static bool CanConnect(string connectionString)
+    {
+        try
+        {
+            using var connection = new MySqlConnection(connectionString + ";Connection Timeout=2;");
+            connection.Open();
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }
