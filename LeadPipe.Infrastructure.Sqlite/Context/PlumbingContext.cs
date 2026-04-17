@@ -1,4 +1,5 @@
-﻿using LeadPipe.Infrastructure.Entity.Sqlite;
+﻿using LeadPipe.Infrastructure.Database.Configuration;
+using LeadPipe.Infrastructure.Entity.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
 namespace LeadPipe.Infrastructure.Sqlite.Context;
@@ -32,7 +33,7 @@ public sealed class PlumbingContext(DbContextOptions<PlumbingContext> options) :
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(PlumbingContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(ConfigurationAssemblyMarker).Assembly);
     }
 
 }
