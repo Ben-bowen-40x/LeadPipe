@@ -26,7 +26,7 @@ public class SourceDataUpdateManager : ISourceDataUpdateManager
             Source.Test, 
             Source.Test2, 
             Source.Leaf
-            ])];
+        ])];
         _services = _validSources.ToDictionaryFast(
         s => s,
         updateFactory.GetService<Plumbing>
