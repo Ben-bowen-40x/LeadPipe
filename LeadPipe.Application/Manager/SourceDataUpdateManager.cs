@@ -22,7 +22,11 @@ public class SourceDataUpdateManager : ISourceDataUpdateManager
     )
     {
         _syncGate = syncGate;
-        _validSources = [.. Enum.GetValues<Source>().Except([Source.Test, Source.Test2])];
+        _validSources = [.. Enum.GetValues<Source>().Except([
+            Source.Test, 
+            Source.Test2, 
+            Source.Leaf
+            ])];
         _services = _validSources.ToDictionaryFast(
         s => s,
         updateFactory.GetService<Plumbing>
