@@ -37,41 +37,16 @@
     },
 
     // *******************************************
-    // Data Reporting
-    // *******************************************
-    "Data report only": {
-      "commandName": "Project",
-      "commandLineArgs": "data -r",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-    "Data report only | Yeller": {
-      "commandName": "Project",
-      "commandLineArgs": "data -r -s Yeller",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-    "Data report only | Lab": {
-      "commandName": "Project",
-      "commandLineArgs": "data -r -s Lab",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-
-    // *******************************************
     // Data Updating
     // *******************************************
-    "Data update only | Get all data": {
+    "Data update | Get all data": {
       "commandName": "Project",
       "commandLineArgs": "data -u",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only | Refresh data": {
+    "Data update | Refresh data": {
       "commandName": "Project",
       "commandLineArgs": "data -Ru",
       "environmentVariables": {
@@ -80,107 +55,61 @@
     },
 
     // Update specific Source
-    "Data update only | Get all data | Yeller": {
+    "Data update | Get all data | Yeller": {
       "commandName": "Project",
       "commandLineArgs": "data -us Yeller",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only | Refresh data | Yeller": {
+    "Data update | Refresh data | Yeller": {
       "commandName": "Project",
       "commandLineArgs": "data -Rus Yeller",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only | Get all data | Lab": {
+    "Data update | Get all data | Lab": {
       "commandName": "Project",
       "commandLineArgs": "data -us Lab",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only | Refresh data | Lab": {
+    "Data update | Refresh data | Lab": {
       "commandName": "Project",
       "commandLineArgs": "data -Rus Lab",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only | Get all data | Lather": {
+    "Data update | Get all data | Lather": {
       "commandName": "Project",
       "commandLineArgs": "data -us Lather",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only | Refresh data | Lather": {
+    "Data update | Refresh data | Lather": {
       "commandName": "Project",
       "commandLineArgs": "data -Rus Lather",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only | Get all data | Leased": {
+    "Data update | Get all data | Leased": {
       "commandName": "Project",
       "commandLineArgs": "data -us Leased",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
     },
-    "Data update only | Refresh data | Leased": {
+    "Data update | Refresh data | Leased": {
       "commandName": "Project",
       "commandLineArgs": "data -Rus Leased",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
-    },
-
-    // *******************************************
-    // Data Updating AND Reporting 
-    // *******************************************
-    "Data update and report | Get all data": {
-      "commandName": "Project",
-      "commandLineArgs": "data",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-    "Data update and report | Refresh data": {
-      "commandName": "Project",
-      "commandLineArgs": "data -R",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-    "Data update and report | Get all data | Yeller": {
-      "commandName": "Project",
-      "commandLineArgs": "data -s Yeller",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-    "Data update and report | Refresh data | Yeller": {
-      "commandName": "Project",
-      "commandLineArgs": "data -Rs Yeller",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-    "Data update and report | Get all data | Lab": {
-      "commandName": "Project",
-      "commandLineArgs": "data -s Lab",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
-    },
-    "Data update and report | Refresh data | Lab": {
-      "commandName": "Project",
-      "commandLineArgs": "data -Rs Lab",
-      "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
-      }
     }
-  }
+   }
 }
