@@ -30,8 +30,10 @@ public class YellerDto
     public string? temporary_phone_number { get; set; }
     public DateTime? time_created { get; set; }
     public DateTime? last_event_time { get; set; }
+    public string? phone_number { get; set; }
     public object? user { get; set; }
     public Project? project { get; set; }
+    public Ilq? ilq { get; set; }
     public YellerEventDto? events { get; set; }
 }
 
@@ -51,10 +53,11 @@ public class Project
     public Project Clone() => new(this);
     #endregion
 
+    public SurveyAnswer[]? survey_answers { get; set; }
     public Location? location { get; set; }
+    public string? additional_info { get; set; }
     public Availability? availability { get; set; }
     public string[]? job_names { get; set; }
-    public SurveyAnswer[]? survey_answers { get; set; }
     public Attach[]? attachments { get; set; }
 }
 
@@ -125,7 +128,11 @@ public class Availability
     public string? status { get; set; }
     public string[]? dates { get; set; }
 }
-
+public class Ilq
+{
+    public string summary { get; set; }
+    public string status { get; set; }
+}
 public class YellerHelperDto
 {
     #region Ctor
