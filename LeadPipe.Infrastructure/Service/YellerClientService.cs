@@ -7,6 +7,7 @@ using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace LeadPipe.Infrastructure.Service;
 
@@ -324,7 +325,8 @@ internal class YellerClientService(
                     continue;
                 }
 
-                YellerHelperDto? value = await response.Content.ReadFromJsonAsync<YellerHelperDto>(cancellationToken: ct);
+                string stringVal = await response.Content.ReadAsStringAsync(ct);
+                YellerHelperDto? value = JsonSerializer.Deserialize<YellerHelperDto>(stringVal);
 
                 if (value?.lead_ids == null || value.lead_ids.Length == 0)
                 {
@@ -416,7 +418,8 @@ internal class YellerClientService(
                     continue;
                 }
 
-                YellerDto? dto = await response.Content.ReadFromJsonAsync<YellerDto>(cancellationToken: ct);
+                var stringVal = await response.Content.ReadAsStringAsync(ct);
+                YellerDto? dto = JsonSerializer.Deserialize<YellerDto>(stringVal);
 
                 if (dto == null)
                 {
