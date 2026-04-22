@@ -20,7 +20,8 @@ public sealed class LibacionDtoToPlumbing : IDtoToVo<LibacionDto, Plumbing>
             ? string.Empty
             : data.Message;
 
-        string metadata = data.Commercial is string c ? c : "Unknown";
+        var isComm = data.Commercial is string c ? c : "Unknown";
+        string metadata = $"Is Commercial: {isComm}";
 
         return new Plumbing(
             Id: 0,
@@ -30,7 +31,7 @@ public sealed class LibacionDtoToPlumbing : IDtoToVo<LibacionDto, Plumbing>
             Branch: null,
             MetaData: metadata,
             Source.Libacion,
-            null
+            [number]
             );
     }
 }
