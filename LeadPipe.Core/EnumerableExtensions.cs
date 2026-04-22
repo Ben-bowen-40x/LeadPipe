@@ -16,7 +16,7 @@ public static class EnumerableExtensions
         var result = new Dictionary<TKey, TValue>(capacity);
 
         foreach (var item in source)
-            result.Add(key(item), value(item));
+            result.TryAdd(key(item), value(item));
 
         return result;
     }
@@ -34,7 +34,7 @@ public static class EnumerableExtensions
         var result = new Dictionary<TKey, TSource>(capacity);
 
         foreach (var item in source)
-            result.Add(key(item), item);
+            result.TryAdd(key(item), item);
 
         return result;
     }
