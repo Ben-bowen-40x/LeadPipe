@@ -27,7 +27,7 @@ internal class PanDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<PanDto, Plumbi
             Branch: null,
             MetaData: meta,
             Source.Pan,
-            null
+            [number]
             );
     }
 }
