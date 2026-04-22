@@ -15,7 +15,7 @@ public class TranslatorBackAndForthTests
         // Arrange: create input DTO and expected VO output
         var dto = new CalliDto
         {
-            Phone = 5551234567,
+            Phone = "5551234567",
             Date = "2025-03-09", // DST gap
             Time = "02:30",
             TimeZone = "mst",
