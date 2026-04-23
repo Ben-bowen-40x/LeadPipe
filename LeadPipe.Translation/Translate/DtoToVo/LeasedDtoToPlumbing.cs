@@ -10,7 +10,7 @@ public class LeasedDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeasedDto, Pl
     private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(LeasedDto data)
     {
-        PhoneNumber number = new(data.PhoneNumber);
+        PhoneNumber number = PhoneNumber.TryParse(data.PhoneNumber, out var ph) ? ph : PhoneNumber.DefaultPhoneNumber;
         DateTime d = DateTime.TryParse(data.Date, out DateTime r)
             ? r
             : DateTime.MaxValue;
@@ -43,7 +43,7 @@ public class LeasedDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<LeasedDto, Pl
                 Branch: data.Branch,
                 MetaData: metadata,
                 Source: Source.Leased,
-                null
+                [number]
             );
         return result;
     }
