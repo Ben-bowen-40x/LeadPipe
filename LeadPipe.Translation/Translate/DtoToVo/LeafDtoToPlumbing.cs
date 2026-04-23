@@ -15,7 +15,7 @@ internal class LeafDtoToPlumbing : IDtoToVo<LeafDto, Plumbing>
             : PhoneNumber.Default.ToString();
         PhoneNumber number = PhoneNumber.TryParse(cellPhone, out PhoneNumber p)
             ? p
-            : new(PhoneNumber.Default);
+            : PhoneNumber.DefaultPhoneNumber;
 
         // Date
         DateTime d = DateTime.SpecifyKind(v.creation, DateTimeKind.Utc);
@@ -56,7 +56,7 @@ internal class LeafDtoToPlumbing : IDtoToVo<LeafDto, Plumbing>
             Branch: null,
             MetaData: metadata,
             Source: Source.Leaf,
-            null
+            [number]
         );
         return result;
     }
