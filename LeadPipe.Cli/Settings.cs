@@ -1,5 +1,4 @@
 ﻿using LeadPipe.Domain;
-using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.MySql.Settings;
 using LeadPipe.Infrastructure.Settings;
 
