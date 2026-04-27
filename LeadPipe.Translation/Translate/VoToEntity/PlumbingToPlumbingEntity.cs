@@ -23,7 +23,7 @@ internal class PlumbingToPlumbingEntity : IVoToEntity<Plumbing, PlumbingEntity>
             Id = plumbing.Id,
             PhoneNumber = plumbing.PhoneNumber,
             Date = plumbing.Date.UtcDateTime,
-            UnixDate = plumbing.Date.ToUnixTimeSeconds(),
+            UnixDate = plumbing.Date.ToUnixTimeMilliseconds(),
             Contents = plumbing.Contents,
             MetaData = plumbing.MetaData,
             Source = plumbing.Source,

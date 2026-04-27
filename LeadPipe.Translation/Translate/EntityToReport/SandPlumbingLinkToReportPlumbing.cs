@@ -31,7 +31,7 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
 
         long phoneNumber = plumb.PhoneNumber.Number;
 
-        DateTime date = DateTimeOffset.FromUnixTimeSeconds(plumb.UnixDate).UtcDateTime;
+        DateTime date = DateTimeOffset.FromUnixTimeMilliseconds(plumb.UnixDate).UtcDateTime;
 
         string contents = plumb.Contents is string c
             ? NewLineRegex().Replace(
@@ -47,14 +47,14 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
 
         // Dates
         DateTime? custDate =
-            _twentyTwelve.ToUnixTimeSeconds() >= sand.UnixDate || _clock.UtcNow.ToUnixTimeSeconds() <= sand.UnixDate
+            _twentyTwelve.ToUnixTimeMilliseconds() >= sand.UnixDate || _clock.UtcNow.ToUnixTimeMilliseconds() <= sand.UnixDate
                 ? null
-                : DateTimeOffset.FromUnixTimeSeconds(sand.UnixDate).UtcDateTime;
+                : DateTimeOffset.FromUnixTimeMilliseconds(sand.UnixDate).UtcDateTime;
 
         DateTime? custCxlDate =
-            sand.UnixCancelDate is null || _twentyTwelve.ToUnixTimeSeconds() >= sand.UnixCancelDate || _clock.UtcNow.ToUnixTimeSeconds() <= sand.UnixCancelDate
+            sand.UnixCancelDate is null || _twentyTwelve.ToUnixTimeMilliseconds() >= sand.UnixCancelDate || _clock.UtcNow.ToUnixTimeMilliseconds() <= sand.UnixCancelDate
                 ? null
-                : DateTimeOffset.FromUnixTimeSeconds(sand.UnixCancelDate.Value).UtcDateTime;
+                : DateTimeOffset.FromUnixTimeMilliseconds(sand.UnixCancelDate.Value).UtcDateTime;
 
         DateTime? subDate = custDate;
 

@@ -63,7 +63,7 @@ public class CaliperMySqlDataSourceTests
             .Returns(Result.Success(new SyncStateEntity
             {
                 BusinessId = BusinessId.From(SyncKey.Caliper.Value),
-                UnixLastSyncUtc = lastSync.ToUnixTimeSeconds()
+                UnixLastSyncUtc = lastSync.ToUnixTimeMilliseconds()
             }));
 
         var refreshed = new List<CaliperMySqlEntity>

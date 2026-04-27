@@ -278,7 +278,7 @@ internal class YellerClientService(
                 BusinessId = BusinessId.From(bId),
                 LastProcessedId = finalIds[bId],
                 LastSyncUtc = DateTime.UtcNow,
-                UnixLastSyncUtc = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+                UnixLastSyncUtc = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()
             };
             states.Add(state);
         }

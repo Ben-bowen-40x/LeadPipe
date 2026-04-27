@@ -11,9 +11,9 @@ internal sealed class CustardEntityToCustard : IEntityToVo<CustardEntity, Custar
         PhoneNumber number1 = new(entity.PhoneNumber);
         PhoneNumber? number2 = entity.PhoneNumber2 is not null ? new(entity.PhoneNumber2) : null;
 
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(entity.UnixDate);
+        DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(entity.UnixDate);
 
-        DateTimeOffset? cxlDate = entity.UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeSeconds((long)entity.UnixCancelDate);
+        DateTimeOffset? cxlDate = entity.UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeMilliseconds((long)entity.UnixCancelDate);
 
         Custard result = new
             (

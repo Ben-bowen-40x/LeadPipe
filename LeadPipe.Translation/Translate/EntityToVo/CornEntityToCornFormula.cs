@@ -9,7 +9,7 @@ internal sealed class CornEntityToCornFormula : IEntityToVo<CornEntity, CornForm
     public CornFormula Translate(CornEntity entity)
     {
         PhoneNumber phoneNumber = new(entity.PhoneNumber);
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(entity.UnixDate);
+        DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(entity.UnixDate);
         CornFormula result = new
             (
                 Id: entity.Id,

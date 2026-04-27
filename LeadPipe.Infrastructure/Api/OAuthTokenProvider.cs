@@ -107,7 +107,7 @@ internal abstract class OAuthTokenProvider<T>(
             return await ForceRefreshAsync(ct);
 
         // If token is expired, refresh it
-        var now = _clock.UtcNow.ToUnixTimeSeconds();
+        var now = _clock.UtcNow.ToUnixTimeMilliseconds();
         if (entity.Value.UnixExpiresAtUtc <= now + BufferSeconds)
             return await ForceRefreshAsync(ct);
 

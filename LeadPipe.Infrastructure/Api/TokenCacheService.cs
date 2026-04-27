@@ -19,7 +19,7 @@ internal sealed class TokenCacheService(
     {
         if (_cache.TryGetValue(key, out AccessToken cached))
         {
-            var n1 = _clock.UtcNow.ToUnixTimeSeconds();
+            var n1 = _clock.UtcNow.ToUnixTimeMilliseconds();
             if (!cached.IsExpired(n1, bufferSeconds))
                 return cached.Value;
         }
@@ -31,7 +31,7 @@ internal sealed class TokenCacheService(
         {
             if (_cache.TryGetValue(key, out cached))
             {
-                var n1 = _clock.UtcNow.ToUnixTimeSeconds();
+                var n1 = _clock.UtcNow.ToUnixTimeMilliseconds();
                 if (!cached.IsExpired(n1, bufferSeconds))
                     return cached.Value;
             }
@@ -41,7 +41,7 @@ internal sealed class TokenCacheService(
                 return Result.Failure<string>(result.Error);
 
             var token = result.Value;
-            var now = _clock.UtcNow.ToUnixTimeSeconds();
+            var now = _clock.UtcNow.ToUnixTimeMilliseconds();
             var ttl = token.GetTtlSeconds(now, bufferSeconds);
 
             if (ttl > 0)

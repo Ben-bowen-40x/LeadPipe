@@ -8,7 +8,7 @@ internal class CaliperEntityToCaliper : IEntityToVo<CaliperEntity, Caliper>
 {
     public Caliper Translate(CaliperEntity c)
     {
-        DateTimeOffset date = DateTimeOffset.FromUnixTimeSeconds(c.UnixDate);
+        DateTimeOffset date = DateTimeOffset.FromUnixTimeMilliseconds(c.UnixDate);
         PhoneNumber number = new(c.PhoneNumber);
         TimeSpan duration = TimeSpan.FromSeconds(c.Duration);
         string note = c.Note;

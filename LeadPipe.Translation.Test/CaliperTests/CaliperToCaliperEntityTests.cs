@@ -34,7 +34,7 @@ public sealed class CaliperToCaliperEntityTests
         Assert.Equal(vo.Id, entity.Id);
         Assert.Equal(5551234567, entity.PhoneNumber.Number);
         Assert.Equal(date.UtcDateTime, entity.Date);
-        Assert.Equal(date.ToUnixTimeSeconds(), entity.UnixDate);
+        Assert.Equal(date.ToUnixTimeMilliseconds(), entity.UnixDate);
         Assert.Equal(vo.Note, entity.Note);
         Assert.Equal(vo.Source, entity.Source);
         Assert.Equal(vo.Location, entity.Location);
@@ -78,7 +78,7 @@ public sealed class CaliperToCaliperEntityTests
         // Assert
         Assert.Equal(vo.Id, current.Id);
         Assert.Equal(date.UtcDateTime, current.Date);
-        Assert.Equal(date.ToUnixTimeSeconds(), current.UnixDate);
+        Assert.Equal(date.ToUnixTimeMilliseconds(), current.UnixDate);
         Assert.Equal(90, current.Duration);
     }
 }

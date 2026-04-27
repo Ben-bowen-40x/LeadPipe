@@ -267,7 +267,7 @@ public class TranslatorBackAndForthFullTests
             PhoneNumber2 = new(5551003000),
             Date = dt,
             UnixDate = d.ToUnixTimeMilliseconds(),
-            UnixCancelDate = c.ToUnixTimeSeconds()
+            UnixCancelDate = c.ToUnixTimeMilliseconds()
         };
 
         var entity = new SandEntity
@@ -276,8 +276,8 @@ public class TranslatorBackAndForthFullTests
             CustardId = 10,
             CustardEntity = custardEntity,
             Date = dt,
-            UnixDate = d.ToUnixTimeSeconds(),
-            UnixCancelDate = c.ToUnixTimeSeconds(),
+            UnixDate = d.ToUnixTimeMilliseconds(),
+            UnixCancelDate = c.ToUnixTimeMilliseconds(),
             Active = true,
             Complete = true,
             Type = "Premium",

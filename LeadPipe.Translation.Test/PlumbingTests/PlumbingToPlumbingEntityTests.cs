@@ -28,7 +28,7 @@ public sealed class PlumbingToPlumbingEntityTests
         PlumbingEntity entity = translator.Translate(vo);
 
         Assert.Equal(date.UtcDateTime, entity.Date);
-        Assert.Equal(date.ToUnixTimeSeconds(), entity.UnixDate);
+        Assert.Equal(date.ToUnixTimeMilliseconds(), entity.UnixDate);
         Assert.Equal(DateTimeKind.Utc, entity.Date.Kind);
     }
 
@@ -83,6 +83,6 @@ public sealed class PlumbingToPlumbingEntityTests
         }
 
         Assert.Equal(vo.Date.UtcDateTime, current.Date);
-        Assert.Equal(vo.Date.ToUnixTimeSeconds(), current.UnixDate);
+        Assert.Equal(vo.Date.ToUnixTimeMilliseconds(), current.UnixDate);
     }
 }

@@ -42,7 +42,7 @@ public class CatManDataSource(ICatManService cat, ISyncStateRepository state) : 
     internal DateTimeOffset GetDate(Result<List<CatManDto>> get)
     {
         return get.IsSuccess
-            ? DateTimeOffset.FromUnixTimeSeconds(get.Value.Min(v => v.unix_time) ?? Now.ToUnixTimeSeconds())
+            ? DateTimeOffset.FromUnixTimeSeconds(get.Value.Min(v => v.unix_time) ?? Now.ToUnixTimeMilliseconds())
             : Now;
     }
     private static async Task<Result> SyncStateAsync(ISyncStateRepository state, DateTimeOffset date, SyncKey key)
@@ -51,7 +51,7 @@ public class CatManDataSource(ICatManService cat, ISyncStateRepository state) : 
         {
             BusinessId = BusinessId.From(key.Value),
             LastSyncUtc = date.UtcDateTime,
-            UnixLastSyncUtc = date.ToUnixTimeSeconds()
+            UnixLastSyncUtc = date.ToUnixTimeMilliseconds()
         };
         var upsert = await state.UpsertRangeAsync([catmanstate]);
         return upsert;
@@ -65,7 +65,7 @@ public sealed class CatManDataSourceBased(
 ) : SyncedDataSourceBase<CatManDto>(sync, clock)
 {
     private readonly ICatManService _cat = cat;
-    private long UnixNow => _clock.UtcNow.ToUnixTimeSeconds();
+    private long UnixNow => _clock.UtcNow.ToUnixTimeMilliseconds();
     protected override SyncKey Key => SyncKey.Catman;
 
     protected override DateTimeOffset GetLatest(Result<List<CatManDto>> entities)

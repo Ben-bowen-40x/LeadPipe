@@ -13,7 +13,7 @@ internal sealed class CornFormulaToCornEntity : IVoToEntity<CornFormula, CornEnt
             Id = c.Id,
             PhoneNumber = c.PhoneNumber,
             Date = c.Date.UtcDateTime,
-            UnixDate = c.Date.ToUnixTimeSeconds(),
+            UnixDate = c.Date.ToUnixTimeMilliseconds(),
             Payload = c.PayLoad,
             MetaData = c.MetaData,
             Source = c.Source

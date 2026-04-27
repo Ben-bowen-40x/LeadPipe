@@ -27,7 +27,7 @@ internal abstract class EntityToReportYeller<TEntity> : IEntityToReport<TEntity,
     public ReportYeller Translate(TEntity data)
     {
         var phone = GetPhoneNumber(data);
-        var eventDate = DateTimeOffset.FromUnixTimeSeconds(GetUnixDate(data)).UtcDateTime;
+        var eventDate = DateTimeOffset.FromUnixTimeMilliseconds(GetUnixDate(data)).UtcDateTime;
         var entityId = GetEntityId(data);
 
         var result = new ReportYeller

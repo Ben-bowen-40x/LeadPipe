@@ -15,7 +15,7 @@ public class MySqlDataSource(ISyncStateRepository sync)
         {
             BusinessId = BusinessId.From(key.Value),
             LastSyncUtc = dateUpdated.UtcDateTime,
-            UnixLastSyncUtc = dateUpdated.ToUnixTimeSeconds()
+            UnixLastSyncUtc = dateUpdated.ToUnixTimeMilliseconds()
         };
 
         Result<List<SyncStateEntity>> upsert = await _sync.UpsertRangeAsync([state]);
@@ -48,7 +48,7 @@ public abstract class SyncedDataSourceBase<TEntity>(
         {
             BusinessId = BusinessId.BuildBusinessId(null, key),
             LastSyncUtc = dateUpdated.UtcDateTime,
-            UnixLastSyncUtc = dateUpdated.ToUnixTimeSeconds()
+            UnixLastSyncUtc = dateUpdated.ToUnixTimeMilliseconds()
         };
 
         Result<List<SyncStateEntity>> upsert = await _sync.UpsertRangeAsync([state]);

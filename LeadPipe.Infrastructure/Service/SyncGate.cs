@@ -109,7 +109,7 @@ public sealed class SyncGate(
             Id = default,
             Key = entity,
             Source = source,
-            UnixSyncUtc = now.ToUnixTimeSeconds(),
+            UnixSyncUtc = now.ToUnixTimeMilliseconds(),
             SuccessState = successState
         };
 

@@ -28,8 +28,8 @@ public sealed class CustardToCustardEntityTests
 
         Assert.Equal(date.UtcDateTime, entity.Date);
         Assert.Equal(cancel.UtcDateTime, entity.CancelDate);
-        Assert.Equal(date.ToUnixTimeSeconds(), entity.UnixDate);
-        Assert.Equal(cancel.ToUnixTimeSeconds(), entity.UnixCancelDate);
+        Assert.Equal(date.ToUnixTimeMilliseconds(), entity.UnixDate);
+        Assert.Equal(cancel.ToUnixTimeMilliseconds(), entity.UnixCancelDate);
         Assert.Equal(DateTimeKind.Utc, entity.Date.Kind);
     }
 
@@ -64,7 +64,7 @@ public sealed class CustardToCustardEntityTests
         }
 
         Assert.Equal(vo.Date.UtcDateTime, current.Date);
-        Assert.Equal(vo.Date.ToUnixTimeSeconds(), current.UnixDate);
+        Assert.Equal(vo.Date.ToUnixTimeMilliseconds(), current.UnixDate);
         Assert.Equal(5551112222, current.PhoneNumber.Number);
     }
 }

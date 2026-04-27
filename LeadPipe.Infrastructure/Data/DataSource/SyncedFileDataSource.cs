@@ -80,7 +80,7 @@ public abstract class SyncedFileDataSource<TDto>(
         {
             BusinessId = BusinessId.BuildBusinessId(Source, SyncKey),
             LastSyncUtc = latest.UtcDateTime,
-            UnixLastSyncUtc = latest.ToUnixTimeSeconds()
+            UnixLastSyncUtc = latest.ToUnixTimeMilliseconds()
         };
 
         await _state.UpsertRangeAsync([state]);

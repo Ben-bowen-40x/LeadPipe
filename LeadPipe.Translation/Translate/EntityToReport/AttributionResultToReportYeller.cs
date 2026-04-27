@@ -28,9 +28,9 @@ internal sealed class AttributionResultToReportYeller(IYellerSettings settings) 
 
         long phone = attr.MatchingPhone;
 
-        DateTime eventDate = DateTimeOffset.FromUnixTimeSeconds(attr.Entity.UnixDate).UtcDateTime;
+        DateTime eventDate = DateTimeOffset.FromUnixTimeMilliseconds(attr.Entity.UnixDate).UtcDateTime;
         long unixCloseDate = attr.Custard.UnixDate < attr.Sand.UnixDate ? attr.Custard.UnixDate : attr.Sand.UnixDate;
-        DateTime closeDate = DateTimeOffset.FromUnixTimeSeconds(unixCloseDate).UtcDateTime;
+        DateTime closeDate = DateTimeOffset.FromUnixTimeMilliseconds(unixCloseDate).UtcDateTime;
 
         var result = new ReportYeller()
         {

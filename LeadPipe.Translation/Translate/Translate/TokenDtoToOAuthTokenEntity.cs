@@ -14,7 +14,7 @@ internal class TokenDtoToOAuthTokenEntity(IClock clock) : ITranslate<TokenDto, O
             throw new InvalidOperationException($"{nameof(t.Provider)} cannot be null");
 
         var now = _clock.UtcNow;
-        var expiresAt = DateTimeOffset.FromUnixTimeSeconds(now.ToUnixTimeSeconds() + t.ExpiresIn);
+        var expiresAt = DateTimeOffset.FromUnixTimeMilliseconds(now.ToUnixTimeMilliseconds() + t.ExpiresIn);
         var result = new OAuthTokenEntity
         {
             Provider = t.Provider,
@@ -22,7 +22,7 @@ internal class TokenDtoToOAuthTokenEntity(IClock clock) : ITranslate<TokenDto, O
             TokenType = t.TokenType,
             RefreshToken = t.RefreshToken,
             ExpiresAtUtc = expiresAt,
-            UnixExpiresAtUtc = expiresAt.ToUnixTimeSeconds(),
+            UnixExpiresAtUtc = expiresAt.ToUnixTimeMilliseconds(),
             UpdatedAtUtc = now,
             UnixUpdatedAtUtc = now.ToUnixTimeMilliseconds()
         };

@@ -17,13 +17,13 @@ public class TestDateGetter
     {
         // Assemble
         DateTimeOffset expected = DateTimeOffset.UtcNow;
-        long unixTime = expected.ToUnixTimeSeconds();
+        long unixTime = expected.ToUnixTimeMilliseconds();
         Result<List<CatManDto>> setup = Result.Success<List<CatManDto>>([new CatManDto() { unix_time = unixTime }]);
 
         // Act
         DateTimeOffset actual = Source.GetDate(setup);
 
         // Assert
-        Assert.Equal(expected.ToUnixTimeSeconds(), actual.ToUnixTimeSeconds());
+        Assert.Equal(expected.ToUnixTimeMilliseconds(), actual.ToUnixTimeMilliseconds());
     }
 }

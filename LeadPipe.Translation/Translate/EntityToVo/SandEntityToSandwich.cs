@@ -14,14 +14,14 @@ internal class SandEntityToSandwich(IEntityToVo<CustardEntity, Custard> eToVo) :
 
         CustardEntity ce = entity.CustardEntity;
         var custard = _eToVo.Translate(ce);
-        DateTimeOffset? dateCancelled = entity.UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeSeconds((long)entity.UnixCancelDate);
+        DateTimeOffset? dateCancelled = entity.UnixCancelDate is null ? null : DateTimeOffset.FromUnixTimeMilliseconds((long)entity.UnixCancelDate);
 
         Sandwich result = new
         (
             SandId: entity.Id,
             CustardId: entity.CustardId,
             Custard: custard,
-            Date: DateTimeOffset.FromUnixTimeSeconds(entity.UnixDate),
+            Date: DateTimeOffset.FromUnixTimeMilliseconds(entity.UnixDate),
             DateCancelled: dateCancelled,
             Active: entity.Active,
             Complete: entity.Complete,

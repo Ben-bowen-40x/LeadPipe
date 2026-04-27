@@ -15,8 +15,8 @@ internal sealed class CustardToCustardEntity : IVoToEntity<Custard, CustardEntit
             PhoneNumber = s.Phone1,
             PhoneNumber2 = s.Phone2,
             Date = s.Date.UtcDateTime,
-            UnixDate = s.Date.ToUnixTimeSeconds(),
-            UnixCancelDate = s.DateCancelled?.ToUnixTimeSeconds(),
+            UnixDate = s.Date.ToUnixTimeMilliseconds(),
+            UnixCancelDate = s.DateCancelled?.ToUnixTimeMilliseconds(),
         };
         return result;
     }

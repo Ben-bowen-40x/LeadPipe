@@ -12,7 +12,7 @@ public sealed class PlumbingEntityToPlumbingTests
             Id = 42,
             PhoneNumber = new(5558889999),
             Date = date,
-            UnixDate = new DateTimeOffset(date, TimeSpan.Zero).ToUnixTimeSeconds(),
+            UnixDate = new DateTimeOffset(date, TimeSpan.Zero).ToUnixTimeMilliseconds(),
             Contents = "Pest issue",
             MetaData = "Meta",
             Source = Source.Leaf
