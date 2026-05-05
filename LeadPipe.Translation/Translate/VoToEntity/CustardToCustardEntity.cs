@@ -9,6 +9,7 @@ internal sealed class CustardToCustardEntity : IVoToEntity<Custard, CustardEntit
 {
     public CustardEntity Translate(Custard s)
     {
+        long? dateCancelled = s.DateCancelled?.ToUnixTime() < 0 ? null : s.DateCancelled?.ToUnixTime();
         CustardEntity result = new()
         {
             Id = s.Id,
@@ -17,7 +18,7 @@ internal sealed class CustardToCustardEntity : IVoToEntity<Custard, CustardEntit
             PhoneNumber2 = s.Phone2,
             Date = s.Date.UtcDateTime,
             UnixDate = s.Date.ToUnixTime(),
-            UnixCancelDate = s.DateCancelled?.ToUnixTime(),
+            UnixCancelDate = dateCancelled,
         };
         return result;
     }
