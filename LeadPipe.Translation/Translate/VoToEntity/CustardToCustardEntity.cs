@@ -9,7 +9,9 @@ internal sealed class CustardToCustardEntity : IVoToEntity<Custard, CustardEntit
 {
     public CustardEntity Translate(Custard s)
     {
-        long? dateCancelled = s.DateCancelled?.ToUnixTime() < 0 ? null : s.DateCancelled?.ToUnixTime();
+        long? dateCancelled = s.DateCancelled?.ToUnixTime() < 0 || s.DateCancelled?.ToUnixTime() == DateTimeOffset.MaxValue.ToUnixTime()
+            ? null
+            : s.DateCancelled?.ToUnixTime();
         CustardEntity result = new()
         {
             Id = s.Id,
