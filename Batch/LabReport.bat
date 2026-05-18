@@ -2,13 +2,11 @@
 
 title Lab Query
 
-set BASE=%USERPROFILE%\Repos\LeadPipe\LeadPipe.Infrastructure\.info
-set BASE2=%USERPROFILE%\Repos\Automate\Automate.Infrastructure\.info\Reports
+set database="%USERPROFILE%\Repos\LeadPipe\LeadPipe.Infrastructure\.info\leadpipe.test.db"
+set output="%USERPROFILE%\Repos\Automate\Automate.Infrastructure\.info\Reports\LabReport_Test.csv"
+set sql="%USERPROFILE%\Repos\LeadPipe\Batch\LabReport.sql"
 
-set database="%BASE%\leadpipe.test.db"
-set output="%BASE2%\LabReport_Test.csv"
-
-sqlite3 -header -csv %database% < "%BASE%\LabReport.sql" > %output%
+sqlite3 -header -csv %database% < %sql% > %output%
 
 set error=%errorlevel%
 echo.
