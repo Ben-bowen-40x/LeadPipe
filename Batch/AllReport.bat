@@ -1,4 +1,4 @@
-:: @echo off
+@echo off
 title All Report
 echo Executing LeadPipe queries
 
@@ -31,6 +31,7 @@ sqlite3 -header -csv %database% < %sql% > %output%
 if not "%errorlevel%"=="0" (
     echo.
     echo %queryName% failed!
+    echo %output% contains the error message
     type %output%
     exit /b 1
 )
