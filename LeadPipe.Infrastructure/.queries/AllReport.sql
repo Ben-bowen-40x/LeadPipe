@@ -22,6 +22,8 @@ select
             THEN substr(p.metadata, instr(p.metadata, 'Emails:') + 7)
         WHEN instr(p.metadata, 'ID: ') > 0 
             THEN substr(p.metadata, instr(p.metadata, 'ID: ') + 4)
+        WHEN instr(p.metadata, 'Id: ') > 0 
+            THEN substr(p.metadata, instr(p.metadata, 'Id: ') + 4)
         ELSE NULL
     END AS `Unique Item`,
 
