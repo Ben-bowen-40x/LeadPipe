@@ -1,6 +1,4 @@
-﻿using LeadPipe.Domain.ValueObjects;
-
-namespace LeadPipe.Infrastructure.Entity;
+﻿namespace LeadPipe.Infrastructure.Entity;
 
 public sealed class OAuthTokenEntity
 {
