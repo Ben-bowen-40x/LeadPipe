@@ -24,8 +24,8 @@ select
             THEN substr(p.metadata, instr(p.metadata, 'ID: ') + 4)
         WHEN instr(p.metadata, 'Id: ') > 0 
             THEN substr(p.metadata, instr(p.metadata, 'Id: ') + 4)
-        ELSE NULL
-    END AS `Unique Item`,
+        ELSE p.metadata
+    END AS `Metadata`,
 
 /*For debugging*/
     p.id AS `PlumbingId`
