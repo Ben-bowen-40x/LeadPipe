@@ -25,7 +25,7 @@ select
     p.id as `PlumbingId`, 
     CASE
         WHEN instr(p.metadata, 'ID: ') > 0
-        THEN substr(p.metadata. instr(p.metadata, 'ID: ') + 4)
+        THEN substr(p.metadata, instr(p.metadata, 'ID: ') + 4)
         ELSE NULL
     END AS 'YellerId'
 from plumbingentities p
