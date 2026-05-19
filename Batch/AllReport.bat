@@ -31,7 +31,7 @@ sqlite3 -header -csv %database% < %sql% > %output%
 if not "%errorlevel%"=="0" (
     echo.
     echo %queryName% failed!
-    echo %output% contains the error message
+    echo See the error message in %output%
     type %output%
     exit /b 1
 )
