@@ -8,10 +8,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include=".info\sqlite3_Instructions.txt" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.15" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.15" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.1" />
@@ -26,12 +22,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Include=".info\AllSources.bat" />
-	  <None Include=".info\ContactForms.bat" />
-	  <None Include=".info\ContactForms.sql" />
-	  <None Include=".info\AllSources.sql" />
-	  <None Include=".info\ScratchPaper.sql" />
-	  <None Include=".info\YellerReport.sql" />
+	  <None Include=".queries\AllReport.sql" />
+	  <None Include=".queries\YellerCorns.sql" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include=".info\" />
 	</ItemGroup>
 
 </Project>
