@@ -4,7 +4,7 @@ echo Executing LeadPipe queries
 
 set base=%USERPROFILE%\Repos
 set outBase=%base%\Automate\Automate.Infrastructure\.info\Reports
-set common=%base%\LeadPipe\LeadPipe.Infrastructure\
+set common=%base%\LeadPipe\LeadPipe.Infrastructure
 set queries=%common%\.queries
 set database=%common%\.info\leadpipe.test.db
 
@@ -26,15 +26,16 @@ echo All queries completed successfully!
 goto :EOF
 
 :runQuery
-title %queryName%
-sqlite3 -header -csv %database% < %sql% > %output%
-if not "%errorlevel%"=="0" (
+echo Running %queryName%
+sqlite3 -header -csv %database% < %sql% > %output% 2>&1
+if errorlevel 1 (
     echo.
     echo %queryName% failed!
-    type %output%
+    echo See the error message in %output%
     exit /b 1
 )
 echo %queryName% execution successful!
+echo Result output to %output%
 exit /b 0
 
 :pauseExecution
