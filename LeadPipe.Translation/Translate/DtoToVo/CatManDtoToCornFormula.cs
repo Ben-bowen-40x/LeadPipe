@@ -38,11 +38,11 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
         string metaData = string.Join(" | ",
             meta.Select(v => v.ToString())
                 .Where(v => !string.IsNullOrWhiteSpace(v)));
-        string utmSource = string.Join(" | ", ExtractUtm(source, meta));
-        string utmMedium = string.Join(" | ", ExtractUtm(medium, meta));
-        string utmCampaign = string.Join(" | ", ExtractUtm(campaign, meta));
-        string utmContent = string.Join(" | ", ExtractUtm(content, meta));
-        string utmTerm = string.Join(" | ", ExtractUtm(term, meta));
+        string utmSource = string.Join(" | ", ExtractValue(source, meta));
+        string utmMedium = string.Join(" | ", ExtractValue(medium, meta));
+        string utmCampaign = string.Join(" | ", ExtractValue(campaign, meta));
+        string utmContent = string.Join(" | ", ExtractValue(content, meta));
+        string utmTerm = string.Join(" | ", ExtractValue(term, meta));
 
         var result = new CornFormula(
             Id: data.id,
@@ -62,8 +62,13 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
     }
     private static LabelIdValueDto LabelIdValue(Custom c) => new(c.label, c.id, c.value);
     private static IEnumerable<string> ExtractUtm(string key, List<LabelIdValueDto> meta) =>
-        meta.Where(v => v.Id == key || v.Label == key || v.Value == key)
+        meta.Where(v => v.Id == key)
             .Select(v => v.ToString());
+    private static IEnumerable<string> ExtractValue(string key, List<LabelIdValueDto> meta) =>
+        meta.Where(v => v.Id == key)
+            .Select(v => v.Value)
+            .Where(id => id is not null)
+            .Select(id => id!);
     private record LabelIdValueDto(string? Label, string? Id, string? Value)
     {
         public override string ToString() => $"Label: {Label}, Id: {Id}, Value: {Value}";
