@@ -14,7 +14,12 @@ public sealed class CornFormulaToCornEntityTests
             Date: date,
             PayLoad: "payload",
             MetaData: "meta",
-            Source: "corn"
+            Source: "corn",
+            UtmSource: null,
+            UtmMedium: null,
+            UtmCampaign: null,
+            UtmContent: null,
+            UtmTerm: null            
         );
 
     [Fact]
