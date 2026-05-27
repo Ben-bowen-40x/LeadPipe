@@ -35,4 +35,4 @@ select
 from cornentities f 
 left join custardentities c on f.phonenumber in (c.phonenumber, c.phonenumber2)
 left join sand s on s.custardid = c.id and s.complete = 1 and `Ranking` = 1
-where f.phonenumber > 0 and f.source = 'Sandbox';
+where f.phonenumber > 0 and f.source = 'Sandbox' and f.payload like '%yelp%';
