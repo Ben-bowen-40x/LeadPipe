@@ -40,7 +40,7 @@ select
 
 /*For debugging*/
     p.id AS `PlumbingId`,
-    ranking
+    ranking, p.plumbingRank
 FROM rankedPlumbing AS p
 LEFT JOIN custardentities AS c ON p.phonenumber IN (c.phonenumber, c.phonenumber2)
 LEFT JOIN sand AS s ON s.custardid = c.id and ranking = 1
