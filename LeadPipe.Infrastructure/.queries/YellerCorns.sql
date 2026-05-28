@@ -1,12 +1,16 @@
 /*Yeller Corns*/
-WITH sand AS (
+WITH rankedCorn AS (
+    SELECT *, dense_rank() OVER (PARTITION BY phonenumber ORDER BY date ASC) AS cornRank
+    FROM cornentities
+    WHERE source like 'Sandbox' 
+        /*and payload like '%yelp%'*/
+),
+sand AS (
     SELECT *,
         DENSE_RANK() OVER (
             PARTITION BY custardid
-            /* sqlite doesn't have a timezone database, but since we're stripping the time out anyway, it doesn't actually matter
-             * date() strips the time out of the datetime value*/
-            ORDER BY date(datetime(date, '-7 hours')) ASC 
-        ) AS `Ranking`
+            ORDER BY date(datetime(date, '-7 hours')) ASC
+        ) AS ranking
     FROM sandentities
 )
 
@@ -32,9 +36,7 @@ select
  /*For debugging*/
     f.id as `Corn Id`
 
-from cornentities f 
+from rankedCorn as f 
 left join custardentities c on f.phonenumber in (c.phonenumber, c.phonenumber2)
-left join sand s on s.custardid = c.id and s.complete = 1 and `Ranking` = 1
-where f.phonenumber > 0 and f.source like 'Sandbox' 
-    /*and f.payload like '%yelp%'*/
-;
+left join sand s on s.custardid = c.id and `Ranking` = 1
+where f.phonenumber > 0 and f.cornRank = 1;
