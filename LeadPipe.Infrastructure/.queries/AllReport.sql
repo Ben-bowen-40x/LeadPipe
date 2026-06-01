@@ -2,7 +2,7 @@
 with sand as (
     /* sqlite doesn't have a timezone database, but since we're stripping the time out anyway, it doesn't actually matter
              * date() strips the time out of the datetime value*/
-    select *, dense_rank() over (partition by custardid order by date(datetime(s.date, '-7 hours'))) as ranking
+    select *, dense_rank() over (partition by custardid order by date(datetime(s.date, '-7 hours'))) as sandRank
     from sandentities s
 ), rankedPlumbing as (
     select *, dense_rank() over (partition by phonenumber order by date asc) as plumbingRank
@@ -40,9 +40,9 @@ select
 
 /*For debugging*/
     p.id AS `PlumbingId`,
-    ranking, p.plumbingRank
+    sandRank, p.plumbingRank
 FROM rankedPlumbing AS p
 LEFT JOIN custardentities AS c ON p.phonenumber IN (c.phonenumber, c.phonenumber2)
-LEFT JOIN sand AS s ON s.custardid = c.id and ranking = 1
+LEFT JOIN sand AS s ON s.custardid = c.id and sandRank = 1
 WHERE p.plumbingRank = 1
 ORDER BY p.id ASC;
