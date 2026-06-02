@@ -22,7 +22,8 @@ internal sealed class CornFormulaToCornEntity : IVoToEntity<CornFormula, CornEnt
             UtmMedium = c.UtmMedium,
             UtmCampaign = c.UtmCampaign,
             UtmContent = c.UtmContent,
-            UtmTerm = c.UtmTerm
+            UtmTerm = c.UtmTerm,
+            ReferralSource = c.ReferralSource
         };
         return result;
     }

@@ -11,5 +11,6 @@ public record CornFormula(
     string? UtmMedium,
     string? UtmCampaign,
     string? UtmContent,
-    string? UtmTerm
+    string? UtmTerm,
+    string? ReferralSource
 );

@@ -22,6 +22,7 @@ public class CornEntity : IEntity, IPhoneDateIdEntity
         UtmCampaign = c.UtmCampaign;
         UtmContent = c.UtmContent;
         UtmTerm = c.UtmTerm;
+        ReferralSource = c.ReferralSource;
 
         CustardCornLinks = [.. c.CustardCornLinks.Select(c => c)];
         SandCornLinks = [.. c.SandCornLinks.Select(c => c)];
@@ -40,6 +41,7 @@ public class CornEntity : IEntity, IPhoneDateIdEntity
     public string? UtmCampaign { get; set; }
     public string? UtmContent { get; set; }
     public string? UtmTerm { get; set; }
+    public string? ReferralSource { get; set; }
 
     public ICollection<CustardCornLink> CustardCornLinks { get; set; } = [];
     public ICollection<SandCornLink> SandCornLinks { get; set; } = [];

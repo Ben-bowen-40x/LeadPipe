@@ -144,7 +144,8 @@ public abstract class PlumbingContextLinkRepository<TEntity, TRepo>
             await _context.Database.ExecuteSqlRawAsync(CreateTempTable, ct);
 
             // Insert in batches
-            int batchSize = 999 / 4;
+            const int columnCount = 4;
+            int batchSize = ParameterLimit / columnCount;
             try
             { await AddLinks(links, batchSize, ct); }
             catch (Exception ex)

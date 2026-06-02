@@ -43,7 +43,8 @@ internal sealed class CornMySqlEntityToCornFormula(IInfrastructureSettings setti
             UtmMedium: entity.medium,
             UtmCampaign: entity.campaign,
             UtmContent: entity.utmContent,
-            UtmTerm: entity.utmTerm
+            UtmTerm: entity.utmTerm,
+            ReferralSource: entity.referringURL
         );
 
         return result;
