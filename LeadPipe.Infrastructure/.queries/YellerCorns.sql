@@ -19,7 +19,8 @@ select
 	f.date as `Date of Message`,
 	f.payload as `Message Contents`,
 	f.metadata as `Message Source`,
-	CASE WHEN f.unixdate < s.unixdate AND f.unixdate < c.unixdate THEN 1 ELSE 0 END AS `IM Lead`,
+    /*The plumbing is before the sand */
+	CASE WHEN f.unixdate < s.unixdate /*AND f.unixdate < c.unixdate*/ THEN 1 ELSE 0 END AS `IM Lead`,
 	1 as `Potential Sales Lead`,
 	c.id as `Customer ID`, 
     s.active as `Subscription is Active`, 
@@ -31,7 +32,8 @@ select
     s.date as `Subscription Start Date`, 
     datetime(s.unixcanceldate / 1000, 'unixepoch') as `Subscription unix cxl date`,
     s.type as `Service Type`,
-    CASE WHEN f.unixdate < s.unixdate AND f.unixdate < c.unixdate AND s.complete = 1 THEN 1 ELSE 0 END AS `Sale`,
+    /*The corn is before the sand and the sand is complete */
+    CASE WHEN f.unixdate < s.unixdate /*AND f.unixdate < c.unixdate*/ AND s.complete = 1 THEN 1 ELSE 0 END AS `Sale`,
 
  /*For debugging*/
     f.id as `Corn Id`

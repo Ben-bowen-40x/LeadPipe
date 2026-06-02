@@ -15,7 +15,8 @@ select
     p.date AS `Date of Message`, 
     p.contents AS `Message Contents`, 
     p.source AS `Message Source`,
-    CASE WHEN p.unixdate < s.unixdate AND p.unixdate < c.unixdate THEN 1 ELSE 0 END AS `IM Lead`, 
+    /*The plumbing is before the sand */
+    CASE WHEN p.unixdate < s.unixdate /*AND p.unixdate < c.unixdate*/ THEN 1 ELSE 0 END AS `IM Lead`, 
     1 AS `Potential Sales Lead`, 
     c.id AS `Customer ID`, 
     s.active AS `Subscription is Active`, 
@@ -27,7 +28,8 @@ select
     s.date AS `Subscription Start Date`, 
     s.unixcanceldate AS `Subscription unix cxl date`,
     s.type AS `Service Type`, 
-    CASE WHEN p.unixdate < s.unixdate AND p.unixdate < c.unixdate AND s.complete = 1 THEN 1 ELSE 0 END AS `Sale`,
+    /*The plumbing is before the sand and the sand is complete */
+    CASE WHEN p.unixdate < s.unixdate /*AND p.unixdate < c.unixdate*/ AND s.complete = 1 THEN 1 ELSE 0 END AS `Sale`,
     CASE 
         WHEN instr(p.metadata, 'Emails:') > 0 
             THEN substr(p.metadata, instr(p.metadata, 'Emails:') + 7)
