@@ -29,7 +29,7 @@ public sealed class CornRepository(
         TableName: TableNames.CornEntitiesName,
         TempTable: $"temp_{TableNames.CornEntitiesName}",
         EntityName: nameof(CornEntity),
-        ColumnCount: 7);
+        ColumnCount: 13);
 
     protected override string CreateTempTable => $"""
         CREATE TEMP TABLE IF NOT EXISTS {EntityDetails.TempTable} (
@@ -39,7 +39,13 @@ public sealed class CornRepository(
             {nameof(CornEntity.UnixDate)} INTEGER NOT NULL,
             {nameof(CornEntity.Payload)} TEXT NOT NULL,
             {nameof(CornEntity.MetaData)} TEXT NOT NULL,
-            {nameof(CornEntity.Source)} TEXT NOT NULL
+            {nameof(CornEntity.Source)} TEXT NOT NULL,
+            {nameof(CornEntity.UtmSource)} TEXT,
+            {nameof(CornEntity.UtmMedium)} TEXT,
+            {nameof(CornEntity.UtmCampaign)} TEXT,
+            {nameof(CornEntity.UtmContent)} TEXT,
+            {nameof(CornEntity.UtmTerm)} TEXT,
+            {nameof(CornEntity.ReferralSource)} TEXT
         ) WITHOUT ROWID;
         DELETE FROM {EntityDetails.TempTable};
     """;
@@ -52,7 +58,13 @@ public sealed class CornRepository(
             {nameof(CornEntity.UnixDate)} = temp.{nameof(CornEntity.UnixDate)},
             {nameof(CornEntity.Payload)} = temp.{nameof(CornEntity.Payload)},
             {nameof(CornEntity.MetaData)} = temp.{nameof(CornEntity.MetaData)},
-            {nameof(CornEntity.Source)} = temp.{nameof(CornEntity.Source)}
+            {nameof(CornEntity.Source)} = temp.{nameof(CornEntity.Source)},
+            {nameof(CornEntity.UtmSource)} = temp.{nameof(CornEntity.UtmSource)},
+            {nameof(CornEntity.UtmMedium)} = temp.{nameof(CornEntity.UtmMedium)},
+            {nameof(CornEntity.UtmCampaign)} = temp.{nameof(CornEntity.UtmCampaign)},
+            {nameof(CornEntity.UtmContent)} = temp.{nameof(CornEntity.UtmContent)},
+            {nameof(CornEntity.UtmTerm)} = temp.{nameof(CornEntity.UtmTerm)},
+            {nameof(CornEntity.ReferralSource)} = temp.{nameof(CornEntity.ReferralSource)}
         FROM {EntityDetails.TempTable} temp
         WHERE {TableNames.CornEntitiesName}.{nameof(CornEntity.Id)} = temp.{nameof(CornEntity.Id)};
     """;
@@ -66,7 +78,13 @@ public sealed class CornRepository(
             {nameof(CornEntity.UnixDate)}, 
             {nameof(CornEntity.Payload)}, 
             {nameof(CornEntity.MetaData)},  
-            {nameof(CornEntity.Source)}
+            {nameof(CornEntity.Source)},
+            {nameof(CornEntity.UtmSource)},
+            {nameof(CornEntity.UtmMedium)},
+            {nameof(CornEntity.UtmCampaign)},
+            {nameof(CornEntity.UtmContent)},
+            {nameof(CornEntity.UtmTerm)},
+            {nameof(CornEntity.ReferralSource)}
         )
         SELECT 
             temp.{nameof(CornEntity.Id)}, 
@@ -75,7 +93,13 @@ public sealed class CornRepository(
             temp.{nameof(CornEntity.UnixDate)}, 
             temp.{nameof(CornEntity.Payload)},     
             temp.{nameof(CornEntity.MetaData)}, 
-            temp.{nameof(CornEntity.Source)}
+            temp.{nameof(CornEntity.Source)},
+            temp.{nameof(CornEntity.UtmSource)},
+            temp.{nameof(CornEntity.UtmMedium)},
+            temp.{nameof(CornEntity.UtmCampaign)},
+            temp.{nameof(CornEntity.UtmContent)},
+            temp.{nameof(CornEntity.UtmTerm)},
+            temp.{nameof(CornEntity.ReferralSource)}
         FROM {EntityDetails.TempTable} temp
         WHERE NOT EXISTS (
             SELECT 1 
@@ -90,7 +114,7 @@ public sealed class CornRepository(
     protected override int[] ColumnIndexes => _columnIndexes ??= [.. Enumerable.Range(0, EntityDetails.ColumnCount)];
     protected override void InsertBatch(List<CornEntity> batch)
     {
-        var values = new List<object>();
+        var values = new List<object?>();
         var rows = new List<string>();
 
         for (int i = 0; i < batch.Count; i++)
@@ -111,6 +135,12 @@ public sealed class CornRepository(
             values.Add(e.Payload ?? string.Empty);
             values.Add(e.MetaData ?? string.Empty);
             values.Add(e.Source ?? string.Empty);
+            values.Add(e.UtmSource); 
+            values.Add(e.UtmMedium);
+            values.Add(e.UtmCampaign);
+            values.Add(e.UtmContent);
+            values.Add(e.UtmTerm);
+            values.Add(e.ReferralSource);
         }
 
         // Order here must match order above
@@ -122,7 +152,13 @@ public sealed class CornRepository(
                 {nameof(CornEntity.UnixDate)},
                 {nameof(CornEntity.Payload)},
                 {nameof(CornEntity.MetaData)},
-                {nameof(CornEntity.Source)}
+                {nameof(CornEntity.Source)},
+                {nameof(CornEntity.UtmSource)},
+                {nameof(CornEntity.UtmMedium)},
+                {nameof(CornEntity.UtmCampaign)},
+                {nameof(CornEntity.UtmContent)},
+                {nameof(CornEntity.UtmTerm)},
+                {nameof(CornEntity.ReferralSource)}
             )
             VALUES {string.Join(",", rows)};
             """;
