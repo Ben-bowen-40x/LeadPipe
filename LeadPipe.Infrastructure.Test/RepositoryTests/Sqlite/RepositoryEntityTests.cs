@@ -75,7 +75,8 @@ public class RepositoryEntityTests
             UnixDate = DateTimeOffset.UtcNow.ToUnixTime(),
             Payload = "InitialPayload",
             MetaData = "InitialMeta",
-            Source = "Source1"
+            Source = "Source1",
+            ReferralSource = "ReferralSource"
         };
 
         var entities = new List<CornEntity> { entity };
@@ -100,7 +101,8 @@ public class RepositoryEntityTests
             UnixDate = DateTimeOffset.UtcNow.AddDays(1).ToUnixTime(),
             Payload = "UpdatedPayload",
             MetaData = "UpdatedMeta",
-            Source = "SourceUpdated"
+            Source = "SourceUpdated",
+            ReferralSource = "ReferralSource"
         };
 
         var updateResult = await repo.UpsertRangeAsync(new List<CornEntity> { updatedEntity });
