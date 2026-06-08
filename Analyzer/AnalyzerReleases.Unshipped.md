@@ -10,3 +10,4 @@ FT0002  | Usage    | Error    | Do not use ToHashSet. Use ToHashSetFast() instea
 FT0003  | Usage    | Error    | Do not use ToDictionary. Use ToDictionaryFast() instead.
 FT0004  | Usage    | Warning  | Unreachable code detected
 FT0005  | Usage    | Warning  | Unused local variable
+FT0006  | Usage    | Warning  | Unused member
