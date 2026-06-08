@@ -17,16 +17,19 @@ namespace Analyzer
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
             description: "Members that are never referenced are dead code and should be removed.",
-            customTags: WellKnownDiagnosticTags.CompilationEnd);
+            customTags: new string[] { WellKnownDiagnosticTags.CompilationEnd, WellKnownDiagnosticTags.Unnecessary });
 
         // The accessibility levels this analyzer currently targets.
         // To expand coverage, add Accessibility.Internal, Accessibility.Public, etc.
         private static readonly ImmutableHashSet<Accessibility> TargetAccessibilities =
             ImmutableHashSet.Create(
-                Accessibility.Private //,
-                // Accessibility.Internal,   // add when ready
-                // Accessibility.Public,     // add when ready
-                // Accessibility.Protected   // add when ready
+                Accessibility.Private
+            //,
+            // Accessibility.Internal   // add when ready
+            // ,   
+            // Accessibility.Public     // add when ready
+            // ,
+            // Accessibility.Protected  // add when ready
             );
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
