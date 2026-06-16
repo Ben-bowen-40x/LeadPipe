@@ -85,7 +85,7 @@ group by
 -- ============================================================
 -- TOGGLE: by year, month, source, status  (touch-date grain = p.date)
 -- ============================================================
- /*
+/*
 select
     strftime('%Y', p.date)              as year,
     strftime('%m', p.date)              as month,
