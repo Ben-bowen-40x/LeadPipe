@@ -12,7 +12,6 @@ internal partial class SandPlumbingLinkToReportPlumbing(IClock clock) : IEntityT
     private readonly IClock _clock = clock;
 
     private readonly static DateTimeOffset _twentyTwelve = new(2012, 1, 1, 0, 0, 0, TimeSpan.Zero);
-    private const string _unk = "Unknown";
     public ReportPlumbing Translate(SandPlumbingLink t)
     {
         if (t.PlumbingEntity is not PlumbingEntity plumb)
