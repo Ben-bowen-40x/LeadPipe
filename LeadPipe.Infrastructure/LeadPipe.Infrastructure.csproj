@@ -22,6 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".queries\AllReportAggregates.sql" />
 	  <None Include=".queries\AllReport.sql" />
 	  <None Include=".queries\YellerCorns.sql" />
 	</ItemGroup>
