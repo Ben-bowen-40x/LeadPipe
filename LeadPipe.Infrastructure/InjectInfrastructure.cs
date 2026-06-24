@@ -77,7 +77,7 @@ public static class InjectInfrastructure
         services.AddScoped<IDataSourceAsync<CatManDto>, CatManDataSourceBased>();
 
         services.AddScoped<IDataSourceAsync<CaliperMySqlEntity>, SyncedCaliperMySqlDataSource>();
-        services.AddScoped<IDataSourceAsync<SandMySqlEntity>, SandMySqlDataSource>();
+        services.AddScoped<IDataSourceAsync<SandMySqlEntity>, SandMySqlDataSourceBased>();
         services.AddScoped<IDataSourceAsync<CustardMySqlEntity>, CustardMySqlDataSourceBased>();
         services.AddScoped<IDataSourceAsync<CornMySqlEntity>, CornMySqlDataSourceBased>();
 
