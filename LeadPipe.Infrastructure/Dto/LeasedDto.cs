@@ -10,7 +10,7 @@ public class LeasedDto
     public string? CompletionDate { get; set; }
     [Name("Phone Number")]
     public string? PhoneNumber { get; set; }
-    [Name("BranchData")]
+    [Name("BranchData", "Branch")]
     public string? Branch { get; set; }
     [Name("Message Chain")]
     public string? Contents { get; set; }

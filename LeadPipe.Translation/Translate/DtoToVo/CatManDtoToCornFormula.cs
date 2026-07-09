@@ -31,11 +31,7 @@ internal sealed class CatManDtoToCornFormula : IDtoToVo<CatManDto, CornFormula>
             .Select(LabelIdValue)
             .ToList();
 
-        string src = string.Join(" | ",
-            new[] { data.source ?? "Unknown", }
-                .Concat(ExtractUtm(medium, meta))
-                .Concat(ExtractUtm(campaign, meta))
-                .Concat(ExtractUtm(source, meta)));
+        string src = data.source ?? "Unknown";
         string metaData = string.Join(" | ",
             meta.Select(v => v.ToString())
                 .Where(v => !string.IsNullOrWhiteSpace(v)));
