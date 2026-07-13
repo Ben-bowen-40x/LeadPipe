@@ -25,6 +25,6 @@ FROM (
     WHERE PhoneNumber > 0
     -- This is here to remove these until we completely nail down the cornentities side of this query
     -- This column has a not null constraint as of 2026-07-09
-      AND Source is NULL 
+      AND Source is NULL
 )
 ORDER BY touch_utc, contact_number_clean;
