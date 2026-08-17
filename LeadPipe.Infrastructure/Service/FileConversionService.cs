@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
-using LeadPipe.Infrastructure.Interfaces.Service;
+using LeadPipe.Infrastructure.Interface.Service;
 
 namespace LeadPipe.Infrastructure.Service;
 

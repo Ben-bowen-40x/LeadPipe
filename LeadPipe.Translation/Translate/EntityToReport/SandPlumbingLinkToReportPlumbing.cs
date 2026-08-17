@@ -1,8 +1,8 @@
 ﻿using LeadPipe.Core;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Core;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Core;
+using LeadPipe.Infrastructure.Interface.Translate;
 using System.Text.RegularExpressions;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;

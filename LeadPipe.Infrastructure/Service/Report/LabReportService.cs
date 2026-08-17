@@ -1,7 +1,7 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Attributes;
+using LeadPipe.Infrastructure.Attribute;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Interfaces.Core;
+using LeadPipe.Infrastructure.Interface.Core;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Infrastructure.Service.Report;

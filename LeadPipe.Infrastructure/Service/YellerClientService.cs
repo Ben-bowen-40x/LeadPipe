@@ -2,8 +2,8 @@
 using LeadPipe.Core;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Repository;
-using LeadPipe.Infrastructure.Interfaces.Service;
+using LeadPipe.Infrastructure.Interface.Repository;
+using LeadPipe.Infrastructure.Interface.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 using System.Net;

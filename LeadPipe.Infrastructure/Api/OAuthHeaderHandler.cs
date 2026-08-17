@@ -1,5 +1,5 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Interfaces.Api;
+using LeadPipe.Infrastructure.Interface.Api;
 
 namespace LeadPipe.Infrastructure.Api;
 

@@ -71,6 +71,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Batch", "Batch", "{37227541
 		..\Automate\ReportGeneration.bat = ..\Automate\ReportGeneration.bat
 		..\Automate\SaveAndCloseExcel.ps1 = ..\Automate\SaveAndCloseExcel.ps1
 		..\Automate\TrackReportChanges.bat = ..\Automate\TrackReportChanges.bat
+		..\Automate\UploadGSheet.bat = ..\Automate\UploadGSheet.bat
+		..\Automate\upload_to_gsheet.py = ..\Automate\upload_to_gsheet.py
 	EndProjectSection
 EndProject
 Global

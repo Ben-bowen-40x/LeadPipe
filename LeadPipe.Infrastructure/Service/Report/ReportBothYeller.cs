@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Application.Service;
 using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Attributes;
+using LeadPipe.Infrastructure.Attribute;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Infrastructure.Service.Report;

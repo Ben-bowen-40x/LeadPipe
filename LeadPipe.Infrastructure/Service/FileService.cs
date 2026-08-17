@@ -1,4 +1,4 @@
-﻿using LeadPipe.Infrastructure.Interfaces.Service;
+﻿using LeadPipe.Infrastructure.Interface.Service;
 using System.Runtime.CompilerServices;
 using System.Text;
 

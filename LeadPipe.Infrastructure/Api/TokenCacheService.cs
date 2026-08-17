@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Core;
-using LeadPipe.Infrastructure.Interfaces.Api;
-using LeadPipe.Infrastructure.Interfaces.Core;
+using LeadPipe.Infrastructure.Interface.Api;
+using LeadPipe.Infrastructure.Interface.Core;
 using Microsoft.Extensions.Caching.Memory;
 using System.Collections.Concurrent;
 

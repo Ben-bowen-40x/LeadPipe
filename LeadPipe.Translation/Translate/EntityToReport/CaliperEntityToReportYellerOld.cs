@@ -1,6 +1,6 @@
 ﻿using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Translate;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;

@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Translate;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace LeadPipe.Translation.Translate.EntityToReport;

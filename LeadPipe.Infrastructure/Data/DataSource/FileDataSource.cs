@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Interfaces.Core;
-using LeadPipe.Infrastructure.Interfaces.Service;
+using LeadPipe.Infrastructure.Interface.Core;
+using LeadPipe.Infrastructure.Interface.Service;
 using Microsoft.Extensions.Logging;
 
 namespace LeadPipe.Infrastructure.Data.DataSource;
