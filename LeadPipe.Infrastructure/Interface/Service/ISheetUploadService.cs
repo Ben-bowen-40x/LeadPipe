@@ -1,6 +1,6 @@
 ﻿namespace LeadPipe.Infrastructure.Interface.Service;
 
-public interface IUploadService
+public interface ISheetUploadService
 {
 
 }
