@@ -1,7 +1,7 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Interfaces.Core;
-using LeadPipe.Infrastructure.Interfaces.Repository;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Core;
+using LeadPipe.Infrastructure.Interface.Repository;
+using LeadPipe.Infrastructure.Interface.Translate;
 
 namespace LeadPipe.Infrastructure.Data.Load;
 

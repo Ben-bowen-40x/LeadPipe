@@ -1,7 +1,7 @@
 ﻿using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Translate;
 using LeadPipe.Translation.Primitives;
 using LeadPipe.Translation.Translate.EntityToVo;
 using NSubstitute;

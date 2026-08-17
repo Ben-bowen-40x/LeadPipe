@@ -1,8 +1,8 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Attributes;
+using LeadPipe.Infrastructure.Attribute;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Repository;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Repository;
+using LeadPipe.Infrastructure.Interface.Translate;
 
 namespace LeadPipe.Infrastructure.Data.Load;
 

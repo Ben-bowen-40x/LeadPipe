@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
-using LeadPipe.Infrastructure.Interfaces.Core;
-using LeadPipe.Infrastructure.Interfaces.Repository;
+using LeadPipe.Infrastructure.Interface.Core;
+using LeadPipe.Infrastructure.Interface.Repository;
 using LeadPipe.Infrastructure.Sqlite.Context;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

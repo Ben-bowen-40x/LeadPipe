@@ -1,6 +1,6 @@
 ﻿using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Translate;
 using System.Data;
 
 namespace LeadPipe.Translation.Translate.DtoToVo;

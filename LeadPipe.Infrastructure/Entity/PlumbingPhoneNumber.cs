@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Domain.ValueObjects;
-using LeadPipe.Infrastructure.Interfaces.Core;
+using LeadPipe.Infrastructure.Interface.Core;
 using System.Diagnostics.CodeAnalysis;
 
 namespace LeadPipe.Infrastructure.Entity;

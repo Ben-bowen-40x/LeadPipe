@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Infrastructure.Dto;
-using LeadPipe.Infrastructure.Interfaces.Service;
+using LeadPipe.Infrastructure.Interface.Service;
 using LeadPipe.Infrastructure.Settings;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Json;

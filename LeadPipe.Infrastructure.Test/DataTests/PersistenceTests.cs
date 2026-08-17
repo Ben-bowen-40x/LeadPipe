@@ -2,8 +2,8 @@
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Data.Persistence;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Repository;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Repository;
+using LeadPipe.Infrastructure.Interface.Translate;
 using NSubstitute;
 
 namespace LeadPipe.Infrastructure.Test.DataTests;

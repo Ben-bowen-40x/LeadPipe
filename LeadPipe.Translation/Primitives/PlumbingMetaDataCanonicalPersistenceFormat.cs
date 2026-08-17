@@ -1,5 +1,5 @@
 ﻿using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Translate;
 
 namespace LeadPipe.Translation.Primitives;
 

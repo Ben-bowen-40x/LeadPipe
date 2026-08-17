@@ -1,6 +1,6 @@
 ﻿using CSharpFunctionalExtensions;
 using LeadPipe.Core;
-using LeadPipe.Infrastructure.Interfaces.Core;
+using LeadPipe.Infrastructure.Interface.Core;
 using System.Diagnostics.CodeAnalysis;
 
 namespace LeadPipe.Infrastructure.Entity;

@@ -3,9 +3,9 @@ using LeadPipe.Core;
 using LeadPipe.Domain.ValueObjects;
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Entity;
-using LeadPipe.Infrastructure.Interfaces.Core;
-using LeadPipe.Infrastructure.Interfaces.Repository;
-using LeadPipe.Infrastructure.Interfaces.Translate;
+using LeadPipe.Infrastructure.Interface.Core;
+using LeadPipe.Infrastructure.Interface.Repository;
+using LeadPipe.Infrastructure.Interface.Translate;
 using LeadPipe.Infrastructure.Settings;
 
 namespace LeadPipe.Infrastructure.Data.Transform;
