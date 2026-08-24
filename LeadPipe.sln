@@ -64,6 +64,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Batch", "Batch", "{37227541
 		..\Automate\LeafExclusion.bat = ..\Automate\LeafExclusion.bat
 		..\Automate\LeafRepo Manual.bat = ..\Automate\LeafRepo Manual.bat
 		..\Automate\LeafRepo.bat = ..\Automate\LeafRepo.bat
+		..\Sql-Queries\ROI Report\Temporary ROI\ManualBatch.bat = ..\Sql-Queries\ROI Report\Temporary ROI\ManualBatch.bat
 		..\Automate\MasterTask.bat = ..\Automate\MasterTask.bat
 		..\Automate\OpenFiles.bat = ..\Automate\OpenFiles.bat
 		..\Automate\Queries.bat = ..\Automate\Queries.bat
