@@ -14,6 +14,7 @@ internal class LeasedFileDataSource(IInfrastructureSettings settings, ICsvRwServ
     protected override Result<List<LeasedDto>> FlattenInvalid(Result<List<LeasedDto>> fileContents)
     {
         if (fileContents.IsFailure) return fileContents;
-        return fileContents.Value.Where(v => PhoneNumber.TryParse(v.PhoneNumber, out var _)).ToList();
+        var result = fileContents.Value.Where(v => PhoneNumber.TryParse(v.PhoneNumber, out var _)).ToList();
+        return result;
     }
 }
