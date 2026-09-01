@@ -2,16 +2,29 @@
 using LeadPipe.Infrastructure.Dto;
 using LeadPipe.Infrastructure.Interface.Translate;
 using LeadPipe.Translation.Primitives;
+using System.Globalization;
 
 namespace LeadPipe.Translation.Translate.DtoToVo;
 
 internal class CalliDtoToPlumbing(IDateTimeTranslate dt) : IDtoToVo<CalliDto, Plumbing>
 {
+    private static readonly string[] Formats =
+    [
+        "M/d/yyyy h:mm:ss tt",
+        "M/d/yyyy h:mm tt",
+        "M/d/yyyy H:mm:ss",
+        "M/d/yyyy H:mm",
+    ];
     private readonly IDateTimeTranslate _dt = dt;
     public Plumbing Translate(CalliDto v)
     {
         PhoneNumber phone = PhoneNumber.TryParse(v.Phone, out var p) ? p : PhoneNumber.DefaultPhoneNumber;
-        DateTime datetime = DateTime.TryParse(v.Date + " " + v.Time, out DateTime dt)
+        DateTime datetime = DateTime.TryParseExact(
+                v.Date + " " + v.Time, 
+                Formats,
+                CultureInfo.InvariantCulture, 
+                DateTimeStyles.None, 
+                out DateTime dt)
             ? dt
             : DateTime.MaxValue;
         string rawZone = v.TimeZone is null ? "mst" : v.TimeZone.ToLowerInvariant();
