@@ -22,6 +22,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include=".queries\AllReportAggregatesLineItems.sql" />
 	  <None Include=".queries\HemorrhoidSheet.sql" />
 	  <None Include=".queries\AllReportAggregates.sql" />
 	  <None Include=".queries\AllReport.sql" />
