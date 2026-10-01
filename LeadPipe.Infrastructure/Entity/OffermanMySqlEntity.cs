@@ -11,9 +11,9 @@ public class OffermanMySqlEntity
     public string? iconBlue { get; set; }
     public string? iconGrey { get; set; }
     public string? officeAddress { get; set; }
-    public double lat { get; set; }
+    public double? lat { get; set; }
     [Column("long")]
-    public double longitude { get; set; }
+    public double? longitude { get; set; }
     public int active { get; set; }
     public string? branchEmaill { get; set; }
     public int fox_region_id { get; set; }
