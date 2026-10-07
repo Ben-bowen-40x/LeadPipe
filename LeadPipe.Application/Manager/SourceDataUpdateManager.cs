@@ -26,6 +26,7 @@ public class SourceDataUpdateManager : ISourceDataUpdateManager
             Source.Test, 
             Source.Test2, 
             Source.Leaf,
+            Source.Lab,
             Source.Yeller
         ])];
         _services = _validSources.ToDictionaryFast(
