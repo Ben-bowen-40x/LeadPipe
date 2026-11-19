@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeadPipe.Cli", "LeadPipe.Cli\LeadPipe.Cli.csproj", "{288BAC3E-7038-42AF-A3F7-501FB2929498}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B2C1815-B7E2-46DA-B8CC-2D8BD536862C}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LeadPipe.Domain", "LeadPipe.Domain\LeadPipe.Domain.csproj", "{9EE6E520-E599-4052-AF34-E4D928FFB0C6}"
 EndProject

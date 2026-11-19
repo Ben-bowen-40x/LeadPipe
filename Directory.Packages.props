@@ -1,0 +1,73 @@
+<Project>
+	<!--
+		2026-11-19: Central Package Management. Every package version in the solution lives here;
+		.csproj files list package names only. No floating versions ("*"): a restore must produce the
+		same graph every time, or the next package edit silently pulls in whatever majors shipped since.
+		To update a package: change it here, then rebuild the whole solution.
+	-->
+	<PropertyGroup>
+		<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+	</PropertyGroup>
+
+	<ItemGroup Label="EF Core">
+		<!--
+			2026-11-19: Held at 9.0.x. Pomelo 9.0.0 is the latest release and only accepts
+			Microsoft.EntityFrameworkCore.Relational [9.0.0, 9.0.999]; there is no Pomelo build for EF Core 10.
+			Translation references both the MySql and Sqlite projects, so every EF Core package must share
+			one version. 9.0.23 also clears GHSA-2m69-gcr7-jv3q (EF Core Sqlite 9.0.23 pulls SQLitePCLRaw >= 2.1.13).
+			EF Core 9 left support 2026-11-10, so 9.0.23 is likely its last patch. Moving off it means
+			replacing Pomelo (e.g. Microting.EntityFrameworkCore.MySql 10.0.x) and then all of these go to 10.0.x together.
+		-->
+		<PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.23" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.23" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.23" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.23" />
+		<PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.23" />
+		<PackageVersion Include="Microsoft.Data.Sqlite" Version="9.0.23" />
+		<PackageVersion Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Label="Microsoft.Extensions">
+		<!--
+			2026-11-19: Held at 10.0.x to match the net10.0 runtime. The 11.0.0 packages also target net10.0,
+			so "*" picked them up and caused the NU1605 DependencyInjection.Abstractions downgrade error.
+		-->
+		<PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="10.0.15" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.15" />
+		<PackageVersion Include="Microsoft.Extensions.Configuration.UserSecrets" Version="10.0.15" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="10.0.15" />
+		<PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.15" />
+		<PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.15" />
+		<PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.15" />
+		<PackageVersion Include="Microsoft.Extensions.Logging" Version="10.0.15" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Console" Version="10.0.15" />
+	</ItemGroup>
+
+	<ItemGroup Label="Libraries">
+		<!-- 2026-11-19: Held at 33.x. "*" floated to 34.0.0 (2026-10-28), a major rewrite that broke ClassMap / CsvHelper.Configuration usage. -->
+		<PackageVersion Include="CsvHelper" Version="33.1.0" />
+		<PackageVersion Include="CSharpFunctionalExtensions" Version="3.7.0" />
+		<PackageVersion Include="CommandLineParser" Version="2.9.1" />
+		<PackageVersion Include="Polly" Version="8.7.0" />
+	</ItemGroup>
+
+	<ItemGroup Label="Serilog">
+		<PackageVersion Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+		<PackageVersion Include="Serilog.Settings.Configuration" Version="10.0.1" />
+		<PackageVersion Include="Serilog.Sinks.Console" Version="6.1.1" />
+		<PackageVersion Include="Serilog.Sinks.File" Version="7.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Label="Test">
+		<PackageVersion Include="coverlet.collector" Version="10.0.1" />
+		<PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.6.0" />
+		<PackageVersion Include="NSubstitute" Version="5.3.0" />
+		<PackageVersion Include="xunit" Version="2.9.3" />
+		<PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+	</ItemGroup>
+
+	<ItemGroup Label="Analyzer (Roslyn)">
+		<PackageVersion Include="Microsoft.CodeAnalysis.Analyzers" Version="5.3.0" />
+		<PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.3.0" />
+	</ItemGroup>
+</Project>
