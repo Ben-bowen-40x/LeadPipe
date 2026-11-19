@@ -29,7 +29,7 @@ internal class Program
 
         using IServiceScope scope = host.Services.CreateScope();
         IServiceProvider service = scope.ServiceProvider;
-        IConfiguration config = service.GetRequiredService<IConfiguration>();
+        //IConfiguration config = service.GetRequiredService<IConfiguration>();
         var settings = service.GetRequiredService<Settings>();
 
         EnsureInMemoryDbIsCreated(service, settings);
