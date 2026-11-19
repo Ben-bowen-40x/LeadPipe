@@ -110,6 +110,20 @@
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"
       }
+    },
+    "Data update | Get all data | Libacion": {
+      "commandName": "Project",
+      "commandLineArgs": "data -s Libacion",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    },
+    "Data update | Refresh data | Libacion": {
+      "commandName": "Project",
+      "commandLineArgs": "data -rs Libacion",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
     }
-   }
+  }
 }
